@@ -11,6 +11,12 @@ This file contains standing instructions for **all** coding agents working on th
 3. **Format** – `uv run --group lint ruff format --check src/mypackage/` must report no files to reformat.
 4. **Type checks** – `uv run --group typecheck ty check src/mypackage` (or `make typecheck`) must report no errors in changed files.
 
+## Pull Request Descriptions
+
+**Never replace or remove an existing PR title or description.** When reporting progress on a PR that already has a title and description, only append new checklist items or update the status of existing ones. The original content must be preserved in full.
+
+This is a common failure mode: an agent called to make a small follow-up change will supply a fresh description scoped only to its own work, silently discarding all prior context. Always read the existing description first and treat it as the base.
+
 ## Commit Messages
 
 All commit messages **must** follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
