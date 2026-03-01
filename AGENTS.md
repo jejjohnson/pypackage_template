@@ -1,15 +1,15 @@
-# Copilot Agent Guidelines
+# Agent Guidelines
 
-This file contains standing instructions for the Copilot coding agent working on this repository.
+This file contains standing instructions for **all** coding agents working on this repository (Copilot, Claude, etc.).
 
 ## Before Every Commit
 
-Always verify all of the following pass before creating a commit or reporting progress:
+**All agents must** verify that every one of the following passes before creating a commit or reporting progress. No exceptions.
 
-1. **Tests** – `uv run pytest -q` must have 0 failures.
-2. **Lint** – `uv run --group lint ruff check src/mypackage/` must report no issues.
+1. **Tests** – `uv run pytest -q` (or `make test`) must have 0 failures.
+2. **Lint** – `uv run --group lint ruff check src/mypackage/` (or `make lint`) must report no issues.
 3. **Format** – `uv run --group lint ruff format --check src/mypackage/` must report no files to reformat.
-4. **Type checks** – run `uv run --group typecheck ty check src/mypackage` (or `make typecheck`) and fix any type errors in changed files.
+4. **Type checks** – `uv run --group typecheck ty check src/mypackage` (or `make typecheck`) must report no errors in changed files.
 
 ## Commit Messages
 
