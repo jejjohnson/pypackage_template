@@ -1,5 +1,7 @@
 # Title
 
+[![Deploy Docs](https://github.com/jejjohnson/pypackage_template/actions/workflows/pages.yml/badge.svg)](https://github.com/jejjohnson/pypackage_template/actions/workflows/pages.yml)
+
 Author: J. Emmanuel Johnson
 Repo: [https://gihub.com/jejjohnson/[package].git](https://gihub.com/jejjohnson/[package].git)
 Website: [jejjohnson.netlify.com](jejjohnson.netlify.com)

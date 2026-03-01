@@ -17,6 +17,19 @@ This file contains standing instructions for **all** coding agents working on th
 
 This is a common failure mode: an agent called to make a small follow-up change will supply a fresh description scoped only to its own work, silently discarding all prior context. Always read the existing description first and treat it as the base.
 
+## Documentation
+
+This repo uses **MkDocs + Material + mkdocstrings + mkdocs-jupyter** for documentation.
+
+- **Build locally**: `make docs-serve` (or `uv run --group docs mkdocs serve`)
+- **Build static site**: `make docs` (or `uv run --group docs mkdocs build`)
+- **Deploy to GitHub Pages**: `make docs-deploy` (or `uv run --group docs mkdocs gh-deploy --force`)
+- **Auto-deploy**: the `pages.yml` workflow deploys automatically on every push to `main`/`master`
+
+When writing docstrings, use **Google style** (enforced by `mkdocstrings` config).
+
+Notebooks in `docs/` may be stored as `.ipynb` files or as `jupytext`-paired `.py` files.
+
 ## Commit Messages
 
 All commit messages **must** follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
