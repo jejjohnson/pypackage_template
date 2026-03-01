@@ -5,7 +5,7 @@ description = "My short description for my project."
 authors = [
     {name="J. Emmanuel Johnson", email="jemanjohnson34@gmail.com"},
 ]
-license = "MIT"
+license = { file = "LICENSE" }
 readme = "README.md"
 keywords = []
 requires-python = ">=3.12"
