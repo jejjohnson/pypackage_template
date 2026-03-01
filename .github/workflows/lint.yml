@@ -1,0 +1,25 @@
+name: Lint
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - name: Install lint dependencies
+        run: uv sync --group lint
+      - name: Run ruff check
+        run: uv run --group lint ruff check src/mypackage/
+      - name: Run ruff format check
+        run: uv run --group lint ruff format --check src/mypackage/
