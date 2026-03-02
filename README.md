@@ -73,6 +73,8 @@ make docs-serve   # preview docs locally
 - `uv.lock` provides a fully reproducible environment (like `package-lock.json` but for Python) — every developer and every CI run installs the exact same versions.
 - Dependency groups (`dev`, `lint`, `typecheck`, `docs`) let you install only what you need for a given task.
 
+> **What:** A Rust-based package manager and virtual environment tool — runs `uv sync` once and every developer gets a bit-for-bit identical environment from `uv.lock`.
+
 > **Why uv?** Eliminates "works on my machine" problems. Faster CI. A single binary replaces pip, pip-tools, virtualenv, and pyenv.
 
 ---
@@ -88,6 +90,8 @@ make docs-serve   # preview docs locally
 - **`[build-system]`**: `hatchling` as the build backend
 - **`[tool.ruff]`**, **`[tool.ty]`**, **`[tool.pytest.ini_options]`**, **`[tool.coverage.*]`**: all tool configs co-located
 
+> **What:** A single `pyproject.toml` replaces `setup.py`, `setup.cfg`, and every scattered `*.cfg` config file — one place for project metadata and every tool's configuration.
+
 > **Why one file?** Standardised (PEP 517/518/621), no scattered config files, tooling reads from one canonical location.
 
 ---
@@ -100,6 +104,8 @@ Source code lives under `src/mypackage/` rather than at the repo root. This forc
 
 - Packaging bugs (missing files, incorrect paths) are caught early rather than hidden by the flat-layout import shortcut.
 - Tests always exercise the installed package, not an accidentally-importable source directory.
+
+> **What:** All source code lives under `src/mypackage/` instead of at the repo root, so the package must be installed before it can be imported.
 
 > **Why `src/` layout?** Industry best practice. See writings by Brett Cannon and Hynek Schlawack on why flat layouts silently mask packaging errors.
 
@@ -119,6 +125,8 @@ packages = ["src/mypackage"]
 ```
 
 Zero-config, PEP 517 compliant. No `MANIFEST.in`, no surprises. Integrates cleanly with uv.
+
+> **What:** `hatchling` is the PEP 517 build backend — run `uv build` and it produces a wheel and sdist with zero extra config.
 
 > **Why hatchling?** Minimal configuration, actively maintained, excellent uv integration, and handles the `src/` layout without extra config.
 
@@ -143,6 +151,8 @@ Rule sets enabled:
 
 Pre-commit hooks run both `ruff` (lint + autofix) and `ruff-format`. CI enforces with `ruff check` and `ruff format --check`.
 
+> **What:** A single Rust binary that lints, sorts imports, and formats Python code — replaces flake8 + isort + black with one tool and one config block.
+
 > **Why ruff?** ~100× faster than the black + flake8 + isort combination; single config block; same results.
 
 ---
@@ -157,6 +167,8 @@ python-version = "3.12"
 ```
 
 [ty](https://github.com/astral-sh/ty) is Astral's new Rust-based type checker (same team as ruff and uv). It is extremely fast and designed to integrate with the rest of the Astral toolchain.
+
+> **What:** A Rust-based static type checker from the Astral team — run `make typecheck` to catch type errors without executing any code.
 
 > **Why ty?** Catches whole classes of bugs before runtime. Faster than mypy or pyright. Part of the same ecosystem as ruff and uv.
 
@@ -175,10 +187,14 @@ addopts = "--cov=src/mypackage --cov-report=term-missing --cov-report=xml:covera
 fail_under = 80
 ```
 
-- Tests live in `tests/`; run with `make test` or `uv run pytest`
-- Coverage report: terminal summary + `coverage.xml` for Codecov upload
-- **Coverage gate:** `fail_under = 80` — CI fails if coverage drops below 80%
+- Tests live in `tests/`.
+- Fast local run (no coverage): `make test` (skips coverage collection for speed)
+- Coverage runs (with reports + gate): `uv run pytest` or `make test-cov`, and in CI
+- Coverage report (when enabled): terminal summary + `coverage.xml` for Codecov upload
+- **Coverage gate:** `fail_under = 80` — coverage-enabled runs and CI fail if coverage drops below 80%
 - CI matrix: Python 3.12 and 3.13
+
+> **What:** pytest with an 80% coverage gate wired in — `make test` is fast (no coverage), while CI and `make test-cov` enforce the gate and upload results to Codecov.
 
 > **Why a coverage gate?** Prevents silent regressions. The matrix catches version-specific bugs that single-version CI misses.
 
@@ -200,6 +216,8 @@ Hooks that run on every `git commit`:
 | `ruff-format` | Format |
 
 Run manually: `make precommit`. Hook versions are bumped automatically weekly via `.github/workflows/pre-commit-autoupdate.yml`.
+
+> **What:** Six git hooks that run automatically on every `git commit` to catch formatting, whitespace, and YAML issues before they reach CI.
 
 > **Why pre-commit?** Stops bad commits at the source rather than relying on CI to catch them after a push. Weekly autoupdate keeps hooks on patched versions.
 
@@ -224,9 +242,11 @@ make docs-serve    # preview locally at http://127.0.0.1:8000
 make docs-deploy   # deploy to GitHub Pages
 ```
 
-Auto-deploy: `.github/workflows/pages.yml` deploys on every push to master.
+Auto-deploy: `.github/workflows/pages.yml` deploys on every push to `main` or `master`.
 
 Nav structure: **Home → API Reference → Changelog**
+
+> **What:** A versioned docs site auto-generated from Google-style docstrings and Jupyter notebooks, deployed to GitHub Pages on every push to the default branch.
 
 > **Why docs-as-code?** Documentation that lives next to code gets updated with it. Auto-API-docs from docstrings means zero duplication between source and docs.
 
@@ -244,7 +264,9 @@ All commit messages must follow the [Conventional Commits](https://www.conventio
 
 Valid types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
 
-The `conventional-commits.yml` workflow validates every PR's commits automatically.
+The `conventional-commits.yml` workflow validates every **PR title** automatically using [`amannn/action-semantic-pull-request`](https://github.com/amannn/action-semantic-pull-request).
+
+> **What:** A CI check that enforces Conventional Commits format on every PR title, ensuring the commit history is machine-readable for automated changelogs and version bumps.
 
 > **Why Conventional Commits?** Enables automated changelogs, drives semantic versioning decisions, and makes `git log` readable at a glance.
 
@@ -254,21 +276,30 @@ The `conventional-commits.yml` workflow validates every PR's commits automatical
 
 **Files:** `release-please-config.json`, `.release-please-manifest.json`, `.github/workflows/release-please.yml`
 
-On every push to master, [Release Please](https://github.com/googleapis/release-please) opens or updates a "release PR" that:
+On every push to the default branch, [Release Please](https://github.com/googleapis/release-please) opens or updates a "release PR" that:
 
 1. Bumps the version in `pyproject.toml` based on commit types
 2. Updates `CHANGELOG.md` with grouped entries
 
 Merging that PR creates a GitHub Release and a git tag — no manual version bumping or changelog editing required.
 
-Changelog sections:
+Changelog sections are driven by `release-please-config.json`. The current mapping:
 
-| Commit type | CHANGELOG section |
-|-------------|------------------|
-| `feat` | Features |
-| `fix` | Bug Fixes |
-| `perf` | Performance Improvements |
-| others | hidden |
+| Commit type | CHANGELOG section | Visible |
+|-------------|------------------|---------|
+| `feat` | Features | ✅ |
+| `fix` | Bug Fixes | ✅ |
+| `perf` | Performance Improvements | ✅ |
+| `revert` | Reverts | ✅ |
+| `docs` | Documentation | hidden |
+| `style` | Styles | hidden |
+| `refactor` | Code Refactoring | hidden |
+| `test` | Tests | hidden |
+| `build` | Build System | hidden |
+| `ci` | Continuous Integration | hidden |
+| `chore` | Miscellaneous | hidden |
+
+> **What:** Fully automated releases — every push to the default branch keeps a "release PR" up to date; merging it tags a release, bumps the version, and publishes a changelog.
 
 > **Why Release Please?** Zero-friction releases. The changelog writes itself from your commit messages.
 
@@ -280,15 +311,19 @@ Changelog sections:
 
 GitHub's free static analysis tool scans for security vulnerabilities on every push, every PR, and on a weekly schedule. Zero configuration required.
 
+> **What:** GitHub's built-in static analysis — scans the codebase for security vulnerabilities on push, PR, and a weekly schedule.
+
 > **Why CodeQL?** Catches common security issues automatically. Free for public repos. No maintenance overhead.
 
 ---
 
 ### 🤖 Dependabot — `.github/dependabot.yml`
 
-Dependabot monitors GitHub Actions versions and opens automated PRs to update them whenever a new version is released.
+Dependabot monitors both **GitHub Actions** versions and **Python (pip) dependencies**, and opens automated PRs to update them whenever a new version is released.
 
-> **Why Dependabot?** Keeps CI actions on recent, patched versions without any manual tracking.
+> **What:** Automated dependency PRs every week — both GitHub Actions and Python packages are kept up to date without manual intervention.
+
+> **Why Dependabot?** Keeps CI actions and Python dependencies on recent, patched versions without any manual tracking.
 
 ---
 
@@ -296,9 +331,11 @@ Dependabot monitors GitHub Actions versions and opens automated PRs to update th
 
 File path patterns are mapped to labels automatically. For example:
 
-- Changes in `src/` → `python` label
+- Changes in `src/` → `source` label
 - Changes in `.github/workflows/` → `ci` label
-- Changes in `docs/` → `documentation` label
+- Changes in dependency files (e.g. `pyproject.toml`, `.pre-commit-config.yaml`) → `dependencies` label
+
+> **What:** Automatic label application on every PR based on which files changed — no manual labelling required.
 
 > **Why auto-labeling?** At-a-glance PR categorization in the GitHub UI with zero manual effort.
 
@@ -330,6 +367,8 @@ All common tasks are available via `make`:
 
 The Makefile auto-loads `.env` and exports its variables. The `check-env-VARNAME` guard pattern lets targets declare required env vars as prerequisites.
 
+> **What:** A self-documenting task runner — `make help` prints every available command with its description, so you never need to remember toolchain invocations.
+
 > **Why a Makefile?** Single interface regardless of the underlying toolchain. Onboarding takes seconds: `make help` shows everything.
 
 ---
@@ -348,6 +387,8 @@ Documented variables:
 | `PYPI_TOKEN` | PyPI token for publishing |
 | `GITHUB_TOKEN` | GitHub personal access token |
 
+> **What:** A committed `.env.example` documents every supported environment variable; the real `.env` is gitignored and auto-loaded by the Makefile.
+
 > **Why `.env.example`?** Local overrides without committing secrets. The Makefile auto-loads and exports vars, so all targets see them automatically.
 
 ---
@@ -365,6 +406,8 @@ Documented variables:
 
 `.github/copilot-instructions.md` provides GitHub Copilot-specific behavioural config: project overview, build commands, key directories, and review guidelines.
 
+> **What:** Explicit behavioural contracts for AI coding agents — `AGENTS.md` for all agents, `copilot-instructions.md` for GitHub Copilot — covering coding principles, quality gates, and git safety rules.
+
 > **Why explicit agent instructions?** LLMs working on repos need explicit contracts about style, safety, and quality gates — the same way human contributors need a `CONTRIBUTING.md`.
 
 ---
@@ -375,19 +418,21 @@ Documented variables:
 
 Defines the review checklist (style, idioms, packaging, docs, error handling, testing, performance, security), Python-specific checks, output format, and suggestion priorities. Referenced by both `AGENTS.md` and `copilot-instructions.md` so that humans and AI agents apply the same criteria.
 
+> **What:** A shared code-review rubric that both human reviewers and AI agents reference, ensuring consistent feedback quality across the project.
+
 ---
 
 ## 🔄 CI/CD Workflows
 
 | Workflow | File | Trigger | What it does |
 |----------|------|---------|-------------|
-| Tests | `ci.yml` | push / PR to master | pytest matrix (3.12, 3.13) + Codecov upload |
-| Lint | `lint.yml` | push / PR to master | `ruff check` + `ruff format --check` |
-| Type Check | `typecheck.yml` | push / PR to master | `ty check` |
-| Deploy Docs | `pages.yml` | push to master | `mkdocs gh-deploy` |
-| Release Please | `release-please.yml` | push to master | automated release PR + changelog |
+| Tests | `ci.yml` | push / PR to default branch | pytest matrix (3.12, 3.13) + Codecov upload |
+| Lint | `lint.yml` | push / PR to default branch | `ruff check` + `ruff format --check` |
+| Type Check | `typecheck.yml` | push / PR to default branch | `ty check` |
+| Deploy Docs | `pages.yml` | push to default branch | `mkdocs gh-deploy` |
+| Release Please | `release-please.yml` | push to default branch | automated release PR + changelog |
 | CodeQL | `codeql.yml` | push / PR / schedule | security static analysis |
-| Conventional Commits | `conventional-commits.yml` | PR | validates commit message format |
+| Conventional Commits | `conventional-commits.yml` | PR | validates PR title format |
 | PR Labeler | `label-pr.yml` | PR | applies path-based labels |
 | Pre-commit Autoupdate | `pre-commit-autoupdate.yml` | weekly schedule | bumps hook revisions, opens PR |
 
