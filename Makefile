@@ -21,7 +21,10 @@
 # Silently include the .env file; missing file is fine - guard targets catch it.
 # ---------------------------------------------------------------------------
 -include .env
-export $(shell sed 's/=.*//' .env 2>/dev/null)
+ifneq (,$(wildcard .env))
+ENV_VARS := $(shell grep -E '^[A-Za-z_][A-Za-z0-9_]*=' .env | cut -d= -f1 | xargs)
+export $(ENV_VARS)
+endif
 
 # ---------------------------------------------------------------------------
 # Calculated variables
@@ -123,14 +126,14 @@ typecheck: ## 🔬 Type-check with ty
 ##@ Testing
 # ===========================================================================
 
-test: ## 🧪 Run tests with pytest
-	@printf "$(YELLOW)>>> Running tests...$(RESET)\n"
-	uv run pytest -v
+test: ## 🧪 Run tests with pytest (no coverage)
+	@printf "$(YELLOW)>>> Running tests (no coverage)...$(RESET)\n"
+	uv run pytest -v -o addopts=
 	@printf "$(GREEN)>>> ✅ Tests passed!$(RESET)\n"
 
 test-cov: ## 📊 Run tests with coverage report
 	@printf "$(YELLOW)>>> Running tests with coverage...$(RESET)\n"
-	uv run pytest -v --cov=$(PKGROOT) --cov-report=term-missing --cov-report=xml:coverage.xml
+	uv run pytest -v
 	@printf "$(GREEN)>>> ✅ Coverage report generated!$(RESET)\n"
 
 # ===========================================================================
