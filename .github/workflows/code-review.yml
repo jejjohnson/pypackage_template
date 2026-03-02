@@ -59,43 +59,36 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Build the prompt
-          INSTRUCTIONS=""
-          if [ -f "CODE_REVIEW.md" ]; then
-            INSTRUCTIONS=$(cat CODE_REVIEW.md)
-          fi
-
-          DIFF=$(cat /tmp/pr-diff.txt)
-
-          # Truncate diff if too large (models have context limits)
-          MAX_CHARS=60000
-          if [ ${#DIFF} -gt $MAX_CHARS ]; then
-            DIFF="${DIFF:0:$MAX_CHARS}"$'\n\n... (diff truncated due to size)'
-          fi
-
           PR_TITLE="${{ github.event.pull_request.title }}"
           PR_BODY="${{ github.event.pull_request.body }}"
 
-          PROMPT="You are a code review agent. Review the following pull request diff according to the instructions below.
+          # Truncate diff if too large (models have context limits)
+          MAX_CHARS=60000
+          DIFF=$(cat /tmp/pr-diff.txt)
+          if [ ${#DIFF} -gt $MAX_CHARS ]; then
+            DIFF="${DIFF:0:$MAX_CHARS}"$'\n\n... (diff truncated due to size)'
+            printf '%s' "$DIFF" > /tmp/pr-diff.txt
+          fi
 
-          ## PR Context
-          - **Title**: ${PR_TITLE}
-          - **Description**: ${PR_BODY}
-
-          ## Review Instructions
-          ${INSTRUCTIONS}
-
-          ## Diff to Review
-          \`\`\`diff
-          ${DIFF}
-          \`\`\`
-
-          Provide your code review following the Output Format specified in the instructions. If there are no issues, say so and highlight what was done well."
+          # Build the prompt into a file to avoid shell interpretation of
+          # special characters (backticks, pipes, etc.) present in CODE_REVIEW.md
+          {
+            printf 'You are a code review agent. Review the following pull request diff according to the instructions below.\n\n'
+            printf '## PR Context\n'
+            printf '- **Title**: %s\n' "$PR_TITLE"
+            printf '- **Description**: %s\n\n' "$PR_BODY"
+            printf '## Review Instructions\n'
+            cat CODE_REVIEW.md 2>/dev/null || printf '(No CODE_REVIEW.md found)\n'
+            printf '\n## Diff to Review\n```diff\n'
+            cat /tmp/pr-diff.txt
+            printf '\n```\n\n'
+            printf 'Provide your code review following the Output Format specified in the instructions. If there are no issues, say so and highlight what was done well.\n'
+          } > /tmp/prompt.txt
 
           # Use GitHub Models API via gh models run
-          echo "$PROMPT" | gh models run gpt-4o -f - > /tmp/review-output.md 2>/dev/null || {
+          gh models run gpt-4o -f /tmp/prompt.txt > /tmp/review-output.md 2>/dev/null || {
             # Fallback: post a simpler message
-            echo "⚠️ AI review generation failed. Please review manually." > /tmp/review-output.md
+            printf '⚠️ AI review generation failed. Please review manually.\n' > /tmp/review-output.md
           }
 
       - name: Post review comment
@@ -103,15 +96,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          REVIEW=$(cat /tmp/review-output.md)
-          COMMENT="## 🔍 AI Code Review
-
-          ${REVIEW}
-
-          ---
-          *This review was generated automatically using the guidelines in \`CODE_REVIEW.md\`.*
-          *Generated at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')*"
+          # Build the comment body in a file to avoid shell interpretation of
+          # special characters in the AI-generated review output
+          {
+            printf '## 🔍 AI Code Review\n\n'
+            cat /tmp/review-output.md
+            printf '\n\n---\n'
+            printf '*This review was generated automatically using the guidelines in `CODE_REVIEW.md`.*\n'
+            printf '*Generated at: %s*\n' "$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          } > /tmp/comment.txt
 
           gh pr comment "${{ github.event.pull_request.number }}" \
             --repo "${{ github.repository }}" \
-            --body "$COMMENT"
+            --body-file /tmp/comment.txt
