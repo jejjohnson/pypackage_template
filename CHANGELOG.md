@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/jejjohnson/pypackage_template/compare/v0.1.2...v0.1.3) (2026-03-02)
+
+
+### Bug Fixes
+
+* address review comments on Makefile .env export and test targets ([c91dfe5](https://github.com/jejjohnson/pypackage_template/commit/c91dfe51896e0e382084c689821eebebdb61eace))
+
 ## [0.1.2](https://github.com/jejjohnson/pypackage_template/compare/v0.1.1...v0.1.2) (2026-03-02)
 
 
