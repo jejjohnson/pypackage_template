@@ -1,0 +1,117 @@
+name: "🔍 AI Code Review"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [master]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: code-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  code-review:
+    name: AI Code Review
+    runs-on: ubuntu-latest
+    if: >-
+      !contains(github.event.pull_request.user.login, '[bot]') &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate diff
+        id: diff
+        run: |
+          DIFF=$(git --no-pager diff --no-prefix --unified=100000 --minimal $(git merge-base --fork-point origin/master)...HEAD 2>/dev/null || echo "")
+          if [ -z "$DIFF" ]; then
+            DIFF=$(git --no-pager diff --no-prefix --unified=100000 --minimal origin/master...HEAD 2>/dev/null || echo "")
+          fi
+          if [ -z "$DIFF" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "No diff found, skipping review."
+            exit 0
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "$DIFF" > /tmp/pr-diff.txt
+          echo "Diff generated ($(wc -l < /tmp/pr-diff.txt) lines)"
+
+      - name: Read review instructions
+        if: steps.diff.outputs.skip != 'true'
+        id: instructions
+        run: |
+          if [ -f "CODE_REVIEW.md" ]; then
+            echo "instructions_found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "instructions_found=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ CODE_REVIEW.md not found, using default review."
+          fi
+
+      - name: Run AI code review
+        if: steps.diff.outputs.skip != 'true'
+        id: review
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Build the prompt
+          INSTRUCTIONS=""
+          if [ -f "CODE_REVIEW.md" ]; then
+            INSTRUCTIONS=$(cat CODE_REVIEW.md)
+          fi
+
+          DIFF=$(cat /tmp/pr-diff.txt)
+
+          # Truncate diff if too large (models have context limits)
+          MAX_CHARS=60000
+          if [ ${#DIFF} -gt $MAX_CHARS ]; then
+            DIFF="${DIFF:0:$MAX_CHARS}"$'\n\n... (diff truncated due to size)'
+          fi
+
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_BODY="${{ github.event.pull_request.body }}"
+
+          PROMPT="You are a code review agent. Review the following pull request diff according to the instructions below.
+
+          ## PR Context
+          - **Title**: ${PR_TITLE}
+          - **Description**: ${PR_BODY}
+
+          ## Review Instructions
+          ${INSTRUCTIONS}
+
+          ## Diff to Review
+          \`\`\`diff
+          ${DIFF}
+          \`\`\`
+
+          Provide your code review following the Output Format specified in the instructions. If there are no issues, say so and highlight what was done well."
+
+          # Use GitHub Models API via gh models run
+          echo "$PROMPT" | gh models run gpt-4o -f - > /tmp/review-output.md 2>/dev/null || {
+            # Fallback: post a simpler message
+            echo "⚠️ AI review generation failed. Please review manually." > /tmp/review-output.md
+          }
+
+      - name: Post review comment
+        if: steps.diff.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REVIEW=$(cat /tmp/review-output.md)
+          COMMENT="## 🔍 AI Code Review
+
+          ${REVIEW}
+
+          ---
+          *This review was generated automatically using the guidelines in \`CODE_REVIEW.md\`.*
+          *Generated at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')*"
+
+          gh pr comment "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" \
+            --body "$COMMENT"
