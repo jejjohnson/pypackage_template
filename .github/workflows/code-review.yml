@@ -74,8 +74,8 @@ jobs:
           {
             printf 'You are a code review agent. Review the following pull request diff according to the instructions below.\n\n'
             printf '## PR Context\n'
-            printf '- **Title**: %s\n' "$PR_TITLE"
-            printf '- **Description**: %s\n\n' "$PR_BODY"
+            printf -- '- **Title**: %s\n' "$PR_TITLE"
+            printf -- '- **Description**: %s\n\n' "$PR_BODY"
             printf '## Review Instructions\n'
             cat CODE_REVIEW.md 2>/dev/null || printf '(No CODE_REVIEW.md found)\n'
             printf '\n## Diff to Review\n```diff\n'
