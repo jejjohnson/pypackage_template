@@ -9,13 +9,14 @@ Standing instructions for **all** agents performing code reviews on this reposit
 Use the following command to get the diff for review:
 
 ```bash
-git --no-pager diff --no-prefix --unified=100000 --minimal $(git merge-base --fork-point main)...HEAD
+BASE_BRANCH="$(git rev-parse --verify master >/dev/null 2>&1 && echo master || echo main)"
+git --no-pager diff --no-prefix --unified=100000 --minimal $(git merge-base --fork-point "$BASE_BRANCH")...HEAD
 ```
 
 If that fails (e.g. detached HEAD, shallow clone), fall back to:
 
 ```bash
-git --no-pager diff --no-prefix --unified=100000 --minimal main...HEAD
+git --no-pager diff --no-prefix --unified=100000 --minimal "$BASE_BRANCH"...HEAD
 ```
 
 ### Reading the diff
@@ -37,8 +38,8 @@ git --no-pager diff --no-prefix --unified=100000 --minimal main...HEAD
 - Appropriate function/method length (single responsibility)
 - Logical code organization and flow
 - Avoidance of deeply nested structures
-- Linting via **ruff** (`uv run --group lint ruff check src/`)
-- Type-hint checking via **ty** (`uv run --group typecheck ty check src/`)
+- Linting via **ruff** (`uv run --group lint ruff check src/mypackage/`)
+- Type-hint checking via **ty** (`uv run --group typecheck ty check src/mypackage`)
 
 > **Rule of thumb**: Sacrifice *cleverness* for *clarity*. Sacrifice *brevity* for *explicitness*.
 > Don't worry about formatting — our CI pipeline (ruff format, pre-commit) handles that automatically.
