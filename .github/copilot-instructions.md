@@ -45,11 +45,11 @@ When implementing features or fixing bugs:
 
 ### Never Suggest Without a Proposal
 Bad: "You should add validation here"
-Good: "Add validation here. Proposed implementation:
+Good: "Add validation here. Proposed implementation:"
 ```python
 if value < 0:
     raise ValueError('Value must be non-negative')
-```"
+```
 
 ### Simplicity First
 - No abstractions for single-use code

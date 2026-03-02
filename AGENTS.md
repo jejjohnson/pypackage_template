@@ -82,7 +82,7 @@ For multi-step tasks, state a brief plan:
 
 ## Development Environment
 
-**IMPORTANT**: Always use `uv run` when running pytest, python, or any shell commands. Do NOT use the system Python.
+**IMPORTANT**: Always use `uv run` when running Python tools or scripts (e.g., `pytest`, `python`, `ruff`, `ty`, `mkdocs`, `pre-commit`) so they run in the project environment. You do **not** need `uv run` for non-Python shell commands (e.g., `git`, `ls`, `cat`). Do NOT use the system Python directly.
 
 ## Pull Request Descriptions
 
