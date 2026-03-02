@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.1.2](https://github.com/jejjohnson/pypackage_template/compare/v0.1.1...v0.1.2) (2026-03-02)
+
+
+### Features
+
+* add CODE_REVIEW.md and AI code review workflow ([258275b](https://github.com/jejjohnson/pypackage_template/commit/258275b5867c28212a94608178511c1c4e9024a3))
+* add CODE_REVIEW.md and Copilot code review instructions ([f4d2489](https://github.com/jejjohnson/pypackage_template/commit/f4d2489e4b31fd431a6e767b27a0af7319965588))
+
+
+### Bug Fixes
+
+* avoid shell interpretation of backticks in CODE_REVIEW.md content ([b733a16](https://github.com/jejjohnson/pypackage_template/commit/b733a169107c934c4961fe64f507068d05969912))
+* pass PR title/body via env block to prevent shell interpretation ([93f1dcc](https://github.com/jejjohnson/pypackage_template/commit/93f1dcc985342d8e4f735d89cd17d75e3d181f66))
+* prevent printf from parsing markdown bullets as options ([7bc501e](https://github.com/jejjohnson/pypackage_template/commit/7bc501e45715df03ee0efd9e30e499b80bb111f5))
+
 ## [0.1.1](https://github.com/jejjohnson/pypackage_template/compare/v0.1.0...v0.1.1) (2026-03-01)
 
 
