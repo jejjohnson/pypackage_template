@@ -1,6 +1,6 @@
 [project]
 name = "mypackage"
-version = "0.1.1"
+version = "0.1.2"
 description = "My short description for my project."
 authors = [
     {name="J. Emmanuel Johnson", email="jemanjohnson34@gmail.com"},
