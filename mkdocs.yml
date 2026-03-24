@@ -42,6 +42,8 @@ plugins:
 
 nav:
   - Home: index.md
+  - Examples:
+      - Demo: notebooks/example_demo.py
   - API Reference: api/reference.md
   - Changelog: CHANGELOG.md
 
