@@ -92,6 +92,31 @@ For multi-step tasks, state a brief plan:
 
 This is a common failure mode: an agent called to make a small follow-up change will supply a fresh description scoped only to its own work, silently discarding all prior context. Always read the existing description first and treat it as the base.
 
+**Do not change** the PR title or description between sessions except to:
+- Correct a conventional-commits format violation in the title.
+- Append new items to the description checklist.
+
+Never rewrite the existing description; only add to it.
+
+## Pull Request Review Comments
+
+When addressing PR review comments, **resolve each comment** after fixing it. Use the GitHub API to mark comments as resolved:
+
+```bash
+# Get the review thread ID from the comment, then resolve it
+gh api graphql -f query='mutation { resolveReviewThread(input: {threadId: "THREAD_ID"}) { thread { isResolved } } }'
+```
+
+Workflow:
+1. Read all PR review comments (`gh api repos/{owner}/{repo}/pulls/{number}/comments`)
+2. Address each comment with code changes
+3. After pushing the fix, resolve each addressed comment thread via the GraphQL API
+4. Do **not** resolve comments you haven't addressed
+
+## Plans
+
+Plans and design documents go in `.plans/` (gitignored, never committed). If a plan needs to be tracked long-term, create a GitHub issue with the same detail instead. **Never commit plan files to the repository.**
+
 ## GIT Safety Rules
 
 - **NEVER** push to `main` or merge into `main` unless the user explicitly says "push to main" or "merge to main".
