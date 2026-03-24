@@ -77,7 +77,7 @@ Plans and design documents go in `.plans/` (gitignored, never committed). Track 
 
 ## PR Review Comments
 
-When addressing PR review comments, always resolve each comment thread after fixing it via the GitHub GraphQL API (`resolveReviewThread` mutation). Do not leave addressed comments unresolved.
+When addressing PR review comments, always resolve each review thread after fixing it via the GitHub GraphQL API (`resolveReviewThread` mutation). Do not leave addressed comments unresolved. To obtain the required `threadId`, first list the pull request's review threads via the GitHub GraphQL API (see the "Pull Request Review Comments" section in `AGENTS.md` for a minimal query and end-to-end workflow).
 
 ## Code Review
 

@@ -92,6 +92,8 @@ For multi-step tasks, state a brief plan:
 
 This is a common failure mode: an agent called to make a small follow-up change will supply a fresh description scoped only to its own work, silently discarding all prior context. Always read the existing description first and treat it as the base.
 
+## PR Title & Description Rules
+
 **Do not change** the PR title or description between sessions except to:
 - Correct a conventional-commits format violation in the title.
 - Append new items to the description checklist.
@@ -100,18 +102,36 @@ Never rewrite the existing description; only add to it.
 
 ## Pull Request Review Comments
 
-When addressing PR review comments, **resolve each comment** after fixing it. Use the GitHub API to mark comments as resolved:
+When addressing PR review comments, **resolve each review thread** after fixing it. Use the GitHub GraphQL API to list threads and resolve them:
 
 ```bash
-# Get the review thread ID from the comment, then resolve it
-gh api graphql -f query='mutation { resolveReviewThread(input: {threadId: "THREAD_ID"}) { thread { isResolved } } }'
+# 1. List all review threads and their IDs for a PR
+gh api graphql -f query='
+  query($owner: String!, $repo: String!, $pr: Int!) {
+    repository(owner: $owner, name: $repo) {
+      pullRequest(number: $pr) {
+        reviewThreads(first: 100) {
+          nodes {
+            id
+            isResolved
+            comments(first: 1) {
+              nodes { body path line }
+            }
+          }
+        }
+      }
+    }
+  }' -f owner=OWNER -f repo=REPO -F pr=PR_NUMBER
+
+# 2. Resolve a review thread by its node ID
+gh api graphql -f query='mutation($threadId: ID!) { resolveReviewThread(input: {threadId: $threadId}) { thread { isResolved } } }' -f threadId=THREAD_ID
 ```
 
 Workflow:
-1. Read all PR review comments (`gh api repos/{owner}/{repo}/pulls/{number}/comments`)
-2. Address each comment with code changes
-3. After pushing the fix, resolve each addressed comment thread via the GraphQL API
-4. Do **not** resolve comments you haven't addressed
+1. List review threads via the GraphQL query above to get thread node IDs
+2. Address each thread with code changes
+3. After pushing the fix, resolve each addressed review thread via the `resolveReviewThread` mutation
+4. Do **not** resolve threads you haven't addressed
 
 ## Plans
 
