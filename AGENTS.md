@@ -94,11 +94,11 @@ This is a common failure mode: an agent called to make a small follow-up change 
 
 ## GIT Safety Rules
 
-- **NEVER** push to `main`/`master` or merge into `main`/`master` unless the user explicitly says "push to main" or "merge to main".
+- **NEVER** push to `main` or merge into `main` unless the user explicitly says "push to main" or "merge to main".
 - **NEVER** push to any remote branch or run `git push` unless the user explicitly asks you to push. Only commit locally.
 - Always work on feature branches.
 - When the user says "merge the changes" or "merge the branch", they mean push the local branch to the remote — NOT merge into main.
-- Always confirm before any action that affects shared branches (main, master, production, etc.).
+- Always confirm before any action that affects shared branches (main, production, etc.).
 
 ## Documentation
 
@@ -107,7 +107,7 @@ This repo uses **MkDocs + Material + mkdocstrings + mkdocs-jupyter** for documen
 - **Build locally**: `make docs-serve` (or `uv run --group docs mkdocs serve`)
 - **Build static site**: `make docs` (or `uv run --group docs mkdocs build`)
 - **Deploy to GitHub Pages**: `make docs-deploy` (or `uv run --group docs mkdocs gh-deploy --force`)
-- **Auto-deploy**: the `pages.yml` workflow deploys automatically on every push to `main`/`master`
+- **Auto-deploy**: the `pages.yml` workflow deploys automatically on every push to `main`
 
 When writing docstrings, use **Google style** (enforced by `mkdocstrings` config).
 

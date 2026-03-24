@@ -9,7 +9,7 @@ Standing instructions for **all** agents performing code reviews on this reposit
 Use the following command to get the diff for review:
 
 ```bash
-BASE_BRANCH="$(git rev-parse --verify master >/dev/null 2>&1 && echo master || echo main)"
+BASE_BRANCH="$(git rev-parse --verify main >/dev/null 2>&1 && echo main || echo master)"
 git --no-pager diff --no-prefix --unified=100000 --minimal $(git merge-base --fork-point "$BASE_BRANCH")...HEAD
 ```
 

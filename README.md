@@ -4,7 +4,7 @@
 [![Lint](https://github.com/jejjohnson/pypackage_template/actions/workflows/lint.yml/badge.svg)](https://github.com/jejjohnson/pypackage_template/actions/workflows/lint.yml)
 [![Type Check](https://github.com/jejjohnson/pypackage_template/actions/workflows/typecheck.yml/badge.svg)](https://github.com/jejjohnson/pypackage_template/actions/workflows/typecheck.yml)
 [![Deploy Docs](https://github.com/jejjohnson/pypackage_template/actions/workflows/pages.yml/badge.svg)](https://github.com/jejjohnson/pypackage_template/actions/workflows/pages.yml)
-[![codecov](https://codecov.io/gh/jejjohnson/pypackage_template/branch/master/graph/badge.svg)](https://codecov.io/gh/jejjohnson/pypackage_template)
+[![codecov](https://codecov.io/gh/jejjohnson/pypackage_template/branch/main/graph/badge.svg)](https://codecov.io/gh/jejjohnson/pypackage_template)
 [![PyPI version](https://img.shields.io/pypi/v/mypackage.svg)](https://pypi.org/project/mypackage/)
 [![Python versions](https://img.shields.io/pypi/pyversions/mypackage.svg)](https://pypi.org/project/mypackage/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -242,7 +242,7 @@ make docs-serve    # preview locally at http://127.0.0.1:8000
 make docs-deploy   # deploy to GitHub Pages
 ```
 
-Auto-deploy: `.github/workflows/pages.yml` deploys on every push to `main` or `master`.
+Auto-deploy: `.github/workflows/pages.yml` deploys on every push to `main`.
 
 Nav structure: **Home → API Reference → Changelog**
 
@@ -401,7 +401,7 @@ Documented variables:
 
 - **Karpathy Coding Principles:** Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution
 - **Pre-commit checklist:** tests, lint, format, type checks must pass before every commit
-- **Git safety rules:** never push to `main`/`master` without explicit instruction
+- **Git safety rules:** never push to `main` without explicit instruction
 - **Conventional Commits** requirement for all commit messages
 
 `.github/copilot-instructions.md` provides GitHub Copilot-specific behavioural config: project overview, build commands, key directories, and review guidelines.
