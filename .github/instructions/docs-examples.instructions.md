@@ -103,10 +103,12 @@ After every `savefig` code cell, add a markdown cell that embeds the image. This
 
 ```python
 # %% [markdown]
-# ![Convergence rates](../../images/notebook_name/convergence.png)
+# ![Convergence rates](../images/notebook_name/convergence.png)
 ```
 
-The relative path `../../images/` goes up from `docs/notebooks/` to `docs/`.
+The relative path `../images/` goes up from `docs/notebooks/` to `docs/`.
+
+> **Note**: The path is relative to the source `.py` file location (`docs/notebooks/`), not the built site URL. One `../` is enough to reach `docs/images/`.
 
 ## Embedding Images in Standalone Markdown Pages
 

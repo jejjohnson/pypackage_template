@@ -88,9 +88,10 @@ version: ## 📋 Display package version and git hash
 ##@ Setup
 # ===========================================================================
 
-install: ## 📦 Install all dependency groups via uv
+install: ## 📦 Install all dependency groups via uv + pre-commit hooks
 	@printf "$(YELLOW)>>> Installing all dependencies...$(RESET)\n"
 	uv sync --all-groups
+	uv run pre-commit install
 	@printf "$(GREEN)>>> ✅ Installation complete!$(RESET)\n"
 
 # Convenience: copy .env.example → .env if .env is missing
@@ -106,15 +107,15 @@ init: ## 🔧 Bootstrap .env from .env.example (skip if .env already exists)
 ##@ Quality
 # ===========================================================================
 
-lint: ## 🧹 Lint code with ruff (no auto-fix)
+lint: ## 🧹 Lint code with ruff (no auto-fix) — entire repo
 	@printf "$(YELLOW)>>> Running ruff check...$(RESET)\n"
-	uv run --group lint ruff check $(PKGROOT)/
+	uv run --group lint ruff check .
 	@printf "$(GREEN)>>> ✅ Lint passed!$(RESET)\n"
 
-format: ## 🖊️  Format code with ruff (format + auto-fix)
+format: ## 🖊️  Format code with ruff (format + auto-fix) — entire repo
 	@printf "$(YELLOW)>>> Running ruff format + fix...$(RESET)\n"
-	uv run --group lint ruff format $(PKGROOT)/
-	uv run --group lint ruff check --fix $(PKGROOT)/
+	uv run --group lint ruff format .
+	uv run --group lint ruff check --fix .
 	@printf "$(GREEN)>>> ✅ Format complete!$(RESET)\n"
 
 typecheck: ## 🔬 Type-check with ty

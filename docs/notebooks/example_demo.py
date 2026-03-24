@@ -72,7 +72,7 @@ fig.savefig(IMG_DIR / "signal_comparison.png", dpi=150, bbox_inches="tight")
 plt.show()
 
 # %% [markdown]
-# ![Signal comparison](../../images/example_demo/signal_comparison.png)
+# ![Signal comparison](../images/example_demo/signal_comparison.png)
 
 # %% [markdown]
 # ## Timing & Statistics
@@ -81,12 +81,13 @@ plt.show()
 # executed) and a static markdown table (visible in the built docs).
 
 # %%
+repeats = 1000
 results: dict[str, dict] = {}
 for label, y in signals.items():
     t0 = time.perf_counter()
-    for _ in range(1000):
+    for _ in range(repeats):
         _ = np.fft.rfft(y)
-    elapsed_ms = (time.perf_counter() - t0) / 1000 * 1e3
+    elapsed_ms = (time.perf_counter() - t0) * 1e3 / repeats
     rms = float(np.sqrt(np.mean(y**2)))
     results[label] = {"time_ms": elapsed_ms, "rms": rms}
 
@@ -128,7 +129,7 @@ fig.savefig(IMG_DIR / "timing_stats.png", dpi=150, bbox_inches="tight")
 plt.show()
 
 # %% [markdown]
-# ![Timing and statistics](../../images/example_demo/timing_stats.png)
+# ![Timing and statistics](../images/example_demo/timing_stats.png)
 
 # %% [markdown]
 # ## Summary
