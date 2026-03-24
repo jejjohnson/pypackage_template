@@ -21,6 +21,26 @@ make precommit   # Run pre-commit on all files
 make docs-serve  # Serve docs locally
 ```
 
+## Before Every Commit — Mandatory Checklist
+
+**All four checks must pass before any commit.** CI runs them on the entire repo (`ruff check .`), not just `src/mypackage/`, so always run the commands below from the repo root.
+
+```bash
+# 1. Tests — zero failures required
+uv run pytest -v
+
+# 2. Lint — run on the ENTIRE repo (includes tests/ and scripts/)
+uv run --group lint ruff check .
+
+# 3. Format check — run on the ENTIRE repo
+uv run --group lint ruff format --check .
+
+# 4. Type check — on the package only
+uv run --group typecheck ty check src/mypackage
+```
+
+> **Common pitfall**: Running `ruff check src/mypackage/` instead of `ruff check .` misses import-sorting errors in `tests/` and `scripts/`. The CI workflow runs `ruff check .`. Always use `.` (repo root), not a subdirectory.
+
 ## Key Directories
 
 | Path | Purpose |
@@ -29,6 +49,7 @@ make docs-serve  # Serve docs locally
 | `tests/` | Test suite |
 | `docs/` | Documentation (MkDocs) |
 | `notebooks/` | Jupyter notebooks |
+| `scripts/` | Example scripts |
 
 ## Behavioral Guidelines
 

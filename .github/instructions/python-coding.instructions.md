@@ -1,5 +1,5 @@
 ---
-applyTo: "src/**/*.py,tests/**/*.py"
+applyTo: "src/**/*.py,tests/**/*.py,scripts/**/*.py"
 ---
 
 # Python Coding Standards

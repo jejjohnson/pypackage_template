@@ -38,7 +38,7 @@ git --no-pager diff --no-prefix --unified=100000 --minimal "$BASE_BRANCH"...HEAD
 - Appropriate function/method length (single responsibility)
 - Logical code organization and flow
 - Avoidance of deeply nested structures
-- Linting via **ruff** (`uv run --group lint ruff check src/mypackage/`)
+- Linting via **ruff** (`uv run --group lint ruff check .`) — lint the **entire repo**, not just the package
 - Type-hint checking via **ty** (`uv run --group typecheck ty check src/mypackage`)
 
 > **Rule of thumb**: Sacrifice *cleverness* for *clarity*. Sacrifice *brevity* for *explicitness*.
