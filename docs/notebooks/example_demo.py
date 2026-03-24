@@ -31,11 +31,9 @@ from __future__ import annotations
 import time
 from pathlib import Path
 
-import matplotlib
-
-matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+
 
 # ── Image output directory ──────────────────────────────────────────
 # Path(__file__) ensures this works regardless of the working directory.
