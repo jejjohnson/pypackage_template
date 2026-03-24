@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.4](https://github.com/jejjohnson/pypackage_template/compare/v0.1.3...v0.1.4) (2026-03-24)
+
+
+### Bug Fixes
+
+* address PR [#19](https://github.com/jejjohnson/pypackage_template/issues/19) review comments ([65b8d57](https://github.com/jejjohnson/pypackage_template/commit/65b8d57e9792a1877d0fd3c5d04a29e121e9219a))
+* resolve lint failures in example notebook and invalid ipynb ([bf55f60](https://github.com/jejjohnson/pypackage_template/commit/bf55f607db5c5daaaefa3f732eaeee06ac5c898c))
+
 ## [0.1.3](https://github.com/jejjohnson/pypackage_template/compare/v0.1.2...v0.1.3) (2026-03-02)
 
 
