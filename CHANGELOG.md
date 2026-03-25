@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.5](https://github.com/jejjohnson/pypackage_template/compare/v0.1.4...v0.1.5) (2026-03-25)
+
+
+### Features
+
+* **docs:** add MathJax support for equations ([3bca9eb](https://github.com/jejjohnson/pypackage_template/commit/3bca9ebcf10212755859dfe13f4024d7bf3d05df))
+* **docs:** add MathJax support for markdown and notebook equations ([b31ab41](https://github.com/jejjohnson/pypackage_template/commit/b31ab4155886ed610b7238a22bbfab0ac4723a1a))
+
+
+### Bug Fixes
+
+* **docs:** guard MathJax subscribe callback against load failures ([c7173a6](https://github.com/jejjohnson/pypackage_template/commit/c7173a6d3847e9c794f0213477278f6582edbd8e))
+* **docs:** pin MathJax CDN to exact version 3.2.2 ([e3130ca](https://github.com/jejjohnson/pypackage_template/commit/e3130ca8f3af5e2597982fe5c1cb779b5f144a5e))
+
 ## [0.1.4](https://github.com/jejjohnson/pypackage_template/compare/v0.1.3...v0.1.4) (2026-03-24)
 
 
