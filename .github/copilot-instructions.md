@@ -83,6 +83,14 @@ if value < 0:
 - Don't add docstrings/comments to code you didn't change
 - Remove only imports/functions that YOUR changes made unused
 
+## Plans
+
+Plans and design documents go in `.plans/` (gitignored, never committed). Track work via GitHub issues, not committed plan files.
+
+## PR Review Comments
+
+When addressing PR review comments, always resolve each review thread after fixing it via the GitHub GraphQL API (`resolveReviewThread` mutation). Do not leave addressed comments unresolved. See the "Pull Request Review Comments" section in `AGENTS.md` for the exact GraphQL queries and workflow.
+
 ## Code Review
 
 For all code review tasks, follow the guidance in `/CODE_REVIEW.md`.

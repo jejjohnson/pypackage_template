@@ -114,3 +114,6 @@ venv.bak/
 
 # Mac OS-specific storage files
 .DS_Store
+
+# Plans (tracked via GitHub issues, not committed)
+.plans/
