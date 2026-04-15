@@ -11,9 +11,9 @@ Every issue carries exactly one `type:*`, one or more `area:*`, at most one `lay
 | Scope | Labels |
 |---|---|
 | **Type** | `type:epic-wave`, `type:epic-theme`, `type:feature`, `type:design`, `type:chore`, `type:docs`, `type:bug` |
-| **Area** | `area:engineering`, `area:testing`, `area:docs` — extend per project (e.g. `area:algorithmic`, `area:integration`) |
+| **Area** | `area:engineering`, `area:testing`, `area:docs`, `area:code` — extend per project (e.g. `area:algorithmic`, `area:integration`) |
 | **Layer** | `layer:0-primitives`, `layer:1-components`, `layer:2-models` — only if the project has a formal layer stack |
-| **Wave** | `wave:0-bootstrap`, `wave:1`, `wave:2`, … — release-scoped phases |
+| **Wave** | `wave:0`, `wave:1`, `wave:2`, … — release-scoped phases (add `wave:N-<slug>` variants for descriptive labels) |
 | **Priority** | `priority:p0` (blocker), `priority:p1` (high), `priority:p2` (normal) |
 
 Bootstrap the standard set on a fresh repo:
@@ -22,7 +22,7 @@ Bootstrap the standard set on a fresh repo:
 make gh-labels
 ```
 
-The script lives at `.github/scripts/create-labels.sh`. Edit the arrays in the script to customise `area:*`, `layer:*`, and `wave:*` for the project, then re-run — the script is idempotent.
+The script lives at `.github/scripts/create-labels.sh`. Edit the hard-coded `create …` entries in the script to customise `area:*`, `layer:*`, and `wave:*` for the project, then re-run — the script is idempotent.
 
 ---
 
@@ -86,15 +86,17 @@ GitHub's task-list feature links bidirectionally from the parent, so checklist i
 
 ## Pre-commit checklist
 
-All four gates must pass before merging to the default branch:
+Run these locally before opening a PR:
 
 ```bash
-make test         # pytest
-make lint         # ruff check .
-make format       # ruff format --check .
+make format       # ruff format . + ruff check --fix .   (applies changes)
+make lint         # ruff check .                         (CI-style check)
 make typecheck    # ty check
+make test         # pytest
 ```
 
-Pre-commit hooks run the lint + format gates on every commit. Run `make precommit` to apply them to all files manually.
+Note that `make format` **mutates files** — it formats and applies autofixes. `make lint` is the CI-parity read-only check. Run `make format` first, commit the result, then run `make lint` / `make test` to verify.
+
+Pre-commit hooks run ruff on every commit. Run `make precommit` to apply them to all files manually.
 
 Commit messages follow the [Conventional Commits](https://www.conventionalcommits.org/) specification — enforced on PR titles by `.github/workflows/conventional-commits.yml`.

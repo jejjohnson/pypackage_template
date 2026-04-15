@@ -13,10 +13,10 @@ labels: ["type:bug"]
 # Minimal reproducing example.
 ```
 
-## Expected Behaviour
+## Expected Behavior
 <!-- What should happen. -->
 
-## Actual Behaviour
+## Actual Behavior
 <!-- What happens instead. Include traceback if relevant. -->
 
 ## Environment

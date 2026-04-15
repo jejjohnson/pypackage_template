@@ -12,7 +12,7 @@
 #
 # Requires: `gh` CLI authenticated with repo scope.
 #
-# Customise by editing the arrays below; run again to apply.
+# Customise by editing the `create` calls below; run again to apply.
 
 set -euo pipefail
 
@@ -48,8 +48,12 @@ echo "Creating area:* labels..."
 create "area:engineering" "0e8a16" "Build, packaging, CI, tooling"
 create "area:testing"     "bfdadc" "Test suite"
 create "area:docs"        "1d76db" "Docs + notebooks"
+create "area:code"        "c2e0c6" "Source-code changes (catch-all fallback)"
 # Edit / extend for your project. Common domain-specific areas:
 #   area:algorithmic, area:integration, area:performance, area:security
+
+echo "Creating Dependabot / misc labels..."
+create "dependencies" "ededed" "Pull requests that update a dependency file"
 
 echo "Creating layer:* labels (edit to match your project's layer stack)..."
 create "layer:0-primitives" "fef2c0" "Layer 0 — pure primitives"
@@ -57,11 +61,14 @@ create "layer:1-components" "fbca04" "Layer 1 — components / services"
 create "layer:2-models"     "d4c5f9" "Layer 2 — public API / wrappers"
 
 echo "Creating wave:* labels (edit to match your release plan)..."
-create "wave:0-bootstrap" "c2e0c6" "Wave 0 — repo bootstrap"
-create "wave:1"           "bfd4f2" "Wave 1"
-create "wave:2"           "d4c5f9" "Wave 2"
-create "wave:3"           "f9d0c4" "Wave 3"
-create "wave:4-advanced"  "fef2c0" "Wave 4+ — advanced features"
+# Plain `wave:N` scheme — simple and matches the label format referenced in
+# the epic issue templates. If you prefer descriptive slugs, add extras like
+# `wave:0-bootstrap`, `wave:1-mvp` alongside the numeric base.
+create "wave:0" "c2e0c6" "Wave 0"
+create "wave:1" "bfd4f2" "Wave 1"
+create "wave:2" "d4c5f9" "Wave 2"
+create "wave:3" "f9d0c4" "Wave 3"
+create "wave:4" "fef2c0" "Wave 4"
 
 echo "Creating priority:* labels..."
 create "priority:p0" "b60205" "Blocker for current wave"

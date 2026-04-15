@@ -15,7 +15,7 @@ details live in the Theme epics and their child issues.
 <!-- One sentence: what outcome does this wave deliver? Maps to a milestone / release. -->
 
 ## Wave / Milestone
-- Wave: `wave:N-<slug>`
+- Wave: `wave:N` (matches the bootstrap label set; swap to `wave:N-<slug>` if you've added descriptive labels)
 - Milestone: `vX.Y-<slug>`
 
 ## Motivation

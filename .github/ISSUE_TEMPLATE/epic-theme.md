@@ -15,7 +15,7 @@ issues (features / designs / chores) that ship together as a coherent slice.
 
 ## Parent Wave
 - Wave epic: #
-- Wave label: `wave:N-<slug>`
+- Wave label: `wave:N` (matches the bootstrap label set; swap to `wave:N-<slug>` if you've added descriptive labels)
 - Milestone: `vX.Y-<slug>`
 
 ## Motivation

@@ -2,6 +2,8 @@
 #
 # Applied by .github/workflows/label-pr.yml using actions/labeler.
 # Labels referenced here must exist — run `make gh-labels` to create them.
+# The `dependencies` label is also created by the bootstrap script so this
+# file works on a fresh repo with no manual label setup.
 #
 # Scopes below map file paths to the standard taxonomy:
 #   area:*   — which part of the project the change touches
@@ -30,6 +32,12 @@
 "area:testing":
   - changed-files:
     - any-glob-to-any-file: "tests/**"
+
+# Catch-all for source changes that don't match a specific layer scope.
+# Ensures every `src/**` PR receives at least one area label.
+"area:code":
+  - changed-files:
+    - any-glob-to-any-file: "src/**"
 
 # --- Layer scopes — edit to match your project's layer stack --------------
 # Example layout for a library with a three-layer stack
