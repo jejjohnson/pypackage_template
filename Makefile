@@ -175,3 +175,6 @@ docs-serve: ## 🌐 Serve documentation locally
 
 docs-deploy: ## 🚀 Deploy documentation to GitHub Pages
 	uv run --group docs mkdocs gh-deploy --force
+
+gh-labels: ## 🏷️  Bootstrap the GitHub label taxonomy (type / area / layer / wave / priority)
+	bash .github/scripts/create-labels.sh
