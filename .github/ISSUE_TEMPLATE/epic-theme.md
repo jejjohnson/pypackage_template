@@ -49,6 +49,13 @@ decisions need to be recorded.
 ## Execution Notes
 <!-- Delete if children are fully parallel. -->
 
+<!--
+If this theme is algorithmic / numerical, use this section to record the
+shared mathematical conventions that every child issue must preserve.
+Examples: parameterization choice, sign conventions, factorization form,
+or which equations the child issues are expected to implement.
+-->
+
 ## Parallelism
 - Can run in parallel with: # (other theme epics in the same wave)
 - Blocked by (inside this wave): #
