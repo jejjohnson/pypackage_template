@@ -80,14 +80,14 @@ Fill in sections according to the template's intent. **Minimum required sections
 ### Step 3 — Apply the style conventions
 
 - **Unicode math in prose** — prefer `σ²`, `E₁`, `∑`, `⊗`, `≈`, `Λ⁻¹`, `∂/∂x`, `O(d³)` over LaTeX / MathJax blocks. Keeps the issue readable in the GH UI and plain-text tools.
-- **`text`-tagged code fences for multi-line equations** so pseudo-math isn't syntax-highlighted as Python:
+- **`text`-tagged code fences for multi-line equations** so pseudo-math isn't syntax-highlighted as Python. Wrap the example in a 4-backtick outer fence so the nested triple-backtick block renders intact:
 
-  ```
+  ````
   ```text
   s_next   = (1 - ρ) · s   + ρ · (s₀   - h)
   η_next   = (1 - ρ) · η   + ρ · (η₀ + g - h ⊙ m)
   ```
-  ```
+  ````
 
 - **Code-first, prose-last** — Design Snapshot and Proposed API should LEAD with the exact snippet the implementer will reproduce; prose goes after.
 - **Concrete implementation steps** — each step should name the file path + function, not a generic `...`. Example: `Add \`blr_diag_update_step\` in \`src/optax_bayes/_src/primitives.py\``
@@ -128,10 +128,10 @@ Returns the new issue's URL; extract the number (e.g. `#42`) for the next step.
 **UI path (when the user wants to review in the browser):**
 
 ```bash
-gh issue create --web --template feature.md
+gh issue create --web
 ```
 
-Opens the new-issue UI with the template pre-selected. The user fills in the body and clicks Submit.
+Opens `/issues/new/choose` so the user picks the template in the UI, fills in the body, and clicks Submit. Note: `gh issue create --web` does NOT respect `--template` — that flag only applies to the non-web flow (where it's used as starting body text). There is no CLI path to pre-select a template for the web flow; the user has to click the template card in the browser.
 
 **Notes:**
 - The `--body-file` path must point to a file containing the post-template body (frontmatter + guidance comments stripped).

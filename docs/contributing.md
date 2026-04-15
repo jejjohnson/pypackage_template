@@ -71,7 +71,7 @@ Delete either section if not relevant. Both exist so that an implementer (human 
 
 ## Creating issues
 
-New issues should use one of the templates in [`.github/ISSUE_TEMPLATE/`](../.github/ISSUE_TEMPLATE/) so that labels, required sections, and title conventions are consistent.
+New issues should use one of the templates in `.github/ISSUE_TEMPLATE/` so that labels, required sections, and title conventions are consistent.
 
 ### From the UI
 
@@ -92,14 +92,16 @@ gh issue create \
 To open the UI in a browser with a template pre-selected:
 
 ```bash
-gh issue create --web --template feature.md
+gh issue create --web
 ```
 
-After the issue is created, apply native parent / blocked-by links via the Makefile targets documented above (or `make gh-sub` / `make gh-block`).
+The web flow opens `/issues/new/choose` so you can pick the template in the UI. `gh issue create` does not support pre-selecting a template for the web path; the `--template` flag is only used as starting body text in the non-web flow.
+
+After the issue is created, apply native parent / blocked-by links via the Makefile targets documented below in the Relationships section (or `make gh-sub` / `make gh-block`).
 
 ### From Claude Code
 
-The [`create-gh-issue`](../.claude/commands/create-gh-issue.md) skill guides Claude through:
+The `create-gh-issue` skill (at `.claude/commands/create-gh-issue.md`) guides Claude through:
 
 - **Picking the right template** (decision tree covering feature / design / bug / research / epic-wave / epic-theme)
 - **Drafting the body** with required sections + rename guidance for optional sections (`Design Snapshot` → `Demo To Implement`, etc.)
@@ -198,7 +200,7 @@ The script resolves issue numbers to GraphQL node IDs automatically, and treats 
 
 #### From Claude Code
 
-The `link-gh-issues` skill at [`.claude/commands/link-gh-issues.md`](../.claude/commands/link-gh-issues.md) guides Claude through the same operations — useful for bulk-applying relationships from a drafted wave backlog, parsing the `Issues` checklist out of a theme epic body, or verifying that the native links match the prose.
+The `link-gh-issues` skill (at `.claude/commands/link-gh-issues.md`) guides Claude through the same operations — useful for bulk-applying relationships from a drafted wave backlog, parsing the `Issues` checklist out of a theme epic body, or verifying that the native links match the prose.
 
 Example prompts:
 
