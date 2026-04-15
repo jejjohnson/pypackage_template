@@ -347,7 +347,7 @@ File path patterns are mapped to labels from the standard taxonomy (`area:*`, `l
 
 **Files:** `.github/ISSUE_TEMPLATE/*.md`, `.github/scripts/create-labels.sh`, `docs/contributing.md`, `CONTRIBUTING.md`
 
-Five opinionated issue templates (plus a `config.yml`) enforce a two-layer epic model (**Wave → Theme → Issue**) and a consistent body format: Problem / User Story / Motivation / Proposed API / References / Implementation Steps / Definition of Done / Testing / Documentation / Relationships.
+Six opinionated issue templates (plus a `config.yml`) enforce a two-layer epic model (**Wave → Theme → Issue**) and a consistent body format: Problem / User Story / Motivation / Proposed API / References / Implementation Steps / Definition of Done / Testing / Documentation / Relationships.
 
 | Template | Purpose |
 |---|---|
@@ -356,6 +356,7 @@ Five opinionated issue templates (plus a `config.yml`) enforce a two-layer epic 
 | `Feature / Enhancement` | One substantial deliverable |
 | `Design / ADR` | Resolves a design question for a new API |
 | `Bug report` | Something isn't working |
+| `Research / Comparative Analysis` | Investigate prior art and produce a prioritized roadmap of follow-up issues |
 
 The `Feature` and `Design` templates include two **optional** sections:
 
@@ -372,7 +373,7 @@ make gh-labels       # idempotent; edit .github/scripts/create-labels.sh to cust
 
 See [`docs/contributing.md`](docs/contributing.md) (or [`CONTRIBUTING.md`](CONTRIBUTING.md) at the repo root) for the full taxonomy, epic model, and conventions.
 
-> **What:** Five issue templates + a 23-label taxonomy + a `Wave → Theme → Issue` hierarchy documented in `docs/contributing.md`.
+> **What:** Six issue templates + a 24-label taxonomy + a `Wave → Theme → Issue` hierarchy documented in `docs/contributing.md`.
 
 > **Why an epic model?** Consistent issue structure lets humans and AI agents collaborate on planning without renegotiating conventions each time. Templates encode the conventions; `make gh-labels` bootstraps them.
 

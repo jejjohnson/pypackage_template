@@ -10,7 +10,7 @@ Every issue carries exactly one `type:*`, one or more `area:*`, at most one `lay
 
 | Scope | Labels |
 |---|---|
-| **Type** | `type:epic-wave`, `type:epic-theme`, `type:feature`, `type:design`, `type:chore`, `type:docs`, `type:bug` |
+| **Type** | `type:epic-wave`, `type:epic-theme`, `type:feature`, `type:design`, `type:chore`, `type:docs`, `type:bug`, `type:research` |
 | **Area** | `area:engineering`, `area:testing`, `area:docs`, `area:code` — extend per project (e.g. `area:algorithmic`, `area:integration`) |
 | **Layer** | `layer:0-primitives`, `layer:1-components`, `layer:2-models` — only if the project has a formal layer stack |
 | **Wave** | `wave:0`, `wave:1`, `wave:2`, … — release-scoped phases (add `wave:N-<slug>` variants for descriptive labels) |
@@ -58,6 +58,7 @@ Issue templates live in `.github/ISSUE_TEMPLATE/`:
 | `Feature / Enhancement` | One substantial deliverable |
 | `Design / ADR` | Resolve an open design question for a new API |
 | `Bug report` | Something isn't working |
+| `Research / Comparative Analysis` | Study prior art (external repo, paper) and produce a prioritized roadmap of follow-up issues |
 
 Feature + Design templates include two **optional** sections for context-heavy issues:
 

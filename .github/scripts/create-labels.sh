@@ -43,6 +43,7 @@ create "type:bug"         "d73a4a" "Something isn't working"
 create "type:design"      "fbca04" "Design / ADR issue for a new API"
 create "type:chore"       "c5def5" "Engineering maintenance"
 create "type:docs"        "0075ca" "Documentation work"
+create "type:research"    "bfe5bf" "Comparative analysis / prior-art survey / investigation"
 
 echo "Creating area:* labels..."
 create "area:engineering" "0e8a16" "Build, packaging, CI, tooling"
