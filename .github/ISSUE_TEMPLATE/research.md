@@ -9,14 +9,25 @@ labels: ["type:research"]
 STYLE NOTES
 - Use unicode math inline in prose (σ², E₁, ∑, ⊗, ≈, Λ⁻¹, ∂/∂x, ℝ, O(d³))
   rather than LaTeX / MathJax blocks. Keeps the issue readable in the GH UI
-  and in plain-text tools. Reach for code fences only for multi-line
-  equations or when subscripts are too dense for unicode.
+  and in plain-text tools. Reach for `text`-tagged code fences only for
+  multi-line equations or when subscripts are too dense for unicode:
+
+      ```text
+      s_next   = (1 - ρ) * s   + ρ * (s₀   - h)
+      η_next   = (1 - ρ) * η   + ρ * (η₀ + g - h * m)
+      ```
+
 - Numbered top-level sections (## 1. ..., ## 2. ..., etc.) give the issue
   a citeable table of contents.
 - Letter-then-number subsections (### A., ### B., then #### A1., #### A2.,
   #### B1., ...) make findings individually linkable ("see A3" reads
   naturally across the project).
+- Lead tables and code-first sections with the concrete content; keep
+  prose short and after the snippet / table.
 - Delete sections that don't apply. Every placeholder is optional.
+- Rename sections if the content type warrants (e.g. rename §1 to
+  "What `<paper>` Proves" for a theory survey, or §2 to
+  "Comparison with Prior Art" when surveying multiple sources).
 
 Research issues produce the plan; the follow-up feature / design issues
 they open do the actual work.

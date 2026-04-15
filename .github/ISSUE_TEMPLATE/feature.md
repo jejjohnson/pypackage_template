@@ -20,30 +20,52 @@ labels: ["type:feature"]
 ```
 
 <!--
-OPTIONAL — Design Snapshot
+OPTIONAL — Inline context ("Design Snapshot")
 Copy here any API signatures, code snippets, configuration examples, or
 excerpts from external / private design docs that the implementer needs to
-work on this issue in isolation. The goal is that another contributor (human
-or AI agent) can implement this issue without opening other repos or chats.
+work on this issue in isolation. Goal: another contributor (human or AI
+agent) can implement this issue without opening other repos or chats.
+
+RENAME the heading to fit the issue type. Examples:
+  ## Design Snapshot            (typical library feature)
+  ## Demo To Implement          (walkthrough / example / notebook issue)
+  ## Demo Snippet To Include    (docs / API-reference issue)
+  ## Config Snippet             (CI / infra issue)
+  ## Reference Trace            (bug reproduction)
+
+Lead with the exact snippet the implementer will reproduce — prose last.
 Delete this section if not relevant.
 -->
 
 ## Design Snapshot
-<!-- Delete if not needed. -->
-```
-<paste relevant excerpt, example usage, or signature here>
+<!-- Delete or rename. -->
+```python
+# Lead with the exact code/config the implementer will reproduce.
 ```
 
 <!--
-OPTIONAL — Mathematical Notes
+OPTIONAL — Inline math / numerical context ("Mathematical Notes")
 For algorithmic / numerical issues: inline equations, sign conventions,
-numerical-stability notes, edge cases. Keeps everything the implementer
-needs in one place. Delete if not relevant.
+numerical-stability notes, edge cases. Keep everything the implementer
+needs in one place.
+
+STYLE — prefer unicode math in prose (σ², E₁, ∑, ⊗, ≈, Λ⁻¹, O(d³)) so
+the issue reads in the GH UI and plain-text tools. Reach for a `text`
+code fence for multi-line equation blocks so syntax-highlighting doesn't
+try to parse pseudo-math:
+
+    ```text
+    s_next   = (1 - ρ) * s   + ρ * (s₀   - h)
+    η_next   = (1 - ρ) * η   + ρ * (η₀ + g - h * m)
+    ```
+
+Rename the heading if the content type warrants (e.g. "Numerical Notes",
+"Stability Notes", "Equations To Test"). Delete if not relevant.
 -->
 
 ## Mathematical Notes
-<!-- Delete if not needed. -->
-```
+<!-- Delete or rename. -->
+```text
 <equations, conventions, numerical considerations>
 ```
 

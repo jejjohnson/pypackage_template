@@ -28,26 +28,42 @@ labels: ["type:design"]
 - **Option C (rejected)** — pros / cons
 
 <!--
-OPTIONAL — Design Snapshot
+OPTIONAL — Inline context ("Design Snapshot")
 Relevant excerpts from external / private design docs, prior art, or
-existing implementations that inform the decision. Delete if not needed.
+existing implementations that inform the decision. Lead with the exact
+signature / snippet; prose last.
+
+Rename the heading to fit the content type: "Prior Art Snippets",
+"Reference Implementations", "Existing Code Excerpt". Delete if N/A.
 -->
 
 ## Design Snapshot
-<!-- Delete if not needed. -->
-```
-<paste relevant excerpt, prior-art snippet, or API sketch here>
+<!-- Delete or rename. -->
+```python
+# Lead with the most relevant prior-art excerpt or API sketch.
 ```
 
 <!--
-OPTIONAL — Mathematical Notes
+OPTIONAL — Inline math / numerical context ("Mathematical Notes")
 Equations, sign conventions, numerical considerations that scope the
-decision. Delete if not relevant.
+decision.
+
+STYLE — prefer unicode math in prose (σ², Λ⁻¹, ∑, O(d³)). Use `text`
+code fences for multi-line equation blocks so pseudo-math isn't mangled
+by syntax highlighting:
+
+    ```text
+    ELBO(λ) = 𝔼_q[ℓ(θ)] − KL(q ‖ p)
+    ∇_λ ELBO = ∇_μ 𝔼[ℓ] − F(λ − λ₀)
+    ```
+
+Rename if the content warrants ("Numerical Considerations",
+"Stability Notes"). Delete if N/A.
 -->
 
 ## Mathematical Notes
-<!-- Delete if not needed. -->
-```
+<!-- Delete or rename. -->
+```text
 <equations, conventions, edge cases>
 ```
 
