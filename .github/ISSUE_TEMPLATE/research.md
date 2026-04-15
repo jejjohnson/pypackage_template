@@ -6,127 +6,157 @@ labels: ["type:research"]
 ---
 
 <!--
-Research issues are for structured investigation that produces a plan, not
-code. Typical shapes:
-  - Compare an external codebase / paper against this project
-  - Survey prior art and extract what's worth adopting
-  - Benchmark alternative approaches before committing to a design
+STYLE NOTES
+- Use unicode math inline in prose (σ², E₁, ∑, ⊗, ≈, Λ⁻¹, ∂/∂x, ℝ, O(d³))
+  rather than LaTeX / MathJax blocks. Keeps the issue readable in the GH UI
+  and in plain-text tools. Reach for code fences only for multi-line
+  equations or when subscripts are too dense for unicode.
+- Numbered top-level sections (## 1. ..., ## 2. ..., etc.) give the issue
+  a citeable table of contents.
+- Letter-then-number subsections (### A., ### B., then #### A1., #### A2.,
+  #### B1., ...) make findings individually linkable ("see A3" reads
+  naturally across the project).
+- Delete sections that don't apply. Every placeholder is optional.
 
-The output is an inventory + gap analysis + prioritized list of follow-up
-issues (features / designs / chores). Those follow-up issues do the actual
-work and should link back here.
+Research issues produce the plan; the follow-up feature / design issues
+they open do the actual work.
 -->
+
+# <Title — e.g. "Comparative Analysis: `<external-repo>` vs `<this project>`">
 
 ## Context
+
 <!--
-What are we investigating and why? One or two paragraphs. Include the
-motivating question and what decision / roadmap this research will inform.
+Two short paragraphs. What are we investigating, what's the motivating
+question, and what decision / roadmap does this research inform?
 -->
-
-## Scope & Questions
-<!-- The concrete questions this research will answer. -->
-- [ ] <question 1>
-- [ ] <question 2>
-
-## Sources Surveyed
-<!-- Repos, papers, docs, discussions. Link everything. -->
-- <repo or paper>: `<url>` — <one-line description>
-- <repo or paper>: `<url>` — <one-line description>
 
 ---
 
-## Findings — What `<subject>` Provides
-<!-- Inventory of the thing being studied. Use the structures below only if
-     they fit; delete subsections that don't apply. -->
+## 1. What `<subject>` Contains
 
 ### Package / Project Structure
 ```
-<tree or component map>
+<tree or component map, e.g.>
+<subject>/
+├── core/
+│   └── <module>.py
+├── algorithms/
+│   └── <module>.py
+└── utils.py
 ```
 
 ### Core Data Structures
+
 | Structure | Fields | Purpose |
 |---|---|---|
-| `<name>` | `<fields>` | <role> |
+| `<name>` | `<fields>` | <role — e.g. Gaussian in square-root form, μ + cholΣ> |
 
 ### Core Algorithms / Features
-#### A. <Algorithm or feature area>
-- `<function or symbol>` — <what it does, complexity, assumptions>
+
+#### A. <Algorithm area — e.g. "Square-root filtering">
+- `<function>(args)` — <what it does>. Complexity O(d³) per step. Returns `(m, cholP)`.
+- `<function>(args)` — <what it does>. Uses the Bonnet–Price identity ∇μ 𝔼[ℓ] = g − Hm.
+
+#### B. <Algorithm area>
+- `<function>(args)` — <what it does>. Parallel via `jax.lax.associative_scan`, gives O(d³ log N) depth on P processors.
+
+---
+
+## 2. Comparison with `<this project>`
+
+### A. Already in `<this project>` (direct equivalents)
+
+| Subject feature | This project's equivalent | Path | Notes |
+|---|---|---|---|
+| `<feature>` | `<our name>` | `src/<path>:<line>` | <gap or divergence> |
+
+### B. Already in `<this project>` but missing enhancements from `<subject>`
+
+#### B1. <Enhancement name> (HIGH PRIORITY)
+- **`<subject>`**: uses <approach>; e.g. σ² = (1/Nd) ∑ rᵢᵀ rᵢ for posterior calibration.
+- **This project**: <current state — what's different, what regresses>.
+- **What's needed**: <concrete change, file paths, function signatures>.
+- **Impact**: <why this matters — correctness / speed / stability>.
+
+#### B2. <Enhancement name> (MEDIUM PRIORITY)
 - ...
 
-#### B. <Algorithm or feature area>
+### C. Missing completely from `<this project>`
+
+#### C1. <Feature name> (HIGH PRIORITY)
+- **What it is**: <description — e.g. Integrated Wiener Process prior with Nordsieck preconditioner P = diag(dtq+½ / q!) for numerical stability on stiff problems>.
+- **Why useful**: <motivation>.
+- **Where in this project**: proposed module `src/<package>/<submodule>.py`.
+
+#### C2. <Feature name> (MEDIUM PRIORITY)
 - ...
 
+### D. `<this project>` has it, `<subject>` doesn't (context only — no action)
+<!-- Useful to note we haven't regressed on things the subject omits. -->
+- `<our feature>` — <why the subject doesn't need it>.
+
 ---
 
-## Comparison — What This Project Already Has
-<!-- Direct equivalents. Be specific — cite file paths + function names. -->
+## 3. Summary Table
 
-| Subject's Feature | This Project's Equivalent | Path | Notes |
+| Feature | `<subject>` | `<this project>` | Status |
 |---|---|---|---|
-| <feature> | `<our name>` | `src/<path>` | <gap or divergence> |
+| Sequential filter | ✓ | ✓ | **Already have** |
+| Parallel filter (associative scan) | ✓ | ✗ (dense only) | **Enhancement needed** |
+| Square-root form | ✓ | ✗ | **Missing** |
+| `tria()` QR utility | ✓ | ✗ | **Missing** (dependency for sq-root work) |
+| Block-tridiag operators | ✗ | ✓ | We're ahead |
 
 ---
 
-## Gap Analysis
+## 4. Recommended Integration Priority
 
-### A. Present here but missing enhancements from `<subject>` (HIGH / MED / LOW)
-#### A1. <Enhancement name> (PRIORITY)
-- **`<subject>`**: <what it does differently>
-- **This project**: <current state>
-- **What's needed**: <concrete change>
-- **Impact**: <why it matters>
-
-### B. Completely missing from this project
-#### B1. <Feature name> (PRIORITY)
-- **What it is**: <description>
-- **Why useful**: <motivation>
-- **Where in this project**: <proposed module / file>
-
-### C. We have it, subject doesn't (context only — no action)
-<!-- Useful for reassuring ourselves we haven't regressed on something. -->
-- `<our feature>` — <why the subject doesn't need it>
-
----
-
-## Summary Table
-| Feature | Subject | This project | Status |
-|---|---|---|---|
-| <feature> | ✓ | ✗ | **Missing** |
-| <feature> | ✓ | ✓ (partial) | **Enhancement needed** |
-| <feature> | ✗ | ✓ | We're ahead |
-
----
-
-## Recommended Integration Priority
 <!-- Phased roadmap. Each phase should be shippable on its own. -->
 
-### Phase 1: Foundations
-1. <item>
+### Phase 1: Foundations (enables everything else)
+1. <item — e.g. `tria()` lower-triangular QR utility>
 2. <item>
 
-### Phase 2: <theme>
-3. <item>
+### Phase 2: <theme — e.g. "Square-root Kalman">
+3. <item — e.g. sqrt_predict, sqrt_update, sqrt_smooth primitives>
 
-### Phase 3: <theme>
+### Phase 3: <theme — e.g. "Parallel-in-time">
 4. <item>
 
----
+### Phase 4: <theme>
+5. <item>
 
-## Proposed Follow-up Issues
-<!-- Concrete issues to open from this research. These are what actually
-     get done. Link them back to this issue via `Parent research: #<this>`. -->
-
-- [ ] `feat(<scope>): <title>` — covers Phase 1 item 1
-- [ ] `feat(<scope>): <title>` — covers Phase 1 item 2
-- [ ] `[Design] <title>` — resolves <open question>
+### Phase 5: Advanced (nice-to-have)
+6. <item>
 
 ---
 
-## Key Synergies (optional)
-<!-- Narrative section for cross-cutting observations: how combining X and
-     Y unlocks Z, architectural implications, dependency chains. Delete if
-     not useful. -->
+## 5. Proposed Follow-up Issues
+
+<!--
+Concrete issues to open from this research. These are what actually get
+done. Each should cite the phase / letter-number it resolves, and link
+back to this issue via `Parent research: #<this>`.
+-->
+
+- [ ] `feat(<scope>): add tria() QR utility` — covers Phase 1 item 1 / C8
+- [ ] `feat(<scope>): square-root Kalman primitives` — covers Phase 2 / B2
+- [ ] `[Design] associative-scan element representation` — resolves open question for Phase 3 / C3
+- [ ] `feat(<scope>): IWP prior with Nordsieck preconditioner` — covers Phase 4 / C1
+
+---
+
+## 6. Key Synergies (optional)
+
+<!--
+Narrative section for cross-cutting observations — how combining X with
+Y unlocks Z, architectural implications, dependency chains between the
+missing pieces. Delete if not useful.
+-->
+
+1. **<Synergy name>**: <one paragraph>.
+2. **<Synergy name>**: <one paragraph>.
 
 ---
 
@@ -137,5 +167,5 @@ motivating question and what decision / roadmap this research will inform.
 ## Relationships
 - Parent (theme epic, if any): #
 - Blocked by: #
-- Blocks (follow-up issues may reference this): #
+- Blocks (follow-up issues from §5 reference this as parent research): #
 - Related: #
