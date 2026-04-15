@@ -308,5 +308,15 @@ When the draft is ready to become real GitHub issues:
 - [ ] Update cross-references (`Parent epic`, `Blocked by`, `Blocks`,
       `Related`) from draft IDs to GH numbers so relationships survive
       in the GH UI.
+- [ ] **Apply native relationships.** The prose `Parent:` / `Blocked
+      by:` / `Blocks:` lines are the human-readable record; they also
+      need the native GitHub sub-issue and dependency links so the UI
+      and automation pick up the hierarchy.
+      - Sub-issues (wave → themes → features):
+        `make gh-sub PARENT=<parent#> CHILDREN="<child1#> <child2#> ..."`
+      - Blocked-by:
+        `make gh-block ISSUE=<this#> BLOCKED_BY=<other#>`
+      - For bulk application, see `.github/scripts/link-issues.sh` or
+        the `link-gh-issues` Claude Code skill.
 - [ ] Either delete this file or keep it as historical record in
       `.plans/archive/`.

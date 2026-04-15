@@ -99,6 +99,29 @@ Rename the heading if the content type warrants (e.g. "Numerical Notes",
 - [ ] Docstrings (covered by Definition of Done)
 
 ## Relationships
+<!--
+Each prose line below has a native GitHub feature you should also apply
+after the issue is opened. Keep the prose as a human-readable record AND
+apply the native link so GitHub's UI (sub-issue panel, dependency graph,
+"unblocks on close") works.
+
+  Parent:      → Sub-issue link. UI: Issue side-panel → Sub-issues →
+                 "Create sub-issue" on the parent, or "Convert to
+                 sub-issue" on the child.
+                 CLI: make gh-sub PARENT=<parent#> CHILDREN="<this#>"
+
+  Blocked by:  → Typed dependency. UI: side-panel → Development →
+                 "Mark as blocked by".
+                 CLI: make gh-block ISSUE=<this#> BLOCKED_BY=<other#>
+
+  Blocks:      → Inverse of Blocked by; apply on the OTHER issue.
+                 CLI: make gh-block ISSUE=<other#> BLOCKED_BY=<this#>
+
+  Related:     → No native feature; mention only.
+
+For bulk / scripted linking see `.github/scripts/link-issues.sh` or the
+`link-gh-issues` Claude Code skill (.claude/commands/link-gh-issues.md).
+-->
 - Parent (theme epic): #
 - Blocked by: #
 - Blocks: #

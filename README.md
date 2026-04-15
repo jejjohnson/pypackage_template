@@ -373,11 +373,24 @@ make gh-labels       # idempotent; edit .github/scripts/create-labels.sh to cust
 
 For planning a whole wave of issues at once, copy [`docs/templates/wave-backlog.md`](docs/templates/wave-backlog.md) into your project's `.plans/` directory and draft the wave as one reviewable file before opening GitHub issues. See [`docs/contributing.md`](docs/contributing.md) → "Drafting a wave backlog" for the workflow.
 
+Once issues are open, apply GitHub's **native sub-issue and blocked-by links** on top of the prose `## Relationships` block. A helper script and three Makefile targets wrap the GraphQL mutations:
+
+```bash
+make gh-sub   PARENT=7  CHILDREN="42 43 44"   # link sub-issues
+make gh-block ISSUE=44  BLOCKED_BY=43          # mark dependency
+make gh-show  ISSUE=44                         # inspect parent / sub-issues / blocking / blocked-by
+```
+
+Two Claude Code skills guide these workflows end-to-end:
+
+- [`create-gh-issue`](.claude/commands/create-gh-issue.md) — picks the right template, drafts the body with required sections, applies labels + milestone, opens via `gh issue create`, and chains to the linking skill for relationships. Handles single issues and bulk publishing of a `.plans/<wave>-backlog.md` file.
+- [`link-gh-issues`](.claude/commands/link-gh-issues.md) — bulk-apply sub-issue and blocked-by links from a drafted backlog or theme epic's Issues checklist.
+
 See [`docs/contributing.md`](docs/contributing.md) (or [`CONTRIBUTING.md`](CONTRIBUTING.md) at the repo root) for the full taxonomy, epic model, and conventions.
 
-> **What:** Six issue templates + a 24-label taxonomy + a `Wave → Theme → Issue` hierarchy + a wave-backlog drafting template under `docs/templates/`, all documented in `docs/contributing.md`.
+> **What:** Six issue templates + a 24-label taxonomy + a `Wave → Theme → Issue` hierarchy + a wave-backlog drafting template under `docs/templates/` + `create-gh-issue` and `link-gh-issues` skills with helper scripts for filing issues and applying native sub-issue / blocked-by links, all documented in `docs/contributing.md`.
 
-> **Why an epic model?** Consistent issue structure lets humans and AI agents collaborate on planning without renegotiating conventions each time. Templates encode the conventions; `make gh-labels` bootstraps them.
+> **Why an epic model?** Consistent issue structure lets humans and AI agents collaborate on planning without renegotiating conventions each time. Templates encode the conventions; `make gh-labels` bootstraps the labels; `make gh-sub` / `make gh-block` wire the native hierarchy.
 
 ---
 
@@ -404,6 +417,9 @@ All common tasks are available via `make`:
 | `make docs-serve` | Preview documentation locally |
 | `make docs-deploy` | Deploy documentation to GitHub Pages |
 | `make gh-labels` | Bootstrap the GitHub label taxonomy (idempotent) |
+| `make gh-sub` | Link CHILDREN as sub-issues of PARENT (e.g. `make gh-sub PARENT=7 CHILDREN="42 43"`) |
+| `make gh-block` | Mark ISSUE as blocked by BLOCKED_BY (`make gh-block ISSUE=44 BLOCKED_BY=43`) |
+| `make gh-show` | Show parent / sub-issues / blocking / blocked-by for an issue |
 | `make version` | Display package version and git hash |
 
 The Makefile auto-loads `.env` and exports its variables. The `check-env-VARNAME` guard pattern lets targets declare required env vars as prerequisites.
