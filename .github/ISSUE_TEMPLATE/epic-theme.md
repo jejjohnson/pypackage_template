@@ -22,7 +22,13 @@ issues (features / designs / chores) that ship together as a coherent slice.
 <!-- Why this group exists; what it ships together. -->
 
 ## Issues
-<!-- Rename to "Canonical Child Issues" if that reads more naturally for the wave. -->
+<!--
+Rename to "Canonical Child Issues" if that reads more naturally.
+
+After opening this epic and its children, link each child issue below
+as a SUB-ISSUE of this epic. One-shot:
+    make gh-sub PARENT=<this#> CHILDREN="<child1#> <child2#> <child3#>"
+-->
 - [ ] #<issue> — <short description>
 - [ ] #<issue> — <short description>
 
@@ -54,5 +60,12 @@ decisions need to be recorded.
 - [ ] Docs / API pages for the theme's surface land
 
 ## Relationships
+<!--
+After opening, apply native links:
+  Parent (wave):  make gh-sub PARENT=<wave#> CHILDREN="<this#>"
+  Sub-issues:     make gh-sub PARENT=<this#> CHILDREN="<child1#> <child2#>"
+  Blocked by:     make gh-block ISSUE=<this#> BLOCKED_BY=<other-theme#>
+Helper: `.github/scripts/link-issues.sh` or the `link-gh-issues` skill.
+-->
 - Parent: #<wave-epic>
 - Related: #
