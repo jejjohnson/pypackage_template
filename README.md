@@ -371,9 +371,11 @@ A companion label taxonomy (`type:*`, `area:*`, `layer:*`, `wave:*`, `priority:*
 make gh-labels       # idempotent; edit .github/scripts/create-labels.sh to customise
 ```
 
+For planning a whole wave of issues at once, copy [`docs/templates/wave-backlog.md`](docs/templates/wave-backlog.md) into your project's `.plans/` directory and draft the wave as one reviewable file before opening GitHub issues. See [`docs/contributing.md`](docs/contributing.md) → "Drafting a wave backlog" for the workflow.
+
 See [`docs/contributing.md`](docs/contributing.md) (or [`CONTRIBUTING.md`](CONTRIBUTING.md) at the repo root) for the full taxonomy, epic model, and conventions.
 
-> **What:** Six issue templates + a 24-label taxonomy + a `Wave → Theme → Issue` hierarchy documented in `docs/contributing.md`.
+> **What:** Six issue templates + a 24-label taxonomy + a `Wave → Theme → Issue` hierarchy + a wave-backlog drafting template under `docs/templates/`, all documented in `docs/contributing.md`.
 
 > **Why an epic model?** Consistent issue structure lets humans and AI agents collaborate on planning without renegotiating conventions each time. Templates encode the conventions; `make gh-labels` bootstraps them.
 

@@ -22,8 +22,26 @@ issues (features / designs / chores) that ship together as a coherent slice.
 <!-- Why this group exists; what it ships together. -->
 
 ## Issues
+<!-- Rename to "Canonical Child Issues" if that reads more naturally for the wave. -->
 - [ ] #<issue> — <short description>
 - [ ] #<issue> — <short description>
+
+<!--
+OPTIONAL — Execution Notes
+Describes ordering / sequencing between child issues inside this theme.
+Useful when some children block others. Examples:
+
+  "#42 lands first because most path rewrites depend on the final
+   module layout. #43 can start once #42's public API is stable."
+
+  "#50 and #51 are fully parallel; #52 depends on both."
+
+Delete this section if the children are fully parallel and no ordering
+decisions need to be recorded.
+-->
+
+## Execution Notes
+<!-- Delete if children are fully parallel. -->
 
 ## Parallelism
 - Can run in parallel with: # (other theme epics in the same wave)

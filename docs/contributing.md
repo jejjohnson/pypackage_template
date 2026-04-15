@@ -69,6 +69,27 @@ Delete either section if not relevant. Both exist so that an implementer (human 
 
 ---
 
+## Drafting a wave backlog
+
+For large planning exercises (new wave, new release, large refactor), draft the whole backlog as one markdown file **before** opening GitHub issues. A template lives at [`docs/templates/wave-backlog.md`](templates/wave-backlog.md).
+
+Why:
+
+- **Review the whole wave in one scroll** instead of clicking through 15 half-drafted issues
+- **Share context once** at the top (Shared Context · Design Snapshot · Intended Package Layout · Runtime Boundary) rather than duplicating across every child issue
+- **Stable draft IDs** (`<PREFIX>-01`, `<PREFIX>-02`, …) let child issues reference each other before GitHub issue numbers exist
+
+Workflow:
+
+1. Copy `docs/templates/wave-backlog.md` into your project's `.plans/` directory (gitignored). Rename to describe the wave — e.g. `.plans/wave-1-backlog.md`.
+2. Pick a short project prefix (e.g. `PYX` for pyrox, `OBX` for optax_bayes). Number drafts sequentially.
+3. Fill in shared context at the top, then draft each issue body.
+4. When the file is ready, open each draft as a real GitHub issue using the matching `.github/ISSUE_TEMPLATE/`. Copy the body verbatim.
+5. Record GitHub issue numbers next to draft IDs in the backlog file, or replace draft IDs throughout. Update cross-references.
+6. Either delete the backlog file or archive it in `.plans/archive/`.
+
+---
+
 ## Relationships
 
 Use an explicit `## Relationships` block at the bottom of each issue / epic body:

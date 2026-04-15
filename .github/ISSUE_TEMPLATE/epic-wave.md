@@ -19,10 +19,23 @@ details live in the Theme epics and their child issues.
 - Milestone: `vX.Y-<slug>`
 
 ## Motivation
-<!-- Why this wave now; what it unlocks; what it blocks. -->
+<!--
+Why this wave now; what it unlocks; what it blocks.
+
+Rename to "Why This Wave Exists" if a narrative framing fits better
+than pure rationale — useful for waves that exist to undo a historical
+state (e.g. "the repo is still a template, every later wave depends
+on a real package identity").
+-->
 
 ## Theme Epics (parallel-safe)
-<!-- One section per theme. Sections can run in parallel unless noted. -->
+<!--
+One section per theme. Sections can run in parallel unless noted.
+
+Rename to "Canonical Epics" if you prefer that wording — matches the
+wave-backlog drafting convention in docs/templates/wave-backlog.md.
+-->
+
 
 ### Section A — <theme>
 - [ ] #<theme-epic-issue>
