@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.6](https://github.com/jejjohnson/pypackage_template/compare/v0.1.5...v0.1.6) (2026-04-16)
+
+
+### Features
+
+* **gh:** add issue templates, label taxonomy, and contributing guide ([#34](https://github.com/jejjohnson/pypackage_template/issues/34)) ([66e36a1](https://github.com/jejjohnson/pypackage_template/commit/66e36a1848f1899ef85d900b06bf2d269d346d5f))
+* **gh:** create-gh-issue + link-gh-issues skills for the issue-template workflow ([#36](https://github.com/jejjohnson/pypackage_template/issues/36)) ([caa5100](https://github.com/jejjohnson/pypackage_template/commit/caa51008dc7917f5cc526333dde6fb8abf310585))
+
 ## [0.1.5](https://github.com/jejjohnson/pypackage_template/compare/v0.1.4...v0.1.5) (2026-03-25)
 
 
