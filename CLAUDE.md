@@ -57,8 +57,8 @@ All implementation lives in `src/mypackage/`. The public API is re-exported thro
 Example notebooks live in `docs/notebooks/` as jupytext percent-format `.py` files. The workflow:
 
 1. Write the `.py` source (jupytext percent format)
-2. Execute locally via `jupytext --to notebook --execute foo.py -o foo.ipynb`
-3. Commit both the `.py` source and the executed `.ipynb` (which contains inline figure outputs)
+2. Convert and execute: `jupytext --to notebook foo.py` then `jupyter nbconvert --execute --inplace foo.ipynb`
+3. Delete the `.py` — the executed `.ipynb` is the committed source of truth
 4. `mkdocs-jupyter` renders the pre-executed `.ipynb` with `execute: false`
 
 Figures render inline via `plt.show()` — do **not** use `savefig` or commit separate PNG files. The `.ipynb` cell outputs are the single source of rendered figures.
