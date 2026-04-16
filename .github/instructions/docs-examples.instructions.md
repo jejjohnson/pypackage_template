@@ -85,7 +85,7 @@ import numpy as np
 
 ## First Markdown Cell — Title + Colab Badge
 
-Every notebook opens with a `#`-level title and a Colab badge pointing at its `main`-branch URL:
+Every notebook opens with a `#`-level title and a Colab badge pointing at its `main`-branch URL. Replace `OWNER/REPO` below with the actual GitHub owner and repository name (e.g. from `repo_url` in `mkdocs.yml`):
 
 ```markdown
 # Demo — Feature Overview
@@ -103,7 +103,7 @@ Every notebook opens with a `#`-level title and a Colab badge pointing at its `m
 
 ## First Code Cell — Colab Detection + Install
 
-Detect Colab, install the package only when needed:
+Detect Colab, install the package only when needed (substitute `OWNER/REPO` with the actual GitHub owner and repository name):
 
 ```python
 import subprocess
