@@ -34,7 +34,7 @@ lint = [
     "ruff>=0.15.17",
 ]
 typecheck = [
-    "ty>=0.0.49",
+    "ty>=0.0.61",
 ]
 docs = [
     "mkdocs>=1.6.1",
