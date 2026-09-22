@@ -154,6 +154,38 @@ class TestErrorHandling:
         assert status == EXIT_ERROR
         assert "could not read" in err
 
+    @pytest.mark.parametrize("token", ["nan", "inf", "-inf", "NaN", "Infinity"])
+    @pytest.mark.parametrize("command", ["summarize", "smooth"])
+    def test_non_finite_input_is_rejected(self, command: str, token: str) -> None:
+        status, out, err = run(command, "-", stdin=f"1 {token} 3")
+        assert status == EXIT_ERROR
+        assert out == ""
+        assert f"only finite numbers, got {token!r} at index 1" in err
+
+    def test_json_never_emits_non_standard_tokens(self) -> None:
+        """Finite inputs can still overflow to a non-finite variance."""
+        status, out, err = run("summarize", "-", "--json", stdin="1e308 -1e308")
+        assert status == EXIT_ERROR
+        assert out == ""
+        assert "JSON cannot represent" in err
+
+    def test_table_output_still_reports_an_overflowed_variance(self) -> None:
+        status, out, _ = run("summarize", "-", stdin="1e308 -1e308")
+        assert status == EXIT_OK
+        assert "inf" in out
+
+    @pytest.mark.parametrize("value", ["-1", "-10", "abc"])
+    def test_invalid_precision_is_a_usage_error(self, value: str) -> None:
+        status, out, err = run("smooth", "-", "--precision", value, stdin="1 2 3")
+        assert status == 2
+        assert out == ""
+        assert "--precision" in err
+
+    def test_zero_precision_is_allowed(self) -> None:
+        status, out, _ = run("smooth", "-", "--precision", "0", stdin="1 2 3")
+        assert status == EXIT_OK
+        assert out.split() == ["1", "2", "3"]
+
     def test_window_larger_than_series_is_reported(self) -> None:
         status, _, err = run("smooth", "-", "--window", "99", stdin="1 2 3")
         assert status == EXIT_ERROR
@@ -161,14 +193,28 @@ class TestErrorHandling:
 
 
 class TestMeta:
-    def test_version_flag_exits_cleanly(self) -> None:
-        assert main(["--version"], out=io.StringIO(), err=io.StringIO()) == EXIT_OK
+    def test_version_is_written_to_the_injected_stream(self) -> None:
+        status, out, err = run("--version")
+        assert status == EXIT_OK
+        assert out.strip() == f"mypackage {mypackage.__version__}"
+        assert err == ""
 
-    def test_help_exits_cleanly(self) -> None:
-        assert main(["--help"], out=io.StringIO(), err=io.StringIO()) == EXIT_OK
+    def test_help_is_written_to_the_injected_stream(self) -> None:
+        status, out, err = run("--help")
+        assert status == EXIT_OK
+        assert out.startswith("usage: mypackage")
+        assert err == ""
 
-    def test_usage_error_returns_two(self) -> None:
-        assert main(["nonsense"], out=io.StringIO(), err=io.StringIO()) == 2
+    def test_usage_errors_are_written_to_the_injected_stream(
+        self, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        status, out, err = run("nonsense")
+        assert status == 2
+        assert out == ""
+        assert "invalid choice" in err
+        # Nothing may leak to the real process streams.
+        leaked = capsys.readouterr()
+        assert (leaked.out, leaked.err) == ("", "")
 
     def test_entry_point_is_declared(self) -> None:
         """`mypackage = "mypackage.cli:main"` must stay wired in pyproject."""

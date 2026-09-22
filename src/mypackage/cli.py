@@ -18,13 +18,15 @@ testable.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
+import math
 import sys
 from collections.abc import Sequence
 from typing import TextIO
 
 from mypackage import __version__
-from mypackage.exceptions import MypackageError
+from mypackage.exceptions import MypackageError, ValidationError
 from mypackage.smoothing import (
     Padding,
     exponential_moving_average,
@@ -53,7 +55,8 @@ def _read_values(path: str, *, stdin: TextIO | None = None) -> list[float]:
         The parsed values.
 
     Raises:
-        ValidationError: If a token cannot be parsed as a number.
+        ValidationError: If a token cannot be parsed as a number, or parses
+            to a non-finite value such as ``nan`` or ``inf``.
         OSError: If the file cannot be read.
     """
     if path == "-":
@@ -63,7 +66,30 @@ def _read_values(path: str, *, stdin: TextIO | None = None) -> list[float]:
             text = handle.read()
 
     tokens = text.replace(",", " ").split()
-    return as_floats(tokens, name="input")
+    values = as_floats(tokens, name="input")
+    # `float()` happily parses "nan" and "inf", but a summary of them is
+    # meaningless and `--json` cannot represent them in standard JSON.
+    for index, (token, value) in enumerate(zip(tokens, values, strict=True)):
+        if not math.isfinite(value):
+            msg = (
+                f"'input' must contain only finite numbers, "
+                f"got {token!r} at index {index}"
+            )
+            raise ValidationError(msg)
+    return values
+
+
+def _non_negative_int(text: str) -> int:
+    """Argparse type for options that must be a non-negative integer."""
+    try:
+        value = int(text)
+    except ValueError:
+        msg = f"invalid int value: {text!r}"
+        raise argparse.ArgumentTypeError(msg) from None
+    if value < 0:
+        msg = f"must be a non-negative integer, got {value}"
+        raise argparse.ArgumentTypeError(msg)
+    return value
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -150,7 +176,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     smooth_parser.add_argument(
         "--precision",
-        type=int,
+        type=_non_negative_int,
         default=6,
         help="Number of decimals in the printed output (default: 6).",
     )
@@ -162,7 +188,16 @@ def _run_summarize(args: argparse.Namespace, out: TextIO, stdin: TextIO | None) 
     values = _read_values(args.path, stdin=stdin)
     summary = summarize(values, ddof=args.ddof)
     if args.json:
-        out.write(json.dumps(summary.to_dict(), indent=2, sort_keys=True) + "\n")
+        try:
+            payload = json.dumps(
+                summary.to_dict(), indent=2, sort_keys=True, allow_nan=False
+            )
+        except ValueError as exc:
+            # Finite inputs can still overflow, e.g. the variance of
+            # [1e308, -1e308]. Standard JSON has no token for that.
+            msg = "summary contains non-finite values, which JSON cannot represent"
+            raise ValidationError(msg) from exc
+        out.write(payload + "\n")
     else:
         for key, value in sorted(summary.to_dict().items()):
             out.write(f"{key:<10}{value:>14.6g}\n")
@@ -195,8 +230,10 @@ def main(
     Args:
         argv: Argument list, excluding the program name. Defaults to
             `sys.argv[1:]`.
-        out: Stream for normal output. Defaults to `sys.stdout`.
-        err: Stream for error messages. Defaults to `sys.stderr`.
+        out: Stream for normal output, including ``--help`` and
+            ``--version``. Defaults to `sys.stdout`.
+        err: Stream for error messages, including argparse usage errors.
+            Defaults to `sys.stderr`.
         stdin: Stream used when the input path is ``"-"``. Defaults to
             `sys.stdin`.
 
@@ -220,8 +257,11 @@ def main(
     err = err if err is not None else sys.stderr
 
     parser = build_parser()
+    # argparse prints --help, --version, and usage errors straight to
+    # sys.stdout / sys.stderr, so redirect them to honour the injected streams.
     try:
-        args = parser.parse_args(argv)
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            args = parser.parse_args(argv)
     except SystemExit as exc:  # --help / --version / usage error
         return int(exc.code or EXIT_OK)
 

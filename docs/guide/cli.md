@@ -25,7 +25,9 @@ mypackage summarize [PATH] [--ddof N] [--json]
 ```
 
 `PATH` is a file of whitespace- or comma-separated numbers, or `-` (the
-default) to read standard input.
+default) to read standard input. Every value must be finite: `nan` and `inf`
+are rejected, because a summary of them is meaningless and `--json` could not
+represent them in standard JSON.
 
 ::::{tab-set}
 :::{tab-item} Table output
@@ -91,7 +93,7 @@ mypackage smooth [PATH] [--method {mean,median,ewma}] [--window N]
 | `--window` | `3` | `mean`, `median` | samples per window |
 | `--alpha` | `0.3` | `ewma` | smoothing factor in $(0, 1]$ |
 | `--padding` | `edge` | `mean`, `median` | `edge`, `reflect`, `zero`, `none` |
-| `--precision` | `6` | — | decimals in the output |
+| `--precision` | `6` | — | decimals in the output; must be non-negative |
 
 ```console
 $ printf "1 1 99 1 1" | mypackage smooth --method median --window 3 --precision 1
@@ -116,7 +118,7 @@ $ echo "1 2 3 4 5" | mypackage smooth --padding none --precision 1
 | Code | Meaning |
 |---|---|
 | `0` | success |
-| `1` | a package error (empty input, bad numbers) or an I/O error |
+| `1` | a package error (empty input, bad or non-finite numbers) or an I/O error |
 | `2` | a usage error — unknown flag, missing subcommand |
 
 Errors go to standard error, prefixed with `error: `, leaving standard output

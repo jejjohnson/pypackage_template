@@ -98,6 +98,24 @@ class Summary:
         return data
 
 
+def _mean(values: list[float]) -> float:
+    """Arithmetic mean of a non-empty list that survives an overflowing sum.
+
+    ``math.fsum`` is exact, but raises ``OverflowError`` when the running
+    total leaves the float range even though the mean itself is finite — for
+    example ``[1e308, 1e308]``. In that case every value is rescaled by a power
+    of two that bounds the largest magnitude, which is exact, summed, and the
+    scale reapplied. `math.ldexp` is used throughout because ``2.0 ** 1024``
+    itself overflows.
+    """
+    try:
+        return math.fsum(values) / len(values)
+    except OverflowError:
+        _, exponent = math.frexp(max(abs(value) for value in values))
+        scaled = [math.ldexp(value, -exponent) for value in values]
+        return math.ldexp(math.fsum(scaled) / len(values), exponent)
+
+
 def summarize(series: Series, *, ddof: int = 1) -> Summary:
     """Compute descriptive statistics for ``series`` in a single pass.
 
@@ -126,6 +144,11 @@ def summarize(series: Series, *, ddof: int = 1) -> Summary:
 
         >>> summarize([3.0], ddof=0).variance
         0.0
+
+        The mean survives inputs whose sum would overflow:
+
+        >>> summarize([1e308, 1e308], ddof=0).mean
+        1e+308
     """
     values = require_non_empty(series)
     count = len(values)
@@ -139,8 +162,13 @@ def summarize(series: Series, *, ddof: int = 1) -> Summary:
         )
         raise ValidationError(msg)
 
-    mean = math.fsum(values) / count
-    variance = math.fsum((value - mean) ** 2 for value in values) / (count - ddof)
+    mean = _mean(values)
+    # `d * d` rather than `d ** 2`: float `**` raises OverflowError, whereas
+    # multiplication overflows to inf, which is the honest IEEE answer when
+    # the variance itself is not representable.
+    variance = math.fsum(d * d for d in (value - mean for value in values)) / (
+        count - ddof
+    )
     return Summary(
         count=count,
         mean=mean,
@@ -249,7 +277,11 @@ class RunningStats:
     M_{2,n} = M_{2,n-1} + (x_n - \\bar{x}_{n-1})(x_n - \\bar{x}_n).$$
 
     Attributes:
-        ddof: Delta degrees of freedom used by ``variance`` and ``std``.
+        ddof: Delta degrees of freedom used by ``variance`` and ``std``. Must
+            be a non-negative integer.
+
+    Raises:
+        ValidationError: If ``ddof`` is negative or not an integer.
 
     Examples:
         >>> stats = RunningStats()
@@ -273,6 +305,14 @@ class RunningStats:
     _m2: float = field(default=0.0, repr=False)
     _minimum: float = field(default=math.inf, repr=False)
     _maximum: float = field(default=-math.inf, repr=False)
+
+    def __post_init__(self) -> None:
+        if isinstance(self.ddof, bool) or not isinstance(self.ddof, int):
+            msg = f"'ddof' must be an integer, got {self.ddof!r}"
+            raise ValidationError(msg)
+        if self.ddof < 0:
+            msg = f"'ddof' must be non-negative, got {self.ddof}"
+            raise ValidationError(msg)
 
     def update(self, value: float) -> RunningStats:
         """Consume a single observation.
