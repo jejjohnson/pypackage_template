@@ -130,7 +130,7 @@ typecheck: ## 🔬 Type-check with ty
 
 test: ## 🧪 Run tests with pytest (no coverage)
 	@printf "$(YELLOW)>>> Running tests (no coverage)...$(RESET)\n"
-	uv run pytest -v -o addopts=
+	uv run pytest -v -o addopts=--doctest-modules
 	@printf "$(GREEN)>>> ✅ Tests passed!$(RESET)\n"
 
 test-cov: ## 📊 Run tests with coverage report
