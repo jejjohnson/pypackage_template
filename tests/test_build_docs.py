@@ -261,6 +261,55 @@ class TestDollarAbbreviationRepair:
         assert build_docs.restore_anchor_case(html, mapping) == (html, 0)
 
 
+class TestNavBaseUrlProblems:
+    """Guards the site-nav regression that shipped in the first deployment.
+
+    The MyST theme re-renders the site nav from the config it embeds for
+    hydration and prepends ``BASE_URL`` to any URL starting with ``/``. The
+    build script used to rewrite the nav entry to a root-relative path, so the
+    deployed button pointed at ``/project/project/reference/`` and 404s — while
+    the static HTML looked perfectly correct, which is why `verify_links` could
+    not see it.
+    """
+
+    def test_flags_a_root_relative_nav_url(self) -> None:
+        html = (
+            '<script>{"nav":[{"title":"API",'
+            '"url":"/pypackage_template/reference/"}]}</script>'
+        )
+        assert build_docs.nav_base_url_problems(html) == [
+            "/pypackage_template/reference/"
+        ]
+
+    def test_accepts_an_absolute_nav_url(self) -> None:
+        html = (
+            '<script>{"nav":[{"title":"API",'
+            '"url":"https://example.com/reference/"}]}</script>'
+        )
+        assert build_docs.nav_base_url_problems(html) == []
+
+    def test_accepts_a_page_without_nav(self) -> None:
+        assert build_docs.nav_base_url_problems("<html><body>hi</body></html>") == []
+
+    def test_deduplicates_across_repeated_config_blocks(self) -> None:
+        """The theme embeds the config more than once per page."""
+        block = '{"nav":[{"title":"API","url":"/proj/reference/"}]}'
+        assert build_docs.nav_base_url_problems(block + block) == ["/proj/reference/"]
+
+    def test_ignores_urls_outside_the_nav_block(self) -> None:
+        html = '<a href="/proj/reference/">x</a><script>{"nav":[]}</script>'
+        assert build_docs.nav_base_url_problems(html) == []
+
+    def test_the_real_nav_url_is_absolute(self) -> None:
+        """`docs/myst.yml` must keep the nav URL absolute."""
+        config = (
+            Path(__file__).resolve().parent.parent / "docs" / "myst.yml"
+        ).read_text(encoding="utf-8")
+        nav = config.split("nav:", 1)[1]
+        url = nav.split("url:", 1)[1].split("\n", 1)[0].strip()
+        assert url.startswith("http"), f"nav url must be absolute, got {url!r}"
+
+
 def test_port_matches_the_myst_config() -> None:
     """`docs/myst.yml` and this script must agree on the inventory port."""
     config = (Path(__file__).resolve().parent.parent / "docs" / "myst.yml").read_text(

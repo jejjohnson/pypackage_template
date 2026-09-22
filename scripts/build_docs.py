@@ -49,12 +49,11 @@ API_SUBDIR = "reference"
 # inventories over http(s), so the freshly built MkDocs output is served here
 # during the MyST build and the resulting URLs are rewritten afterwards.
 API_PORT = 8910
-API_ORIGIN = f"http://127.0.0.1:{API_PORT}/"
-
-# The site-level nav link in docs/myst.yml must be a full URL, so it names the
-# deployed location. It is rewritten to the assembled site's own path for the
-# same reason as API_ORIGIN.
-API_PUBLIC_URL = "https://jejjohnson.github.io/pypackage_template/reference/"
+# No trailing slash: mystmd echoes the configured inventory URL into the page
+# config it embeds for hydration, and it normalises away the trailing slash.
+# Matching the bare origin rewrites that echo as well as the links, so the leak
+# check below can be absolute about it.
+API_ORIGIN = f"http://127.0.0.1:{API_PORT}"
 
 
 # ---------------------------------------------------------------------------
@@ -128,6 +127,33 @@ def anchor_case_map(entries: dict[str, str]) -> dict[str, str]:
 # ---------------------------------------------------------------------------
 
 _HREF = re.compile(r'href="([^"]*)"')
+_NAV = re.compile(r'"nav":\s*(\[.*?\])', re.DOTALL)
+
+
+def nav_base_url_problems(html: str) -> list[str]:
+    """Find site-nav URLs that the theme will prefix with ``BASE_URL`` twice.
+
+    The MyST theme re-renders the site nav from the config it embeds for
+    hydration, prepending ``BASE_URL`` to any URL that starts with ``/``. A nav
+    entry that already carries the deployment prefix therefore ends up doubled
+    (``/project/project/page/``) and 404s — but only after hydration, so the
+    static HTML looks correct and [`verify_links`][] cannot see it.
+
+    Nav URLs must be absolute, which the theme treats as external and leaves
+    alone.
+
+    Args:
+        html: A rendered page's source.
+
+    Returns:
+        A list of offending nav URLs; empty when every entry is safe.
+    """
+    problems: list[str] = []
+    for block in _NAV.findall(html):
+        for url in re.findall(r'"url"\s*:\s*"([^"]*)"', block):
+            if url.startswith("/"):
+                problems.append(url)
+    return sorted(set(problems))
 
 
 def restore_anchor_case(html: str, mapping: dict[str, str]) -> tuple[str, int]:
@@ -335,7 +361,7 @@ def assemble(base_url: str) -> list[str]:
 
     inventory = parse_inventory((MKDOCS_OUT / "objects.inv").read_bytes())
     mapping = anchor_case_map(inventory)
-    replacement = f"{base_url}/{API_SUBDIR}/"
+    replacement = f"{base_url}/{API_SUBDIR}"
 
     fixed_anchors = 0
     rewritten = 0
@@ -345,8 +371,6 @@ def assemble(base_url: str) -> list[str]:
         html = page.read_text(encoding="utf-8")
         html, anchors = restore_anchor_case(html, mapping)
         html, origins = rewrite_api_origin(html, API_ORIGIN, replacement)
-        html, public = rewrite_api_origin(html, API_PUBLIC_URL, replacement)
-        origins += public
         if anchors or origins:
             page.write_text(html, encoding="utf-8")
         fixed_anchors += anchors
@@ -355,12 +379,19 @@ def assemble(base_url: str) -> list[str]:
     print(f"repaired {fixed_anchors} lowercased API anchors")
     print(f"rewrote {rewritten} API links to {replacement}")
 
-    leaked = [
-        str(p.relative_to(PUBLIC))
-        for p in PUBLIC.rglob("*.html")
-        if API_ORIGIN in p.read_text(encoding="utf-8", errors="replace")
-    ]
-    problems = [f"{page}: build-time API origin leaked into output" for page in leaked]
+    problems: list[str] = []
+    for page in PUBLIC.rglob("*.html"):
+        if page.is_relative_to(PUBLIC / API_SUBDIR):
+            continue
+        text = page.read_text(encoding="utf-8", errors="replace")
+        name = page.relative_to(PUBLIC)
+        if API_ORIGIN in text:
+            problems.append(f"{name}: build-time API origin leaked into output")
+        for url in nav_base_url_problems(text):
+            problems.append(
+                f"{name}: site-nav URL {url!r} is root-relative; the theme will "
+                f"prepend BASE_URL to it again on hydration. Use an absolute URL."
+            )
     return problems + verify_links(PUBLIC, base_url)
 
 
