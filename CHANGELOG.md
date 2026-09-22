@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.7](https://github.com/jejjohnson/pypackage_template/compare/v0.1.6...v0.1.7) (2026-09-22)
+
+
+### Features
+
+* ship a real worked example, and split the docs across mystmd + mkdocstrings ([#93](https://github.com/jejjohnson/pypackage_template/issues/93)) ([294b27f](https://github.com/jejjohnson/pypackage_template/commit/294b27f4e5fed37d521aa21865c26e2f52eb5797))
+
+
+### Bug Fixes
+
+* address the Codex review findings from [#93](https://github.com/jejjohnson/pypackage_template/issues/93) ([#96](https://github.com/jejjohnson/pypackage_template/issues/96)) ([7c3d86f](https://github.com/jejjohnson/pypackage_template/commit/7c3d86f4807196cbb5faba36a52ada6293fd7c0d))
+* **docs:** stop rewriting the site-nav URL, which 404s after hydration ([#95](https://github.com/jejjohnson/pypackage_template/issues/95)) ([d78220c](https://github.com/jejjohnson/pypackage_template/commit/d78220ce52f65b41aa3808fe7f8dbf335b8aa3c4))
+
 ## [0.1.6](https://github.com/jejjohnson/pypackage_template/compare/v0.1.5...v0.1.6) (2026-05-14)
 
 
