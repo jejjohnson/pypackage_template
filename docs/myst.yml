@@ -1,0 +1,55 @@
+# ---------------------------------------------------------------------------
+# mystmd builds the prose half of the documentation: home page, guides, and
+# executed example notebooks. The API reference is built separately by MkDocs
+# + mkdocstrings and mounted at `/reference/`. See `docs/README.md`.
+#
+# `references.api` points at a LOCAL server because mystmd only loads
+# intersphinx inventories over http(s) — a filesystem path is rejected and a
+# `file://` URL is silently ignored. `scripts/build_docs.py` serves the freshly
+# built MkDocs `site/` on this exact port, then rewrites the resulting
+# localhost URLs to the deployed `/reference/` path. Keep the port in sync
+# with API_PORT in that script.
+# ---------------------------------------------------------------------------
+version: 1
+
+project:
+  id: mypackage-docs
+  title: mypackage
+  description: >-
+    Descriptive statistics, smoothing filters, and composable transforms for
+    one-dimensional numeric series — with zero runtime dependencies.
+  github: https://github.com/jejjohnson/pypackage_template
+  authors:
+    - name: J. Emmanuel Johnson
+  references:
+    api: http://127.0.0.1:8910/
+  toc:
+    - file: index.md
+    - title: Guide
+      children:
+        - file: guide/quickstart.md
+        - file: guide/statistics.md
+        - file: guide/smoothing.md
+        - file: guide/transforms.md
+        - file: guide/cli.md
+    - title: Examples
+      children:
+        - file: notebooks/tour.ipynb
+        - file: notebooks/smoothing_deep_dive.ipynb
+    - title: Project
+      children:
+        - file: contributing.md
+        - file: changelog.md
+
+site:
+  title: mypackage
+  template: book-theme
+  options:
+    logo_text: mypackage
+  # mystmd requires a full URL here, so the deployed location is hard-coded
+  # the way `repo_url` is in mkdocs.yml. scripts/build_docs.py rewrites it to
+  # the assembled site's own `/reference/` path, so local previews and
+  # subpath deployments both resolve correctly.
+  nav:
+    - title: API reference
+      url: https://jejjohnson.github.io/pypackage_template/reference/

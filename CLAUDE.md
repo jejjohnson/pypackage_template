@@ -14,7 +14,7 @@ make install              # Install all deps (uv sync --all-groups) + pre-commit
 make test                 # Run tests: uv run pytest -v
 make format               # Auto-fix: ruff format . && ruff check --fix .
 make lint                 # Lint code: ruff check .
-make typecheck            # Type check: ty check src/mypackage
+make typecheck            # Type check: ty check src/mypackage scripts
 make precommit            # Run pre-commit on all files
 make docs-serve           # Local docs server
 ```
@@ -31,7 +31,7 @@ uv run pytest tests/test_example.py::TestClass::test_method -v
 uv run pytest -v                              # Tests + doctests
 uv run --group lint ruff check .              # Lint — ENTIRE repo, not just src/mypackage/
 uv run --group lint ruff format --check .     # Format — ENTIRE repo
-uv run --group typecheck ty check src/mypackage  # Typecheck — package only
+uv run --group typecheck ty check src/mypackage scripts  # Typecheck
 ```
 
 **Critical**: Always lint/format with `.` (repo root), not `src/mypackage/`. CI runs `ruff check .` which includes `tests/`, `scripts/`, **and the code cells of `docs/notebooks/*.ipynb`**.
@@ -82,16 +82,61 @@ Dependency direction is strictly one-way:
 | `notebooks/` | Scratch Jupyter notebooks |
 | `scripts/` | Example scripts |
 
+## Documentation
+
+The docs are built by **two tools** and deployed as one site — see
+`docs/README.md` for the full rationale.
+
+| Half | Tool | Source | Deployed at |
+|---|---|---|---|
+| Prose — home, guides, notebooks | mystmd | `docs/*.md`, `docs/guide/`, `docs/notebooks/` | `/` |
+| API reference | MkDocs + mkdocstrings | `docs/api/` | `/reference/` |
+
+```bash
+make docs          # build both halves, assemble into public/, verify links
+make docs-api      # API reference only (fast; no Node needed)
+make docs-serve    # build, then serve the assembled site at :8000
+```
+
+`scripts/build_docs.py` orchestrates this. It serves the freshly built
+`site/` on port 8910 so mystmd can read the `objects.inv` (mystmd only loads
+inventories over http — a path is rejected and `file://` is silently
+ignored), rewrites the resulting localhost URLs to `/reference/`, repairs
+anchors broken by the mystmd `$`-expansion bug, and then verifies that every
+internal link in the assembled site resolves. Its pure functions are covered
+by `tests/test_build_docs.py`.
+
+**mystmd is a Node CLI**: `npm install -g mystmd`. It is not a uv dependency.
+
+### Writing prose
+
+Prose pages are **MyST Markdown**, not MkDocs-Material Markdown. Use
+`:::{note}` / `:::{tab-set}` / `:::{dropdown}` directives, not `!!!` / `===`
+/ `???` blocks.
+
+Cross-reference the API with the `xref:` protocol and the **top-level**
+exported name:
+
+```markdown
+[`summarize`](xref:api#mypackage.summarize)      <!-- correct -->
+[`summarize`](xref:api#mypackage.stats.summarize) <!-- avoid: see docs/README.md -->
+```
+
+A target missing from the inventory fails `myst build --strict`.
+
+### URLs are flat
+
+mystmd derives a page's URL from its **basename**, so `guide/quickstart.md`
+is served at `/quickstart/`, not `/guide/quickstart/`. Two files sharing a
+basename collide into an order-dependent `-1` suffix, so keep basenames
+unique across `docs/guide/` and `docs/notebooks/`. Frontmatter `slug:` is
+ignored.
+
 ## Documentation Examples
 
-Example notebooks live in `docs/notebooks/` as jupytext percent-format `.py` files. The workflow:
-
-1. Write the `.py` source (jupytext percent format)
-2. Convert and execute: `jupytext --to notebook foo.py` then `jupyter nbconvert --execute --inplace foo.ipynb`
-3. Delete the `.py` — the executed `.ipynb` is the committed source of truth
-4. `mkdocs-jupyter` renders the pre-executed `.ipynb` with `execute: false`
-
-Figures render inline via `plt.show()` — do **not** use `savefig` or commit separate PNG files. The `.ipynb` cell outputs are the single source of rendered figures.
+Example notebooks live in `docs/notebooks/` as executed `.ipynb` files with
+their outputs committed; mystmd renders them without re-executing. Author
+them in jupytext percent format, execute, then delete the `.py`.
 
 See `.github/instructions/docs-examples.instructions.md` for full standards.
 

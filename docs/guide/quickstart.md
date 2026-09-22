@@ -2,7 +2,7 @@
 
 Everything in this page is a real, runnable snippet. If you prefer an
 executable version with plots, jump to the
-[quickstart notebook](../notebooks/quickstart.ipynb).
+[guided tour notebook](../notebooks/tour.ipynb).
 
 ## Install
 
@@ -14,8 +14,8 @@ There are no runtime dependencies, so this pulls in nothing else.
 
 ## Describe a series
 
-[`summarize`][mypackage.summarize] returns a frozen
-[`Summary`][mypackage.Summary] — immutable, hashable, comparable.
+[`summarize`](xref:api#mypackage.summarize) returns a frozen
+[`Summary`](xref:api#mypackage.Summary) — immutable, hashable, comparable.
 
 ```python
 import mypackage as mp
@@ -37,16 +37,17 @@ population variance:
 mp.summarize(series, ddof=0).variance   # 4.0
 ```
 
-!!! note "Why `fsum`?"
-    Summation uses `math.fsum`, and the variance is computed from deviations
-    rather than from $\sum x^2 - (\sum x)^2 / N$. The naive formula loses
-    every significant digit when the mean is large — a series centred on
-    $10^9$ returns a *negative* variance. See
-    [Statistics](statistics.md#numerical-stability).
+:::{note} Why `fsum`?
+Summation uses `math.fsum`, and the variance is computed from deviations
+rather than from $\sum x^2 - (\sum x)^2 / N$. The naive formula loses
+every significant digit when the mean is large — a series centred on
+$10^9$ returns a *negative* variance. See
+[Statistics](statistics.md#numerical-stability).
+:::
 
 ## Stream it instead
 
-When the data doesn't fit in memory, [`RunningStats`][mypackage.RunningStats]
+When the data doesn't fit in memory, [`RunningStats`](xref:api#mypackage.RunningStats)
 consumes it one value at a time in constant space:
 
 ```python
@@ -76,7 +77,7 @@ mp.median_filter(spike, 3)    # [1.0,   1.0,   1.0,   1.0, 1.0] — removed
 
 ## Compose transforms
 
-[`Pipeline`][mypackage.Pipeline] fits each step on the output of the previous
+[`Pipeline`](xref:api#mypackage.Pipeline) fits each step on the output of the previous
 one, then applies them in order:
 
 ```python
@@ -99,7 +100,7 @@ len(pipeline), len(extended)   # (3, 4)
 
 ## Handle failures
 
-Every error derives from [`MypackageError`][mypackage.MypackageError]:
+Every error derives from [`MypackageError`](xref:api#mypackage.MypackageError):
 
 ```python
 try:

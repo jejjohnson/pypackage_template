@@ -9,33 +9,37 @@ template has something real to chew on: `mkdocstrings` renders its docstrings,
 `ty` checks its annotations, `pytest` exercises its branches, and every
 `Examples:` block on this site is executed on each test run.
 
-!!! tip "Using this as a template"
-    Replace `mypackage` with your own package and delete what you don't need.
-    The point of keeping a real library here is that the docs build, the API
-    reference, the notebooks, and the coverage gate all start out *working* —
-    so when they break, it's because of something you changed.
+:::{tip} Using this as a template
+Replace `mypackage` with your own package and delete what you don't need.
+The point of keeping a real library here is that the docs build, the API
+reference, the notebooks, and the coverage gate all start out *working* —
+so when they break, it's because of something you changed.
+:::
 
 ## Installation
 
-=== "uv"
+::::{tab-set}
+:::{tab-item} uv
 
-    ```bash
-    uv add mypackage
-    ```
+```bash
+uv add mypackage
+```
+:::
+:::{tab-item} pip
 
-=== "pip"
+```bash
+pip install mypackage
+```
+:::
+:::{tab-item} From source
 
-    ```bash
-    pip install mypackage
-    ```
-
-=== "From source"
-
-    ```bash
-    git clone https://github.com/jejjohnson/pypackage_template.git
-    cd pypackage_template
-    make install
-    ```
+```bash
+git clone https://github.com/jejjohnson/pypackage_template.git
+cd pypackage_template
+make install
+```
+:::
+::::
 
 ## Quickstart
 
@@ -60,36 +64,41 @@ echo "2 4 4 4 5 5 7 9" | mypackage summarize - --json
 
 ## The three layers
 
-<div class="grid cards" markdown>
+::::{grid} 1 1 3 3
 
-- :material-chart-box: **Statistics**
+:::{grid-item-card} Statistics
+:link: guide/statistics.md
 
-    Batch summaries and a streaming accumulator.
-    [`summarize`][mypackage.summarize] · [`quantile`][mypackage.quantile] ·
-    [`zscores`][mypackage.zscores] ·
-    [`RunningStats`][mypackage.RunningStats]
+Batch summaries and a streaming accumulator.
 
-    [:octicons-arrow-right-24: Statistics guide](guide/statistics.md)
+[`summarize`](xref:api#mypackage.summarize) ·
+[`quantile`](xref:api#mypackage.quantile) ·
+[`zscores`](xref:api#mypackage.zscores) ·
+[`RunningStats`](xref:api#mypackage.RunningStats)
+:::
 
-- :material-chart-bell-curve: **Smoothing**
+:::{grid-item-card} Smoothing
+:link: guide/smoothing.md
 
-    Linear and non-linear filters with explicit boundary handling.
-    [`moving_average`][mypackage.moving_average] ·
-    [`exponential_moving_average`][mypackage.exponential_moving_average] ·
-    [`median_filter`][mypackage.median_filter]
+Linear and non-linear filters with explicit boundary handling.
 
-    [:octicons-arrow-right-24: Smoothing guide](guide/smoothing.md)
+[`moving_average`](xref:api#mypackage.moving_average) ·
+[`exponential_moving_average`](xref:api#mypackage.exponential_moving_average) ·
+[`median_filter`](xref:api#mypackage.median_filter)
+:::
 
-- :material-pipe: **Transforms**
+:::{grid-item-card} Transforms
+:link: guide/transforms.md
 
-    A fit/apply lifecycle with structural typing.
-    [`Standardize`][mypackage.Standardize] ·
-    [`MinMaxScale`][mypackage.MinMaxScale] · [`Clip`][mypackage.Clip] ·
-    [`Pipeline`][mypackage.Pipeline]
+A fit/apply lifecycle with structural typing.
 
-    [:octicons-arrow-right-24: Transforms guide](guide/transforms.md)
+[`Standardize`](xref:api#mypackage.Standardize) ·
+[`MinMaxScale`](xref:api#mypackage.MinMaxScale) ·
+[`Clip`](xref:api#mypackage.Clip) ·
+[`Pipeline`](xref:api#mypackage.Pipeline)
+:::
 
-</div>
+::::
 
 ## Design rules
 
@@ -98,12 +107,12 @@ The library follows four rules, and the test suite enforces all of them:
 1. **Pure where possible.** Every function returns a new list and never
    mutates its input. Stateful objects confine their state to a `fit` step.
 2. **Validate once, at the boundary.** Public entry points coerce and check
-   their inputs through [`as_floats`][mypackage.as_floats] and friends, so
+   their inputs through [`as_floats`](xref:api#mypackage.as_floats) and friends, so
    internal helpers can assume well-formed data.
 3. **Fail with a typed exception.** Everything raised derives from
-   [`MypackageError`][mypackage.MypackageError] *and* from the closest
+   [`MypackageError`](xref:api#mypackage.MypackageError) *and* from the closest
    standard-library exception, so `except ValueError` still works.
-4. **Structural, not nominal, typing.** [`Pipeline`][mypackage.Pipeline]
+4. **Structural, not nominal, typing.** [`Pipeline`](xref:api#mypackage.Pipeline)
    accepts anything with an `apply` method — no base class, no registry.
 
 ## Where to go next
@@ -114,5 +123,5 @@ The library follows four rules, and the test suite enforces all of them:
 | Understand the filters | [Smoothing](guide/smoothing.md) |
 | Build my own transform | [Transforms](guide/transforms.md) |
 | Use it from the shell | [CLI](guide/cli.md) |
-| Read the full API | [API Reference](api/reference.md) |
-| Run an executable example | [Quickstart notebook](notebooks/quickstart.ipynb) |
+| Read the full API | [API reference](xref:api#mypackage) |
+| Run an executable example | [Guided tour](notebooks/tour.ipynb) |

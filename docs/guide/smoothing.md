@@ -4,9 +4,9 @@ Three filters, one decision: **what do you want to preserve?**
 
 | Filter | Kind | Support | Preserves | Destroys |
 |---|---|---|---|---|
-| [`moving_average`][mypackage.moving_average] | linear | finite, symmetric | slow trends | edges, spikes |
-| [`exponential_moving_average`][mypackage.exponential_moving_average] | linear | infinite, causal | streaming latency | phase |
-| [`median_filter`][mypackage.median_filter] | non-linear | finite, symmetric | **edges** | fine texture |
+| [`moving_average`](xref:api#mypackage.moving_average) | linear | finite, symmetric | slow trends | edges, spikes |
+| [`exponential_moving_average`](xref:api#mypackage.exponential_moving_average) | linear | infinite, causal | streaming latency | phase |
+| [`median_filter`](xref:api#mypackage.median_filter) | non-linear | finite, symmetric | **edges** | fine texture |
 
 ## Moving average
 
@@ -38,11 +38,12 @@ Expanding the recursion shows the weights decay geometrically into the past:
 
 $$y_i = \alpha \sum_{k=0}^{i-1} (1-\alpha)^k x_{i-k} + (1-\alpha)^i x_0$$
 
-!!! info "Causality is the point"
-    `y[i]` depends only on samples up to `i`, so this filter runs on a live
-    stream where a centred window cannot. The price is a phase lag of roughly
-    $(1-\alpha)/\alpha$ samples — with $\alpha = 0.1$, features arrive about
-    nine samples late.
+:::{note} Causality is the point
+`y[i]` depends only on samples up to `i`, so this filter runs on a live
+stream where a centred window cannot. The price is a phase lag of roughly
+$(1-\alpha)/\alpha$ samples — with $\alpha = 0.1$, features arrive about
+nine samples late.
+:::
 
 ```python
 mp.exponential_moving_average([1.0, 2.0, 3.0], alpha=0.5)
@@ -58,19 +59,22 @@ window can be arbitrarily corrupted without moving the output at all. The mean
 has a breakdown point of $0$ — a single infinite sample takes the whole window
 with it.
 
-=== "Median filter"
+::::{tab-set}
+:::{tab-item} Median filter
 
-    ```python
-    mp.median_filter([1.0, 1.0, 99.0, 1.0, 1.0], window=3)
-    # [1.0, 1.0, 1.0, 1.0, 1.0]     ← spike gone
-    ```
+```python
+mp.median_filter([1.0, 1.0, 99.0, 1.0, 1.0], window=3)
+# [1.0, 1.0, 1.0, 1.0, 1.0]     ← spike gone
+```
+:::
+:::{tab-item} Moving average
 
-=== "Moving average"
-
-    ```python
-    mp.moving_average([1.0, 1.0, 99.0, 1.0, 1.0], window=3)
-    # [1.0, 33.67, 33.67, 33.67, 1.0]   ← spike smeared over 3 samples
-    ```
+```python
+mp.moving_average([1.0, 1.0, 99.0, 1.0, 1.0], window=3)
+# [1.0, 33.67, 33.67, 33.67, 1.0]   ← spike smeared over 3 samples
+```
+:::
+::::
 
 The same property makes it preserve step edges that a mean filter blurs:
 
@@ -87,7 +91,7 @@ scaling and addition, and it erases genuine fine texture along with the noise.
 ## Boundary handling
 
 Any finite-support filter needs values past the ends of the series.
-[`Padding`][mypackage.Padding] makes that choice explicit instead of hiding it.
+[`Padding`](xref:api#mypackage.Padding) makes that choice explicit instead of hiding it.
 
 | Strategy | Extension | Output length | Use when |
 |---|---|---|---|
@@ -110,19 +114,21 @@ mp.moving_average([1.0, 2.0, 3.0, 4.0, 5.0], window=3, padding="none")
 `"zero"`, and `"none"` work anywhere the enum does — handy for CLI flags and
 config files.
 
-!!! note "Reflection does not preserve slope"
-    Mirroring is *even* reflection: the padded values rise where the signal
-    falls. On a monotone ramp that puts them on the wrong side of the truth,
-    producing exactly **twice** the boundary error of edge padding. Reflect
-    earns its keep when the ends are oscillatory, where repeating a single
-    value is the worse approximation. The
-    [deep dive notebook](../notebooks/smoothing_deep_dive.ipynb) measures both.
+:::{note} Reflection does not preserve slope
+Mirroring is *even* reflection: the padded values rise where the signal
+falls. On a monotone ramp that puts them on the wrong side of the truth,
+producing exactly **twice** the boundary error of edge padding. Reflect
+earns its keep when the ends are oscillatory, where repeating a single
+value is the worse approximation. The
+[deep dive notebook](../notebooks/smoothing_deep_dive.ipynb) measures both.
+:::
 
-!!! warning "Zero padding is rarely what you want"
-    Unless the series really is centred on zero, `Padding.ZERO` drags both
-    ends of the output toward the origin, creating an artefact that looks
-    exactly like a real trend. It is included because signal-processing code
-    often assumes it, not because it is a good default.
+:::{warning} Zero padding is rarely what you want
+Unless the series really is centred on zero, `Padding.ZERO` drags both
+ends of the output toward the origin, creating an artefact that looks
+exactly like a real trend. It is included because signal-processing code
+often assumes it, not because it is a good default.
+:::
 
 ## Choosing a window
 
@@ -139,4 +145,4 @@ walks through this with plots and a quantitative error sweep.
 
 ## API
 
-Full signatures live in the [smoothing API reference](../api/smoothing.md).
+Full signatures live in the [smoothing API reference](xref:api#mypackage.smoothing).

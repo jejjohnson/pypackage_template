@@ -6,7 +6,6 @@ series. That is the entire contract:
 ```python
 from mypackage import Series
 
-
 class Square:
     def apply(self, series: Series) -> list[float]:
         return [value**2 for value in series]
@@ -14,7 +13,7 @@ class Square:
 
 `Square` inherits from nothing and registers with nothing, yet it composes
 with the built-ins, satisfies `isinstance` checks, and works inside a
-[`Pipeline`][mypackage.Pipeline]:
+[`Pipeline`](xref:api#mypackage.Pipeline):
 
 ```python
 import mypackage as mp
@@ -23,30 +22,31 @@ isinstance(Square(), mp.Transform)                 # True
 mp.chain(mp.Standardize(), Square()).fit_apply(data)
 ```
 
-This works because [`Transform`][mypackage.Transform] is a
+This works because [`Transform`](xref:api#mypackage.Transform) is a
 `runtime_checkable` `Protocol` — *structural* typing. The static checker
 verifies the shape; `isinstance` verifies the method exists at runtime.
 
-!!! note "Protocol `isinstance` checks are shallow"
-    A `runtime_checkable` protocol only checks that the attribute *exists* —
-    not its signature. Static type checking (`make typecheck`) is what catches
-    an `apply` with the wrong parameters. The runtime check exists to give a
-    clear [`ValidationError`][mypackage.ValidationError] when someone drops a
-    string into a pipeline, not to replace the type checker.
+:::{note} Protocol `isinstance` checks are shallow
+A `runtime_checkable` protocol only checks that the attribute *exists* —
+not its signature. Static type checking (`make typecheck`) is what catches
+an `apply` with the wrong parameters. The runtime check exists to give a
+clear [`ValidationError`](xref:api#mypackage.ValidationError) when someone drops a
+string into a pipeline, not to replace the type checker.
+:::
 
 ## Stateless versus fitted
 
 | Transform | Learns from data? | Protocol |
 |---|---|---|
-| [`Clip`][mypackage.Clip] | no | `Transform` |
-| [`MovingAverage`][mypackage.MovingAverage] | no | `Transform` |
-| [`Standardize`][mypackage.Standardize] | yes — mean, std | `Transform`, `Fittable` |
-| [`MinMaxScale`][mypackage.MinMaxScale] | yes — min, max | `Transform`, `Fittable` |
+| [`Clip`](xref:api#mypackage.Clip) | no | `Transform` |
+| [`MovingAverage`](xref:api#mypackage.MovingAverage) | no | `Transform` |
+| [`Standardize`](xref:api#mypackage.Standardize) | yes — mean, std | `Transform`, `Fittable` |
+| [`MinMaxScale`](xref:api#mypackage.MinMaxScale) | yes — min, max | `Transform`, `Fittable` |
 
 Stateless transforms implement `fit` as a no-op returning `self`, so they drop
 into a pipeline next to fitted ones without any special casing.
 
-Fitted transforms raise [`NotFittedError`][mypackage.NotFittedError] when used
+Fitted transforms raise [`NotFittedError`](xref:api#mypackage.NotFittedError) when used
 before `fit` — never a silent identity, never a `None`-propagating `nan`:
 
 ```python
@@ -72,7 +72,7 @@ deviation from the test data, quietly leaking information about it into the
 transform. The shortcut exists — `fit_apply` — precisely so that the leaking
 version has to be *typed out*, rather than being what you get by default.
 
-[`Standardize`][mypackage.Standardize] also provides `inverse`, which maps
+[`Standardize`](xref:api#mypackage.Standardize) also provides `inverse`, which maps
 standardised values back to the original scale:
 
 ```python
@@ -81,7 +81,7 @@ scaler.inverse(scaler.apply(train)) == train   # True (to floating point)
 
 ## Pipelines
 
-[`Pipeline`][mypackage.Pipeline] applies steps left to right. Fitting is
+[`Pipeline`](xref:api#mypackage.Pipeline) applies steps left to right. Fitting is
 sequential: each step is fitted on the *output of the previous step*, exactly
 as it will see the data at apply time.
 
@@ -95,18 +95,19 @@ pipeline = mp.Pipeline([
 clean = pipeline.fit_apply(raw)
 ```
 
-??? example "Why sequential fitting matters"
-    Consider `Clip(upper=10.0)` followed by `Standardize()` on the series
-    `[0, 10, 1000]`. The clip turns it into `[0, 10, 10]`, so the scaler must
-    learn a mean of `6.67` — not the `336.67` of the raw series. Fitting each
-    step on raw data instead would produce a pipeline whose `apply` behaves
-    completely differently from its `fit`.
+:::{dropdown} Why sequential fitting matters
+Consider `Clip(upper=10.0)` followed by `Standardize()` on the series
+`[0, 10, 1000]`. The clip turns it into `[0, 10, 10]`, so the scaler must
+learn a mean of `6.67` — not the `336.67` of the raw series. Fitting each
+step on raw data instead would produce a pipeline whose `apply` behaves
+completely differently from its `fit`.
 
-    ```python
-    pipeline = mp.Pipeline([mp.Clip(upper=10.0), mp.Standardize()])
-    pipeline.fit([0.0, 10.0, 1000.0])
-    pipeline[1].mean_          # 6.666..., not 336.666...
-    ```
+```python
+pipeline = mp.Pipeline([mp.Clip(upper=10.0), mp.Standardize()])
+pipeline.fit([0.0, 10.0, 1000.0])
+pipeline[1].mean_          # 6.666..., not 336.666...
+```
+:::
 
 ### Composition
 
@@ -144,7 +145,6 @@ from dataclasses import dataclass
 
 from mypackage import Series, ValidationError
 
-
 @dataclass(frozen=True, slots=True)
 class Detrend:
     """Subtract a rolling baseline estimated by a median filter."""
@@ -169,9 +169,9 @@ Checklist for a well-behaved transform:
 - [x] configuration is validated at construction, not at apply time
 - [x] `fit` returns `self` so it chains
 - [x] stateful transforms raise
-      [`NotFittedError`][mypackage.NotFittedError] before `fit`
-- [x] errors derive from [`MypackageError`][mypackage.MypackageError]
+      [`NotFittedError`](xref:api#mypackage.NotFittedError) before `fit`
+- [x] errors derive from [`MypackageError`](xref:api#mypackage.MypackageError)
 
 ## API
 
-Full signatures live in the [transforms API reference](../api/transforms.md).
+Full signatures live in the [transforms API reference](xref:api#mypackage.transforms).

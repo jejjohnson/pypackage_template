@@ -4,7 +4,7 @@ Two complementary APIs cover the same ground:
 
 | | Batch | Streaming |
 |---|---|---|
-| Entry point | [`summarize`][mypackage.summarize] | [`RunningStats`][mypackage.RunningStats] |
+| Entry point | [`summarize`](xref:api#mypackage.summarize) | [`RunningStats`](xref:api#mypackage.RunningStats) |
 | Input | the whole series | one value at a time |
 | Memory | $O(N)$ | $O(1)$ |
 | Gives you | mean, variance, extrema, **median** | mean, variance, extrema |
@@ -24,17 +24,18 @@ where $\delta$ is `ddof`. Use $\delta = 1$ (the default) when the series is a
 *sample* from a larger population, and $\delta = 0$ when it *is* the
 population.
 
-??? question "Why is the default `ddof=1` rather than `0`?"
-    With $\delta = 0$ the estimator is biased low: it divides by $N$ but the
-    deviations are taken from the *sample* mean, which is itself fitted to the
-    data and therefore sits closer to the points than the true mean does.
-    Bessel's correction ($\delta = 1$) compensates exactly. NumPy defaults to
-    $\delta = 0$; pandas and R default to $\delta = 1$. This package follows
-    pandas, because "I have a sample" is the more common situation.
+:::{dropdown} Why is the default `ddof=1` rather than `0`?
+With $\delta = 0$ the estimator is biased low: it divides by $N$ but the
+deviations are taken from the *sample* mean, which is itself fitted to the
+data and therefore sits closer to the points than the true mean does.
+Bessel's correction ($\delta = 1$) compensates exactly. NumPy defaults to
+$\delta = 0$; pandas and R default to $\delta = 1$. This package follows
+pandas, because "I have a sample" is the more common situation.
+:::
 
 ## Quantiles
 
-[`quantile`][mypackage.quantile] uses linear interpolation between order
+[`quantile`](xref:api#mypackage.quantile) uses linear interpolation between order
 statistics — the same as NumPy's default `method="linear"`. With
 $h = q\,(N-1)$ and $j = \lfloor h \rfloor$:
 
@@ -55,8 +56,8 @@ list is never touched.
 
 ## Standardising
 
-[`zscores`][mypackage.zscores] is the functional form; the stateful
-[`Standardize`][mypackage.Standardize] transform is the one you want when the
+[`zscores`](xref:api#mypackage.zscores) is the functional form; the stateful
+[`Standardize`](xref:api#mypackage.Standardize) transform is the one you want when the
 statistics must be *learned once and reused* — see
 [Transforms](transforms.md#leakage).
 
@@ -64,15 +65,16 @@ statistics must be *learned once and reused* — see
 mp.zscores([1.0, 2.0, 3.0])    # [-1.0, 0.0, 1.0]
 ```
 
-!!! warning "Constant series"
-    A constant series has $s = 0$, so standardising it is undefined. Both
-    `zscores` and `Standardize.fit` raise
-    [`ValidationError`][mypackage.ValidationError] rather than silently
-    returning zeros or `nan`.
+:::{warning} Constant series
+A constant series has $s = 0$, so standardising it is undefined. Both
+`zscores` and `Standardize.fit` raise
+[`ValidationError`](xref:api#mypackage.ValidationError) rather than silently
+returning zeros or `nan`.
+:::
 
 ## Streaming with Welford's algorithm
 
-[`RunningStats`][mypackage.RunningStats] folds each observation into a running
+[`RunningStats`](xref:api#mypackage.RunningStats) folds each observation into a running
 mean and a running sum of squared deviations:
 
 $$\bar{x}_n = \bar{x}_{n-1} + \frac{x_n - \bar{x}_{n-1}}{n},
@@ -118,17 +120,18 @@ naive = (sum(v * v for v in values) - sum(values) ** 2 / n) / (n - 1)
 # -21845.333333333332   ← catastrophic cancellation, and negative
 ```
 
-!!! danger "Never use the naive formula"
-    It is not a rounding-error problem you can shrug off: the result has the
-    wrong *sign*. `math.fsum` plus deviation-based accumulation costs nothing
-    and is always correct.
+:::{danger} Never use the naive formula
+It is not a rounding-error problem you can shrug off: the result has the
+wrong *sign*. `math.fsum` plus deviation-based accumulation costs nothing
+and is always correct.
+:::
 
 ## API
 
-- [`summarize`][mypackage.summarize]
-- [`Summary`][mypackage.Summary]
-- [`quantile`][mypackage.quantile]
-- [`zscores`][mypackage.zscores]
-- [`RunningStats`][mypackage.RunningStats]
+- [`summarize`](xref:api#mypackage.summarize)
+- [`Summary`](xref:api#mypackage.Summary)
+- [`quantile`](xref:api#mypackage.quantile)
+- [`zscores`](xref:api#mypackage.zscores)
+- [`RunningStats`](xref:api#mypackage.RunningStats)
 
-Full signatures live in the [statistics API reference](../api/stats.md).
+Full signatures live in the [statistics API reference](xref:api#mypackage.stats).

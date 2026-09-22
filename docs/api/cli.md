@@ -1,6 +1,6 @@
 # CLI
 
-The `mypackage` console script. See the [CLI guide](../guide/cli.md) for
+The `mypackage` console script. See the [CLI guide](../../cli/) for
 usage, flags, and exit codes.
 
 ::: mypackage.cli

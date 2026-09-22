@@ -27,50 +27,54 @@ mypackage summarize [PATH] [--ddof N] [--json]
 `PATH` is a file of whitespace- or comma-separated numbers, or `-` (the
 default) to read standard input.
 
-=== "Table output"
+::::{tab-set}
+:::{tab-item} Table output
 
-    ```console
-    $ echo "1 2 3 4 5" | mypackage summarize
-    count                  5
-    ddof                   1
-    maximum                5
-    mean                   3
-    median                 3
-    minimum                1
-    spread                 4
-    std              1.58114
-    variance             2.5
-    ```
+```console
+$ echo "1 2 3 4 5" | mypackage summarize
+count                  5
+ddof                   1
+maximum                5
+mean                   3
+median                 3
+minimum                1
+spread                 4
+std              1.58114
+variance             2.5
+```
+:::
+:::{tab-item} JSON output
 
-=== "JSON output"
+```console
+$ echo "1 2 3 4 5" | mypackage summarize --json
+{
+  "count": 5,
+  "ddof": 1,
+  "maximum": 5.0,
+  "mean": 3.0,
+  "median": 3.0,
+  "minimum": 1.0,
+  "spread": 4.0,
+  "std": 1.5811388300841898,
+  "variance": 2.5
+}
+```
+:::
+:::{tab-item} From a file
 
-    ```console
-    $ echo "1 2 3 4 5" | mypackage summarize --json
-    {
-      "count": 5,
-      "ddof": 1,
-      "maximum": 5.0,
-      "mean": 3.0,
-      "median": 3.0,
-      "minimum": 1.0,
-      "spread": 4.0,
-      "std": 1.5811388300841898,
-      "variance": 2.5
-    }
-    ```
+```console
+$ mypackage summarize measurements.txt --ddof 0
+```
+:::
+::::
 
-=== "From a file"
+:::{tip} Piping into `jq`
+`--json` makes the output composable:
 
-    ```console
-    $ mypackage summarize measurements.txt --ddof 0
-    ```
-
-!!! tip "Piping into `jq`"
-    `--json` makes the output composable:
-
-    ```bash
-    mypackage summarize data.txt --json | jq '.mean, .std'
-    ```
+```bash
+mypackage summarize data.txt --json | jq '.mean, .std'
+```
+:::
 
 ## `smooth`
 
@@ -127,7 +131,7 @@ $ echo $?
 
 ## Testing a CLI
 
-[`main`][mypackage.cli.main] accepts its streams as arguments and **returns**
+[`main`](xref:api#mypackage.cli.main) accepts its streams as arguments and **returns**
 an exit status rather than calling `sys.exit`. That is what makes the whole
 CLI testable in-process, with no subprocess and no monkeypatching:
 
@@ -143,10 +147,10 @@ status                                 # 0
 json.loads(out.getvalue())["mean"]     # 2.5
 ```
 
-[`build_parser`][mypackage.cli.build_parser] is exposed separately so tests
+[`build_parser`](xref:api#mypackage.cli.build_parser) is exposed separately so tests
 and documentation tooling can introspect the argument structure without
 running anything.
 
 ## API
 
-Full signatures live in the [CLI API reference](../api/cli.md).
+Full signatures live in the [CLI API reference](xref:api#mypackage.cli).

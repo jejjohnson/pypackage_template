@@ -7,7 +7,7 @@
 - **CLI Framework**: `argparse` (stdlib — the package has zero runtime dependencies)
 - **Layout**: `src/` layout (`src/mypackage/`)
 - **Testing**: pytest
-- **Docs**: MkDocs + Material + mkdocstrings + mkdocs-jupyter
+- **Docs**: mystmd (prose, notebooks) + MkDocs/mkdocstrings (API reference), assembled by `scripts/build_docs.py`
 - **Demo package**: `mypackage` — series statistics, smoothing filters, and composable transforms
 
 ## Build & Test Commands
@@ -39,7 +39,7 @@ uv run --group lint ruff check .
 uv run --group lint ruff format --check .
 
 # 4. Type check — on the package only
-uv run --group typecheck ty check src/mypackage
+uv run --group typecheck ty check src/mypackage scripts
 ```
 
 > **Common pitfall**: Running `ruff check src/mypackage/` instead of `ruff check .` misses import-sorting errors in `tests/` and `scripts/`. The CI workflow runs `ruff check .`. Always use `.` (repo root), not a subdirectory.
@@ -51,8 +51,10 @@ uv run --group typecheck ty check src/mypackage
 | `src/mypackage/` | Main package source code |
 | `tests/` | Test suite |
 | `docs/` | Documentation (MkDocs) |
-| `docs/guide/` | Hand-written guide pages |
+| `docs/guide/` | Hand-written guide pages (**MyST** Markdown, not MkDocs-Material) |
+| `docs/api/` | MkDocs API reference — the only half MkDocs builds |
 | `docs/notebooks/` | Executed example notebooks (`.ipynb`, outputs committed) |
+| `scripts/` | Build tooling, incl. the two-tool docs pipeline |
 | `notebooks/` | Scratch Jupyter notebooks |
 | `scripts/` | Example scripts |
 

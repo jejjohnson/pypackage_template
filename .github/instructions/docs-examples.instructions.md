@@ -6,7 +6,7 @@ applyTo: "docs/**/*.ipynb,docs/**/*.py,docs/**/*.md,notebooks/**/*.ipynb"
 
 ## Overview
 
-Example notebooks live in `docs/notebooks/` as **executed `.ipynb` files**. The committed `.ipynb` carries both source cells and rendered cell outputs (including matplotlib figures as embedded PNGs). `mkdocs-jupyter` renders them with `execute: false`, so the committed outputs are what users see in the docs.
+Example notebooks live in `docs/notebooks/` as **executed `.ipynb` files**. The committed `.ipynb` carries both source cells and rendered cell outputs (including matplotlib figures as embedded PNGs). **mystmd** renders them without re-executing, so the committed outputs are what users see in the docs.
 
 Every notebook is **Google Colab compatible** — the first cell detects Colab and `pip install`s the right dependencies so users can click "Open in Colab" and run end-to-end without touching the host environment.
 
@@ -57,11 +57,24 @@ No separate `images/` directory — figures live inside the `.ipynb` cell output
    entry:
 
    ```bash
-   uv run --group docs mkdocs build --strict
+   make docs
    ```
 
-8. Commit the `.ipynb` and its `mkdocs.yml` nav entry. `mkdocs-jupyter` picks
-   it up automatically.
+   This builds both halves of the site, assembles them, and verifies that
+   every internal link resolves — including links from the notebook prose
+   into the API reference.
+
+8. Commit the `.ipynb` and add it to the `toc` in `docs/myst.yml`.
+
+## Notebook Basenames Must Be Unique
+
+mystmd derives a page's URL from its **basename**, ignoring the directory. A
+notebook named `quickstart.ipynb` therefore collides with a guide page named
+`quickstart.md`, and mystmd silently disambiguates them with an
+order-dependent `-1` suffix — an unstable URL that changes when files are
+added. Frontmatter `slug:` is ignored, so the only fix is a distinct basename.
+
+Keep basenames unique across `docs/`, `docs/guide/`, and `docs/notebooks/`.
 
 ## Ruff Lints Notebook Code Cells
 
@@ -282,8 +295,9 @@ MathJax is configured in `mkdocs.yml` — both inline and display math render in
 - [ ] `ruff check docs/notebooks/` passes on the `.ipynb` (code cells ≤ 88 chars)
 - [ ] No cell output has `output_type: error`
 - [ ] `.py` deleted; `.ipynb` with embedded outputs committed
-- [ ] Listed in `mkdocs.yml` nav
-- [ ] `mkdocs build --strict` passes
+- [ ] Listed in the `toc` in `docs/myst.yml`
+- [ ] Basename unique across `docs/`
+- [ ] `make docs` passes (both halves build, all links resolve)
 - [ ] Every numeric claim in the prose matches the executed output — if a cell
       prints a table, the paragraph describing it must agree with the numbers
       actually printed, not the ones you expected

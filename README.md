@@ -36,9 +36,11 @@ pypackage_template/
 │   ├── cli.py                        # argparse console script
 │   └── py.typed                      # PEP 561 typing marker
 ├── tests/                            # pytest test suite (100% coverage)
-├── docs/                             # MkDocs documentation source
-│   ├── guide/                        # Hand-written guide pages
-│   ├── api/                          # mkdocstrings API reference
+├── docs/                             # Documentation source
+│   ├── myst.yml                      # MyST project (prose half)
+│   ├── README.md                     # How the two-tool docs build works
+│   ├── guide/                        # Guide pages (MyST Markdown)
+│   ├── api/                          # mkdocstrings API reference (MkDocs)
 │   └── notebooks/                    # Executed example notebooks
 ├── notebooks/                        # Scratch Jupyter notebooks
 ├── .github/
@@ -47,10 +49,11 @@ pypackage_template/
 │   ├── copilot-instructions.md       # Copilot behavioural config
 │   ├── dependabot.yml                # Automated dependency PRs
 │   └── labeler.yml                   # Automatic PR labelling rules
+├── scripts/build_docs.py             # Builds, assembles & link-checks the docs
 ├── pyproject.toml                    # Single source of truth for project metadata & tools
 ├── uv.lock                           # Fully reproducible lockfile
 ├── Makefile                          # Self-documenting task runner
-├── mkdocs.yml                        # Documentation site configuration
+├── mkdocs.yml                        # API-reference site configuration
 ├── .pre-commit-config.yaml           # Git hook definitions
 ├── release-please-config.json        # Automated release & changelog config
 ├── .release-please-manifest.json     # Tracks the current released version
@@ -258,40 +261,78 @@ Run manually: `make precommit`. Hook versions are bumped automatically weekly vi
 
 ---
 
-### 📖 Documentation — MkDocs + Material + mkdocstrings + mkdocs-jupyter
+### 📖 Documentation — mystmd (prose) + MkDocs/mkdocstrings (API)
 
-**Files:** `mkdocs.yml`, `pyproject.toml` (`[dependency-groups] docs`), `.github/workflows/pages.yml`
+**Files:** `docs/myst.yml`, `mkdocs.yml`, `scripts/build_docs.py`, `docs/README.md`, `.github/workflows/docs.yml`
 
-| Plugin | Role |
-|--------|------|
-| `mkdocs-material` | Responsive theme with dark/light toggle, tabs, copy buttons |
-| `mkdocstrings[python]` | Auto-generates API docs from Google-style docstrings |
-| `mkdocs-jupyter` | Renders `.ipynb` notebooks directly in the docs site |
-| `jupytext` | Stores notebooks as `.py` files for clean git diffs |
+The documentation is built by **two generators and deployed as one site**,
+because neither tool is good at both halves:
 
-Commands:
+| Half | Tool | Source | Deployed at |
+|---|---|---|---|
+| Home, guides, notebooks | [mystmd](https://mystmd.org) | `docs/*.md`, `docs/guide/`, `docs/notebooks/` | `/` |
+| API reference | MkDocs + mkdocstrings | `docs/api/` | `/reference/` |
+
+MyST is far better for prose — real cross-references, first-class notebook
+handling, PDF/LaTeX export, and a directive syntax that beats admonition
+soup. What it has no answer for is autodoc: there is no mature way to render
+Python docstrings into a MyST site today. mkdocstrings does that well and
+publishes a Sphinx-compatible `objects.inv`, which is exactly what mystmd
+needs to cross-reference *into* it. So each tool does the half it is good at.
 
 ```bash
-make docs          # build static site
-make docs-serve    # preview locally at http://127.0.0.1:8000
-make docs-deploy   # deploy to GitHub Pages
+make docs          # build both halves, assemble into public/, verify links
+make docs-api      # API reference only (fast; needs no Node)
+make docs-serve    # build, then serve the assembled site at :8000
 ```
 
-Auto-deploy: `.github/workflows/pages.yml` deploys on every push to `main`.
+`mystmd` is a Node CLI (`npm install -g mystmd`), not a uv dependency.
 
-Nav structure: **Home → Guide → Examples → API Reference → Contributing → Changelog**
+Prose links into the API with the `xref:` protocol:
 
-The `Changelog` page pulls the root `CHANGELOG.md` in via a `pymdownx.snippets`
-include, so Release Please stays the single source of truth.
+```markdown
+[`summarize`](xref:api#mypackage.summarize)
+```
 
-Builds run with `--strict`, both locally (`make docs`) and in CI
-(`.github/workflows/docs.yml`), so a broken cross-reference, a missing nav
-entry, or an unresolvable `mkdocstrings` target fails the pull request rather
-than silently shipping.
+A target that is not in the inventory fails `myst build --strict`.
 
-> **What:** A versioned docs site auto-generated from Google-style docstrings and Jupyter notebooks, deployed to GitHub Pages on every push to the default branch.
+> **What:** Two documentation generators stitched into one site, with every
+> link between them verified on each build.
 
-> **Why docs-as-code?** Documentation that lives next to code gets updated with it. Auto-API-docs from docstrings means zero duplication between source and docs.
+> **Why two?** MyST wins on prose and notebooks; mkdocstrings wins on
+> docstrings. The `objects.inv` that mkdocstrings already publishes is the
+> bridge, so you do not have to compromise on either half.
+
+---
+
+### 🔗 Verified cross-generator links — `scripts/build_docs.py`
+
+**File:** `scripts/build_docs.py`, tested by `tests/test_build_docs.py`
+
+Splitting the docs across two tools creates a class of bug neither tool can
+catch: a link from one generator's output into the other's. The build script
+closes that gap. It
+
+1. builds the API reference with MkDocs,
+2. serves it locally so mystmd can read the inventory — mystmd only loads
+   inventories over http, rejecting a filesystem path and *silently ignoring*
+   a `file://` URL,
+3. builds the prose with mystmd,
+4. assembles both into `public/`,
+5. repairs anchors mangled by a mystmd bug (it lowercases an object's name
+   when expanding the `$` anchor abbreviation in an inventory), and
+6. **verifies that every internal link in the assembled site resolves** — the
+   target file must exist and, when the link carries a fragment, that anchor
+   must really be in it.
+
+Step 6 is the one that matters: it is the only check that sees both halves at
+once, and it turns a silent broken deep-link into a failed pull request.
+
+> **What:** A build script that assembles the two documentation halves and
+> fails CI on any broken link between them.
+
+> **Why:** Cross-generator links are exactly the links no single tool
+> validates, which makes them the ones that rot silently.
 
 ---
 
@@ -529,8 +570,8 @@ Defines the review checklist (style, idioms, packaging, docs, error handling, te
 | Tests | `ci.yml` | push / PR to default branch | pytest matrix (3.12, 3.13) + Codecov upload |
 | Lint | `lint.yml` | push / PR to default branch | `ruff check` + `ruff format --check` |
 | Type Check | `typecheck.yml` | push / PR to default branch | `ty check` |
-| Docs | `docs.yml` | push / PR to default branch | `mkdocs build --strict` |
-| Deploy Docs | `pages.yml` | push to default branch | `mkdocs gh-deploy --strict` |
+| Docs | `docs.yml` | push / PR to default branch | build both halves + verify every link |
+| Deploy Docs | `pages.yml` | push to default branch | deploy the assembled site to Pages |
 | Release Please | `release-please.yml` | push to default branch | automated release PR + changelog |
 | CodeQL | `codeql.yml` | push / PR / schedule | security static analysis |
 | Conventional Commits | `conventional-commits.yml` | PR | validates PR title format |
@@ -573,6 +614,7 @@ Follow this checklist when using this repo as a base for a new project:
 | ty | <https://github.com/astral-sh/ty> |
 | hatchling | <https://hatch.pypa.io/latest/> |
 | pytest | <https://docs.pytest.org/> |
+| mystmd | <https://mystmd.org> |
 | MkDocs Material | <https://squidfunk.github.io/mkdocs-material/> |
 | mkdocstrings | <https://mkdocstrings.github.io/> |
 | pre-commit | <https://pre-commit.com/> |
