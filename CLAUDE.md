@@ -28,19 +28,47 @@ uv run pytest tests/test_example.py::TestClass::test_method -v
 ### Pre-commit checklist (all four must pass)
 
 ```bash
-uv run pytest -v                              # Tests
+uv run pytest -v                              # Tests + doctests
 uv run --group lint ruff check .              # Lint — ENTIRE repo, not just src/mypackage/
 uv run --group lint ruff format --check .     # Format — ENTIRE repo
 uv run --group typecheck ty check src/mypackage  # Typecheck — package only
 ```
 
-**Critical**: Always lint/format with `.` (repo root), not `src/mypackage/`. CI runs `ruff check .` which includes `tests/` and `scripts/`.
+**Critical**: Always lint/format with `.` (repo root), not `src/mypackage/`. CI runs `ruff check .` which includes `tests/`, `scripts/`, **and the code cells of `docs/notebooks/*.ipynb`**.
+
+`--doctest-modules` is in `addopts` and `src/mypackage` is a `testpath`, so every `Examples:` block in a docstring is executed on each run. When you change behaviour, update the examples — and verify the expected output against what the code actually prints.
+
+### Building the docs
+
+```bash
+uv run --group docs mkdocs build --strict   # what CI runs; broken refs fail
+```
 
 ## Architecture
 
 ### Package structure
 
-All implementation lives in `src/mypackage/`. The public API is re-exported through `src/mypackage/__init__.py`.
+All implementation lives in `src/mypackage/`. The public API is re-exported through `src/mypackage/__init__.py`, and `__all__` there is the contract — `tests/test_public_api.py` enforces it.
+
+| Module | Contents |
+|---|---|
+| `_typing.py` | PEP 695 `type` aliases + runtime-checkable `Transform` / `Fittable` protocols |
+| `exceptions.py` | `MypackageError` hierarchy; each member also subclasses the nearest stdlib exception |
+| `utils.py` | Validators (`as_floats`, `require_non_empty`, `require_positive`), generic `Window[T]`, `timer()` |
+| `stats.py` | `summarize`/`Summary`, `quantile`, `zscores`, `RunningStats` (Welford) |
+| `smoothing.py` | `moving_average`, `exponential_moving_average`, `median_filter`, `Padding` |
+| `transforms.py` | `Standardize`, `MinMaxScale`, `Clip`, `MovingAverage`, `Pipeline`, `chain` |
+| `cli.py` | `argparse` console script (`mypackage summarize|smooth`), wired via `[project.scripts]` |
+
+Dependency direction is strictly one-way:
+`_typing` → `exceptions` → `utils` → `stats` → `smoothing` → `transforms` → `cli`.
+
+### Invariants the tests enforce
+
+- Every public function returns a **new** list and never mutates its input.
+- Inputs are validated once, at the public boundary, via the `utils` validators.
+- Stateful transforms raise `NotFittedError` before `fit`, never a silent identity.
+- `Transform` is structural, so user-defined transforms compose without a base class.
 
 ### Key directories
 
@@ -48,8 +76,10 @@ All implementation lives in `src/mypackage/`. The public API is re-exported thro
 |------|---------|
 | `src/mypackage/` | Main package source code |
 | `tests/` | Test suite |
-| `docs/` | Documentation (MkDocs) |
-| `notebooks/` | Jupyter notebooks |
+| `docs/guide/` | Hand-written guide pages |
+| `docs/api/` | mkdocstrings API reference, one page per module |
+| `docs/notebooks/` | Executed example notebooks (outputs committed) |
+| `notebooks/` | Scratch Jupyter notebooks |
 | `scripts/` | Example scripts |
 
 ## Documentation Examples

@@ -1,6 +1,7 @@
 """Shared type aliases and structural protocols.
 
-The aliases are written with :pep:`695` ``type`` statements (Python 3.12+), and
+The aliases are written with [PEP 695](https://peps.python.org/pep-0695/)
+``type`` statements (Python 3.12+), and
 the protocols are *structural*: any object with the right methods satisfies
 them, no inheritance or registration required. That is what lets
 [`Pipeline`][mypackage.Pipeline] accept a user-defined transform it has never

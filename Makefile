@@ -169,7 +169,7 @@ clean: ## 🗑️  Remove build artefacts and cache directories
 # ===========================================================================
 
 docs: ## 📖 Build documentation with mkdocs
-	uv run --group docs mkdocs build
+	uv run --group docs mkdocs build --strict
 
 docs-serve: ## 🌐 Serve documentation locally
 	uv run --group docs mkdocs serve

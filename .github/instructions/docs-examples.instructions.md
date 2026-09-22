@@ -45,8 +45,44 @@ No separate `images/` directory — figures live inside the `.ipynb` cell output
      --ExecutePreprocessor.timeout=180
    ```
 
-5. Delete the `.py` — the `.ipynb` is the committed source of truth.
-6. Commit the `.ipynb`. `mkdocs-jupyter` picks it up automatically.
+5. Lint the notebook, **not** the `.py`:
+
+   ```bash
+   uv run --group lint ruff format docs/notebooks/
+   uv run --group lint ruff check docs/notebooks/
+   ```
+
+6. Delete the `.py` — the `.ipynb` is the committed source of truth.
+7. Confirm the docs still build strictly, since a new notebook needs a nav
+   entry:
+
+   ```bash
+   uv run --group docs mkdocs build --strict
+   ```
+
+8. Commit the `.ipynb` and its `mkdocs.yml` nav entry. `mkdocs-jupyter` picks
+   it up automatically.
+
+## Ruff Lints Notebook Code Cells
+
+`ruff check .` — what CI runs — includes the **code cells** of every
+`docs/notebooks/*.ipynb`. Two consequences:
+
+- **Code cell lines must be ≤ 88 characters**, same as the rest of the repo.
+  Long `ax.plot(...)` calls are the usual offender; bind an intermediate
+  variable rather than letting the line run.
+- **Lint the `.ipynb`, never the jupytext `.py`.** The `.py` will report E501
+  on every markdown cell, because the standard below requires each markdown
+  paragraph to be one long line. It will also report `I001`, because ruff sees
+  the cell-separated import blocks as one unsorted block. Both are artefacts
+  of the flat `.py` view and neither applies to the notebook, where ruff lints
+  each cell independently. This is a large part of why step 6 deletes the
+  `.py`.
+
+If you need to fix a lint error after executing, edit the `.py` (regenerate it
+with `jupytext --to py:percent foo.ipynb`), re-convert, and **re-execute** —
+never hand-edit a committed `.ipynb`'s source cells, or the outputs stop
+matching the code that supposedly produced them.
 
 ## Jupytext Header (dev only)
 
@@ -243,5 +279,11 @@ MathJax is configured in `mkdocs.yml` — both inline and display math render in
 - [ ] `%watermark` version readout
 - [ ] Matplotlib defaults only (no `style.use`, no `rcParams`)
 - [ ] Converted to `.ipynb` and executed in place
+- [ ] `ruff check docs/notebooks/` passes on the `.ipynb` (code cells ≤ 88 chars)
+- [ ] No cell output has `output_type: error`
 - [ ] `.py` deleted; `.ipynb` with embedded outputs committed
 - [ ] Listed in `mkdocs.yml` nav
+- [ ] `mkdocs build --strict` passes
+- [ ] Every numeric claim in the prose matches the executed output — if a cell
+      prints a table, the paragraph describing it must agree with the numbers
+      actually printed, not the ones you expected

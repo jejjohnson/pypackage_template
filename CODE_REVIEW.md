@@ -124,6 +124,10 @@ When reviewing dependency choices or suggesting alternatives, prefer these libra
 | HTTP | `httpx` |
 | Testing | `pytest` |
 
+> The bundled demo package uses stdlib `argparse` for its CLI rather than
+> `cyclopts`, because the template advertises zero runtime dependencies.
+> Prefer `cyclopts` in a real project where a CLI dependency is acceptable.
+
 ---
 
 ## Python-Specific Checks

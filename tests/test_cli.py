@@ -1,4 +1,4 @@
-"""Tests for :mod:`mypackage.cli`.
+"""Tests for ``mypackage.cli``.
 
 `main` takes explicit streams, so the whole CLI is testable without
 monkeypatching `sys.stdout` or spawning a subprocess.

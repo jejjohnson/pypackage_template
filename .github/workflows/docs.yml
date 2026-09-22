@@ -1,0 +1,26 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.12"
+      - name: Install docs dependencies
+        run: uv sync --group docs
+      # --strict turns broken cross-references, missing nav entries, and
+      # unresolvable mkdocstrings targets into build failures, so docs rot
+      # is caught on the PR rather than after it is deployed.
+      - name: Build documentation
+        run: uv run mkdocs build --strict

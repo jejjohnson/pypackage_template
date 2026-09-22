@@ -1,4 +1,4 @@
-"""Exception hierarchy for :mod:`mypackage`.
+"""Exception hierarchy for `mypackage`.
 
 Every error raised by this package derives from
 [`MypackageError`][mypackage.MypackageError], so a caller can trap the whole

@@ -1,5 +1,5 @@
 site_name: mypackage
-site_description: My short description for my project.
+site_description: Descriptive statistics, smoothing filters, and composable transforms for numeric series.
 site_author: J. Emmanuel Johnson
 repo_url: https://github.com/jejjohnson/pypackage_template
 repo_name: jejjohnson/pypackage_template
@@ -10,8 +10,11 @@ theme:
     - navigation.tabs
     - navigation.sections
     - navigation.top
+    - navigation.indexes
     - content.code.copy
     - content.code.annotate
+    - content.tabs.link
+    - toc.follow
   palette:
     - scheme: default
       primary: indigo
@@ -34,19 +37,45 @@ plugins:
           paths: [src]
           options:
             docstring_style: google
+            docstring_section_style: table
             show_source: true
             show_root_heading: true
+            show_root_full_path: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            show_signature_annotations: true
+            signature_crossrefs: true
+            separate_signature: true
+            members_order: source
+            merge_init_into_class: true
+            heading_level: 3
+            filters: ["!^_"]
   - mkdocs-jupyter:
       execute: false
       ignore_h1_titles: true
 
 nav:
   - Home: index.md
+  - Guide:
+      - Quickstart: guide/quickstart.md
+      - Statistics: guide/statistics.md
+      - Smoothing: guide/smoothing.md
+      - Transforms: guide/transforms.md
+      - CLI: guide/cli.md
   - Examples:
-      - Demo: notebooks/example_demo.ipynb
-  - API Reference: api/reference.md
+      - Quickstart notebook: notebooks/quickstart.ipynb
+      - Smoothing deep dive: notebooks/smoothing_deep_dive.ipynb
+  - API Reference:
+      - Overview: api/reference.md
+      - Statistics: api/stats.md
+      - Smoothing: api/smoothing.md
+      - Transforms: api/transforms.md
+      - Utilities: api/utils.md
+      - Protocols: api/typing.md
+      - Exceptions: api/exceptions.md
+      - CLI: api/cli.md
   - Contributing: contributing.md
-  - Changelog: CHANGELOG.md
+  - Changelog: changelog.md
 
 markdown_extensions:
   - admonition
@@ -54,12 +83,25 @@ markdown_extensions:
       generic: true
   - pymdownx.highlight:
       anchor_linenums: true
-  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.tasklist:
+      custom_checkbox: true
   - attr_list
   - md_in_html
+  - tables
+  - footnotes
   - toc:
       permalink: true
 

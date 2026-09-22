@@ -1,4 +1,4 @@
-"""Tests for :mod:`mypackage.utils`."""
+"""Tests for ``mypackage.utils``."""
 
 from __future__ import annotations
 

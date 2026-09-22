@@ -1,4 +1,4 @@
-"""Tests for :mod:`mypackage.smoothing`."""
+"""Tests for ``mypackage.smoothing``."""
 
 from __future__ import annotations
 

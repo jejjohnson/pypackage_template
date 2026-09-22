@@ -58,7 +58,14 @@ from mypackage.transforms import (
     Standardize,
     chain,
 )
-from mypackage.utils import Elapsed, Window, as_floats, require_non_empty, timer
+from mypackage.utils import (
+    Elapsed,
+    Window,
+    as_floats,
+    require_non_empty,
+    require_positive,
+    timer,
+)
 
 
 __version__ = "0.1.6"
@@ -89,6 +96,7 @@ __all__ = [
     "moving_average",
     "quantile",
     "require_non_empty",
+    "require_positive",
     "summarize",
     "timer",
     "zscores",
