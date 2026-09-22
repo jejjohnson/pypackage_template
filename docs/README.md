@@ -25,6 +25,26 @@ MkDocs + mkdocstrings already does that well, and it publishes a
 Sphinx-compatible `objects.inv`, which is exactly what mystmd needs to
 cross-reference *into* it. So each tool does the half it is good at.
 
+## If the theme download is blocked
+
+`myst build --html` fetches the site template as a zip from GitHub. Behind a
+corporate proxy or a restrictive egress policy that request can fail with a
+403 while ordinary git access still works. Clone the template and point at it
+locally instead:
+
+```bash
+git clone --depth 1 https://github.com/myst-templates/book-theme.git /tmp/book-theme
+```
+
+Then set `site.template` in `docs/myst.yml` to `/tmp/book-theme` for that
+build. Everything else is unchanged.
+
+Note that the rendered pages still load KaTeX, Font Awesome, and
+jupyter-matplotlib stylesheets from CDNs at view time. Without network access
+in the *browser*, maths renders doubled — KaTeX ships an accessibility MathML
+copy that its stylesheet is responsible for hiding. That is a viewing
+artefact, not a build problem.
+
 ## Cross-references from prose into the API
 
 In any MyST page, link to an API object with the `xref:` protocol and the
