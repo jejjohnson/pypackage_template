@@ -25,6 +25,23 @@ MkDocs + mkdocstrings already does that well, and it publishes a
 Sphinx-compatible `objects.inv`, which is exactly what mystmd needs to
 cross-reference *into* it. So each tool does the half it is good at.
 
+## Site-nav URLs must be absolute
+
+The theme re-renders the site nav from the config it embeds for hydration, and
+prepends `BASE_URL` to any nav URL starting with `/`. A nav entry that already
+carries the deployment prefix is therefore doubled —
+`/pypackage_template/pypackage_template/reference/` — and 404s.
+
+This bites only *after* hydration: the server-rendered HTML is correct, so
+`curl` and `verify_links` both see a healthy link. Keep `site.nav` URLs
+absolute (mystmd rejects `/reference/` and `reference/` anyway) and never
+rewrite them at build time. `nav_base_url_problems` in
+`scripts/build_docs.py` fails the build if one becomes root-relative.
+
+The trade-off is that a local preview's nav button points at the deployed
+site. In-page `xref:` links are unaffected — the theme does not re-prefix
+those, so they are rewritten to `{BASE_URL}/reference/...` as normal.
+
 ## If the theme download is blocked
 
 `myst build --html` fetches the site template as a zip from GitHub. Behind a
@@ -92,3 +109,7 @@ Prefer the top-level name. Two safety nets back that up in
   resolves to a file that exists and, when it carries a fragment, to an anchor
   that is really in that file. It sees both generators' output at once, so it
   catches this class of bug regardless of cause — keep it either way.
+
+Both operate on the **static** HTML. Anything the theme re-renders on
+hydration — the site nav above being the case that actually bit us — is
+invisible to them, which is why that one needs its own check.
