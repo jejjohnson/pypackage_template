@@ -1,17 +1,36 @@
-site_name: mypackage
-site_description: My short description for my project.
+# ---------------------------------------------------------------------------
+# MkDocs builds ONLY the API reference, which is deployed as the `/reference/`
+# subtree of the MyST site. Prose, guides, and notebooks are built by mystmd
+# from `docs/myst.yml`. See `docs/README.md` for the split and the rationale.
+#
+# mkdocstrings publishes a Sphinx-compatible `objects.inv` into `site/`, and
+# that inventory is what lets the MyST prose cross-reference into these pages.
+# ---------------------------------------------------------------------------
+site_name: mypackage API reference
+site_description: API reference for mypackage — generated from Google-style docstrings.
 site_author: J. Emmanuel Johnson
 repo_url: https://github.com/jejjohnson/pypackage_template
 repo_name: jejjohnson/pypackage_template
 
+docs_dir: docs/api
+site_dir: site
+
+# The guide pages live in the MyST half of the site, so links to them point
+# outside `docs_dir` by design. The assembled-site link checker in
+# `scripts/build_docs.py` validates them instead — across both halves, which
+# neither tool can do on its own.
+validation:
+  links:
+    unrecognized_links: ignore
+    absolute_links: ignore
+
 theme:
   name: material
   features:
-    - navigation.tabs
     - navigation.sections
     - navigation.top
     - content.code.copy
-    - content.code.annotate
+    - toc.follow
   palette:
     - scheme: default
       primary: indigo
@@ -34,19 +53,29 @@ plugins:
           paths: [src]
           options:
             docstring_style: google
+            docstring_section_style: table
             show_source: true
             show_root_heading: true
-  - mkdocs-jupyter:
-      execute: false
-      ignore_h1_titles: true
+            show_root_full_path: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            show_signature_annotations: true
+            signature_crossrefs: true
+            separate_signature: true
+            members_order: source
+            merge_init_into_class: true
+            heading_level: 3
+            filters: ["!^_"]
 
 nav:
-  - Home: index.md
-  - Examples:
-      - Demo: notebooks/example_demo.ipynb
-  - API Reference: api/reference.md
-  - Contributing: contributing.md
-  - Changelog: CHANGELOG.md
+  - Overview: index.md
+  - Statistics: stats.md
+  - Smoothing: smoothing.md
+  - Transforms: transforms.md
+  - Utilities: utils.md
+  - Protocols: typing.md
+  - Exceptions: exceptions.md
+  - CLI: cli.md
 
 markdown_extensions:
   - admonition
@@ -54,12 +83,16 @@ markdown_extensions:
       generic: true
   - pymdownx.highlight:
       anchor_linenums: true
-  - pymdownx.superfences
-  - pymdownx.tabbed:
-      alternate_style: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.details
   - attr_list
   - md_in_html
+  - tables
   - toc:
       permalink: true
 

@@ -117,3 +117,8 @@ venv.bak/
 
 # Plans (tracked via GitHub issues, not committed)
 .plans/
+
+# Documentation build outputs
+site/
+public/
+docs/_build/

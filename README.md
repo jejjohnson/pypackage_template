@@ -16,7 +16,9 @@ Author: J. Emmanuel Johnson
 Repo: [https://github.com/jejjohnson/pypackage_template](https://github.com/jejjohnson/pypackage_template)
 Website: [jejjohnson.netlify.com](https://jejjohnson.netlify.com)
 
-An opinionated, modern Python package template with best-practice tooling already wired up. When you use this template, you get linting, formatting, type checking, testing with coverage gates, auto-generated documentation, automated releases, security scanning, and AI agent instructions — all configured and integrated from day one. No boilerplate to write; just rename the package and start coding.
+An opinionated, modern Python package template with best-practice tooling already wired up. When you use this template, you get linting, formatting, type checking, testing with coverage gates, auto-generated documentation, automated releases, security scanning, and AI agent instructions — all configured and integrated from day one.
+
+It also ships a **real worked example** rather than an empty `src/` directory. `mypackage` is a dependency-free library for descriptive statistics, smoothing filters, and composable transforms over numeric series — around 500 statements, 100% covered, with a console script, executable doctests, guide pages, and two executed example notebooks. Every piece of tooling in this repository is therefore *demonstrably working* on day one: the API reference renders real docstrings, the coverage gate measures real branches, and the notebooks import the real package. Delete it and drop in your own code when you adopt the template.
 
 ---
 
@@ -25,19 +27,33 @@ An opinionated, modern Python package template with best-practice tooling alread
 ```
 pypackage_template/
 ├── src/mypackage/                    # Main package code (src layout)
-├── tests/                            # pytest test suite
-├── docs/                             # MkDocs documentation source
-├── notebooks/                        # Jupyter notebooks
+│   ├── _typing.py                    # Type aliases + structural protocols
+│   ├── exceptions.py                 # Typed exception hierarchy
+│   ├── utils.py                      # Validators, generic Window[T], timer()
+│   ├── stats.py                      # summarize, quantile, RunningStats
+│   ├── smoothing.py                  # moving_average, median_filter, Padding
+│   ├── transforms.py                 # Standardize, Clip, Pipeline, chain
+│   ├── cli.py                        # argparse console script
+│   └── py.typed                      # PEP 561 typing marker
+├── tests/                            # pytest test suite (100% coverage)
+├── docs/                             # Documentation source
+│   ├── myst.yml                      # MyST project (prose half)
+│   ├── README.md                     # How the two-tool docs build works
+│   ├── guide/                        # Guide pages (MyST Markdown)
+│   ├── api/                          # mkdocstrings API reference (MkDocs)
+│   └── notebooks/                    # Executed example notebooks
+├── notebooks/                        # Scratch Jupyter notebooks
 ├── .github/
-│   ├── workflows/                    # GitHub Actions CI/CD workflows (9 total)
+│   ├── workflows/                    # GitHub Actions CI/CD workflows (10 total)
 │   ├── instructions/                 # Copilot custom instructions
 │   ├── copilot-instructions.md       # Copilot behavioural config
 │   ├── dependabot.yml                # Automated dependency PRs
 │   └── labeler.yml                   # Automatic PR labelling rules
+├── scripts/build_docs.py             # Builds, assembles & link-checks the docs
 ├── pyproject.toml                    # Single source of truth for project metadata & tools
 ├── uv.lock                           # Fully reproducible lockfile
 ├── Makefile                          # Self-documenting task runner
-├── mkdocs.yml                        # Documentation site configuration
+├── mkdocs.yml                        # API-reference site configuration
 ├── .pre-commit-config.yaml           # Git hook definitions
 ├── release-please-config.json        # Automated release & changelog config
 ├── .release-please-manifest.json     # Tracks the current released version
@@ -56,8 +72,15 @@ pypackage_template/
 git clone https://github.com/jejjohnson/pypackage_template.git
 cd pypackage_template
 make install      # install all dependency groups
-make test         # run tests
+make test         # run tests + doctests
 make docs-serve   # preview docs locally
+```
+
+Then try the bundled example:
+
+```bash
+echo "1 2 3 4 5" | uv run mypackage summarize
+echo "1 1 99 1 1" | uv run mypackage smooth --method median --window 3
 ```
 
 ---
@@ -126,6 +149,16 @@ packages = ["src/mypackage"]
 
 Zero-config, PEP 517 compliant. No `MANIFEST.in`, no surprises. Integrates cleanly with uv.
 
+The demo package also exercises two packaging features you will want in a real
+project:
+
+- **`[project.scripts]`** installs a console script:
+  `mypackage = "mypackage.cli:main"`. `make build` produces a wheel whose
+  `mypackage` command works on any machine that installs it.
+- **`src/mypackage/py.typed`** is the [PEP 561](https://peps.python.org/pep-0561/) marker that tells downstream
+  type checkers your annotations are real and should be honoured. Without it,
+  every annotation you write is invisible to your users.
+
 > **What:** `hatchling` is the PEP 517 build backend — run `uv build` and it produces a wheel and sdist with zero extra config.
 
 > **Why hatchling?** Minimal configuration, actively maintained, excellent uv integration, and handles the `src/` layout without extra config.
@@ -180,21 +213,26 @@ python-version = "3.12"
 
 ```toml
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-addopts = "--cov=src/mypackage --cov-report=term-missing --cov-report=xml:coverage.xml"
+testpaths = ["tests", "src/mypackage"]
+addopts = "--doctest-modules --cov=src/mypackage --cov-report=term-missing ..."
 
 [tool.coverage.report]
-fail_under = 80
+fail_under = 90
 ```
 
 - Tests live in `tests/`.
+- **Doctests are part of the suite.** `src/mypackage` is a testpath and
+  `--doctest-modules` is in `addopts`, so every `Examples:` block in a
+  Google-style docstring is executed. Documentation that drifts from the code
+  fails the build. `ruff format` is configured with `docstring-code-format`
+  so those examples are formatted like real source.
 - Fast local run (no coverage): `make test` (skips coverage collection for speed)
 - Coverage runs (with reports + gate): `uv run pytest` or `make test-cov`, and in CI
 - Coverage report (when enabled): terminal summary + `coverage.xml` for Codecov upload
-- **Coverage gate:** `fail_under = 80` — coverage-enabled runs and CI fail if coverage drops below 80%
+- **Coverage gate:** `fail_under = 90` — coverage-enabled runs and CI fail if coverage drops below 90% (the bundled example sits at 100%)
 - CI matrix: Python 3.12 and 3.13
 
-> **What:** pytest with an 80% coverage gate wired in — `make test` is fast (no coverage), while CI and `make test-cov` enforce the gate and upload results to Codecov.
+> **What:** pytest with a 90% coverage gate and executable doctests wired in — `make test` is fast (no coverage), while CI and `make test-cov` enforce the gate and upload results to Codecov.
 
 > **Why a coverage gate?** Prevents silent regressions. The matrix catches version-specific bugs that single-version CI misses.
 
@@ -223,32 +261,78 @@ Run manually: `make precommit`. Hook versions are bumped automatically weekly vi
 
 ---
 
-### 📖 Documentation — MkDocs + Material + mkdocstrings + mkdocs-jupyter
+### 📖 Documentation — mystmd (prose) + MkDocs/mkdocstrings (API)
 
-**Files:** `mkdocs.yml`, `pyproject.toml` (`[dependency-groups] docs`), `.github/workflows/pages.yml`
+**Files:** `docs/myst.yml`, `mkdocs.yml`, `scripts/build_docs.py`, `docs/README.md`, `.github/workflows/docs.yml`
 
-| Plugin | Role |
-|--------|------|
-| `mkdocs-material` | Responsive theme with dark/light toggle, tabs, copy buttons |
-| `mkdocstrings[python]` | Auto-generates API docs from Google-style docstrings |
-| `mkdocs-jupyter` | Renders `.ipynb` notebooks directly in the docs site |
-| `jupytext` | Stores notebooks as `.py` files for clean git diffs |
+The documentation is built by **two generators and deployed as one site**,
+because neither tool is good at both halves:
 
-Commands:
+| Half | Tool | Source | Deployed at |
+|---|---|---|---|
+| Home, guides, notebooks | [mystmd](https://mystmd.org) | `docs/*.md`, `docs/guide/`, `docs/notebooks/` | `/` |
+| API reference | MkDocs + mkdocstrings | `docs/api/` | `/reference/` |
+
+MyST is far better for prose — real cross-references, first-class notebook
+handling, PDF/LaTeX export, and a directive syntax that beats admonition
+soup. What it has no answer for is autodoc: there is no mature way to render
+Python docstrings into a MyST site today. mkdocstrings does that well and
+publishes a Sphinx-compatible `objects.inv`, which is exactly what mystmd
+needs to cross-reference *into* it. So each tool does the half it is good at.
 
 ```bash
-make docs          # build static site
-make docs-serve    # preview locally at http://127.0.0.1:8000
-make docs-deploy   # deploy to GitHub Pages
+make docs          # build both halves, assemble into public/, verify links
+make docs-api      # API reference only (fast; needs no Node)
+make docs-serve    # build, then serve the assembled site at :8000
 ```
 
-Auto-deploy: `.github/workflows/pages.yml` deploys on every push to `main`.
+`mystmd` is a Node CLI (`npm install -g mystmd`), not a uv dependency.
 
-Nav structure: **Home → API Reference → Changelog**
+Prose links into the API with the `xref:` protocol:
 
-> **What:** A versioned docs site auto-generated from Google-style docstrings and Jupyter notebooks, deployed to GitHub Pages on every push to the default branch.
+```markdown
+[`summarize`](xref:api#mypackage.summarize)
+```
 
-> **Why docs-as-code?** Documentation that lives next to code gets updated with it. Auto-API-docs from docstrings means zero duplication between source and docs.
+A target that is not in the inventory fails `myst build --strict`.
+
+> **What:** Two documentation generators stitched into one site, with every
+> link between them verified on each build.
+
+> **Why two?** MyST wins on prose and notebooks; mkdocstrings wins on
+> docstrings. The `objects.inv` that mkdocstrings already publishes is the
+> bridge, so you do not have to compromise on either half.
+
+---
+
+### 🔗 Verified cross-generator links — `scripts/build_docs.py`
+
+**File:** `scripts/build_docs.py`, tested by `tests/test_build_docs.py`
+
+Splitting the docs across two tools creates a class of bug neither tool can
+catch: a link from one generator's output into the other's. The build script
+closes that gap. It
+
+1. builds the API reference with MkDocs,
+2. serves it locally so mystmd can read the inventory — mystmd only loads
+   inventories over http, rejecting a filesystem path and *silently ignoring*
+   a `file://` URL,
+3. builds the prose with mystmd,
+4. assembles both into `public/`,
+5. repairs anchors mangled by a mystmd bug (it lowercases an object's name
+   when expanding the `$` anchor abbreviation in an inventory), and
+6. **verifies that every internal link in the assembled site resolves** — the
+   target file must exist and, when the link carries a fragment, that anchor
+   must really be in it.
+
+Step 6 is the one that matters: it is the only check that sees both halves at
+once, and it turns a silent broken deep-link into a failed pull request.
+
+> **What:** A build script that assembles the two documentation halves and
+> fails CI on any broken link between them.
+
+> **Why:** Cross-generator links are exactly the links no single tool
+> validates, which makes them the ones that rot silently.
 
 ---
 
@@ -486,7 +570,8 @@ Defines the review checklist (style, idioms, packaging, docs, error handling, te
 | Tests | `ci.yml` | push / PR to default branch | pytest matrix (3.12, 3.13) + Codecov upload |
 | Lint | `lint.yml` | push / PR to default branch | `ruff check` + `ruff format --check` |
 | Type Check | `typecheck.yml` | push / PR to default branch | `ty check` |
-| Deploy Docs | `pages.yml` | push to default branch | `mkdocs gh-deploy` |
+| Docs | `docs.yml` | push / PR to default branch | build both halves + verify every link |
+| Deploy Docs | `pages.yml` | push to default branch | deploy the assembled site to Pages |
 | Release Please | `release-please.yml` | push to default branch | automated release PR + changelog |
 | CodeQL | `codeql.yml` | push / PR / schedule | security static analysis |
 | Conventional Commits | `conventional-commits.yml` | PR | validates PR title format |
@@ -499,18 +584,24 @@ Defines the review checklist (style, idioms, packaging, docs, error handling, te
 
 Follow this checklist when using this repo as a base for a new project:
 
-1. **Search-and-replace** `mypackage` with your package name everywhere (source, config, docs)
-2. **Update `[project]` in `pyproject.toml`**: name, description, authors, keywords, classifiers, `requires-python`
-3. **Update `mkdocs.yml`**: `site_name`, `site_description`, `repo_url`, `repo_name`
-4. **Rename `src/mypackage/`** to `src/<yourpackage>/`
-5. **Copy `.env.example` to `.env`** (`make init`) and fill in values
-6. **Run `make install`** then **`make test`** to verify the baseline works
-7. **Set up Codecov** and add `CODECOV_TOKEN` to GitHub Secrets if you want coverage tracking
-8. **Update badge URLs** in this README to point at your repository
-9. **Update `[project.urls]`** in `pyproject.toml` to your repository URL
-10. Delete or update `CHANGELOG.md` and `.release-please-manifest.json` to start fresh
-11. **Bootstrap the GitHub label taxonomy**: `make gh-labels` (edits `.github/scripts/create-labels.sh` if you need to customise `area:*` / `layer:*` / `wave:*` for your project)
-12. **Review `docs/contributing.md`** and adjust the label taxonomy / epic model / contact links for your project; update `.github/ISSUE_TEMPLATE/config.yml` discussions URL
+1. **Decide what to do with the demo package.** `src/mypackage/` is a worked
+   example, not scaffolding you must keep. Either delete its modules and start
+   fresh (also clearing `tests/`, `docs/guide/`, `docs/api/`, and
+   `docs/notebooks/`), or keep one module as a reference while you build. The
+   coverage gate is set to 90%, so an empty package with no tests will fail CI
+   until you either add tests or lower `fail_under`.
+2. **Search-and-replace** `mypackage` with your package name everywhere (source, config, docs)
+3. **Update `[project]` in `pyproject.toml`**: name, description, authors, keywords, classifiers, `requires-python`
+4. **Update `mkdocs.yml`**: `site_name`, `site_description`, `repo_url`, `repo_name`
+5. **Rename `src/mypackage/`** to `src/<yourpackage>/`
+6. **Copy `.env.example` to `.env`** (`make init`) and fill in values
+7. **Run `make install`** then **`make test`** to verify the baseline works
+8. **Set up Codecov** and add `CODECOV_TOKEN` to GitHub Secrets if you want coverage tracking
+9. **Update badge URLs** in this README to point at your repository
+10. **Update `[project.urls]`** in `pyproject.toml` to your repository URL
+11. Delete or update `CHANGELOG.md` and `.release-please-manifest.json` to start fresh
+12. **Bootstrap the GitHub label taxonomy**: `make gh-labels` (edits `.github/scripts/create-labels.sh` if you need to customise `area:*` / `layer:*` / `wave:*` for your project)
+13. **Review `docs/contributing.md`** and adjust the label taxonomy / epic model / contact links for your project; update `.github/ISSUE_TEMPLATE/config.yml` discussions URL
 
 ---
 
@@ -523,6 +614,7 @@ Follow this checklist when using this repo as a base for a new project:
 | ty | <https://github.com/astral-sh/ty> |
 | hatchling | <https://hatch.pypa.io/latest/> |
 | pytest | <https://docs.pytest.org/> |
+| mystmd | <https://mystmd.org> |
 | MkDocs Material | <https://squidfunk.github.io/mkdocs-material/> |
 | mkdocstrings | <https://mkdocstrings.github.io/> |
 | pre-commit | <https://pre-commit.com/> |

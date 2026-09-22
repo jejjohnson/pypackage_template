@@ -24,6 +24,9 @@ dependencies = []
 [project.urls]
 Repository = "https://github.com/jejjohnson/mypackage"
 
+[project.scripts]
+mypackage = "mypackage.cli:main"
+
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
@@ -37,12 +40,16 @@ typecheck = [
     "ty>=0.0.73",
 ]
 docs = [
+    # The prose half of the site is built by mystmd, a Node CLI installed with
+    # `npm install -g mystmd` rather than through uv. See docs/README.md.
+    # MkDocs here builds only the API reference, whose `objects.inv` is what
+    # lets the MyST prose cross-reference into it.
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.7.7",
     "mkdocstrings[python]>=1.0.6",
-    "mkdocs-jupyter>=0.26.3",
     "jupytext>=1.19.3",
     "ipykernel>=7.3.0",
+    "nbconvert>=7.16.6",
     # matplotlib + watermark used by the example notebooks during local
     # re-execution. The guarded watermark cell in each notebook no-ops
     # if the package is missing, but installing it here lets the version
@@ -74,12 +81,29 @@ ignore = ["E402", "E721", "E731", "E741"]
 combine-as-imports = true
 lines-after-imports = 2
 
+[tool.ruff.lint.per-file-ignores]
+# Tests deliberately construct invalid inputs and assert on the failure.
+"tests/**" = ["B011"]
+
+[tool.ruff.format]
+# Format the code inside ``Examples:`` doctest blocks like real source.
+docstring-code-format = true
+docstring-code-line-length = 72
+
 [tool.ty.environment]
 python-version = "3.12"
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-addopts = "--cov=src/mypackage --cov-report=term-missing --cov-report=xml:coverage.xml"
+# `src/mypackage` is a testpath so that --doctest-modules collects the
+# ``Examples:`` blocks in every Google-style docstring. They are executable
+# documentation: if an example in the docs goes stale, CI fails.
+testpaths = ["tests", "src/mypackage"]
+addopts = """\
+    --doctest-modules \
+    --cov=src/mypackage \
+    --cov-report=term-missing \
+    --cov-report=xml:coverage.xml\
+"""
 
 [tool.coverage.run]
 source = ["src/mypackage"]
@@ -87,4 +111,9 @@ omit = ["tests/*"]
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 80
+fail_under = 90
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "\\.\\.\\.",
+]

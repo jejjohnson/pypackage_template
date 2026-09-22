@@ -4,10 +4,11 @@
 
 - **Python**: 3.12+
 - **Package Manager**: uv
-- **CLI Framework**: cyclopts
+- **CLI Framework**: `argparse` (stdlib — the package has zero runtime dependencies)
 - **Layout**: `src/` layout (`src/mypackage/`)
 - **Testing**: pytest
-- **Docs**: MkDocs + Material + mkdocstrings + mkdocs-jupyter
+- **Docs**: mystmd (prose, notebooks) + MkDocs/mkdocstrings (API reference), assembled by `scripts/build_docs.py`
+- **Demo package**: `mypackage` — series statistics, smoothing filters, and composable transforms
 
 ## Build & Test Commands
 
@@ -26,7 +27,9 @@ make docs-serve  # Serve docs locally
 **All four checks must pass before any commit.** CI runs them on the entire repo (`ruff check .`), not just `src/mypackage/`, so always run the commands below from the repo root.
 
 ```bash
-# 1. Tests — zero failures required
+# 1. Tests + doctests — zero failures required
+#    `--doctest-modules` is in addopts, so every `Examples:` block in a
+#    docstring is executed. A stale example is a failing build.
 uv run pytest -v
 
 # 2. Lint — run on the ENTIRE repo (includes tests/ and scripts/)
@@ -36,7 +39,7 @@ uv run --group lint ruff check .
 uv run --group lint ruff format --check .
 
 # 4. Type check — on the package only
-uv run --group typecheck ty check src/mypackage
+uv run --group typecheck ty check src/mypackage scripts
 ```
 
 > **Common pitfall**: Running `ruff check src/mypackage/` instead of `ruff check .` misses import-sorting errors in `tests/` and `scripts/`. The CI workflow runs `ruff check .`. Always use `.` (repo root), not a subdirectory.
@@ -48,7 +51,11 @@ uv run --group typecheck ty check src/mypackage
 | `src/mypackage/` | Main package source code |
 | `tests/` | Test suite |
 | `docs/` | Documentation (MkDocs) |
-| `notebooks/` | Jupyter notebooks |
+| `docs/guide/` | Hand-written guide pages (**MyST** Markdown, not MkDocs-Material) |
+| `docs/api/` | MkDocs API reference — the only half MkDocs builds |
+| `docs/notebooks/` | Executed example notebooks (`.ipynb`, outputs committed) |
+| `scripts/` | Build tooling, incl. the two-tool docs pipeline |
+| `notebooks/` | Scratch Jupyter notebooks |
 | `scripts/` | Example scripts |
 
 ## Behavioral Guidelines
@@ -57,6 +64,11 @@ uv run --group typecheck ty check src/mypackage
 - Ignore style issues that linters/formatters catch (formatting, import order, quote style)
 - Don't suggest changes to code you weren't asked to modify
 - Match existing patterns even if you'd do it differently
+
+### Docstrings Are Tested
+`Examples:` blocks in Google-style docstrings run under `--doctest-modules`.
+When you change a function's behaviour, update its examples — and make sure
+the expected output is what the code actually prints, not what it ought to.
 
 ### Always Propose Tests
 When implementing features or fixing bugs:
