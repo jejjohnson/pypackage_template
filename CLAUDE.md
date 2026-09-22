@@ -5,7 +5,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 <!-- TODO: Replace with your project description -->
-A Python package. Built with Python 3.12+, uv, pytest, and MkDocs.
+An opinionated Python package template. Built with Python 3.12+, uv, pytest,
+mystmd, and MkDocs.
+
+The template ships a real worked example, `mypackage`: a **dependency-free**
+library for descriptive statistics, smoothing filters, and composable
+transforms over one-dimensional numeric series. It exists so every tool here
+has something real to operate on — replace it with your own code when you
+adopt the template.
 
 ## Common Commands
 
@@ -41,8 +48,12 @@ uv run --group typecheck ty check src/mypackage scripts  # Typecheck
 ### Building the docs
 
 ```bash
-uv run --group docs mkdocs build --strict   # what CI runs; broken refs fail
+make docs        # what CI runs: builds both halves and verifies every link
+make docs-api    # API reference only — fast, and needs no Node
 ```
+
+See the [Documentation](#documentation) section below; `mkdocs build` alone
+covers only the API half.
 
 ## Architecture
 
@@ -80,7 +91,7 @@ Dependency direction is strictly one-way:
 | `docs/api/` | mkdocstrings API reference, one page per module |
 | `docs/notebooks/` | Executed example notebooks (outputs committed) |
 | `notebooks/` | Scratch Jupyter notebooks |
-| `scripts/` | Example scripts |
+| `scripts/` | Build tooling, incl. `build_docs.py` (the two-tool docs pipeline) |
 
 ## Documentation
 
