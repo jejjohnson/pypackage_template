@@ -75,6 +75,21 @@ class TestSummarize:
         values = [offset + delta for delta in (1.0, 2.0, 3.0, 4.0)]
         assert summarize(values).variance == pytest.approx(5.0 / 3.0)
 
+    def test_mean_survives_an_overflowing_sum(self) -> None:
+        summary = summarize([1e308, 1e308], ddof=0)
+        assert summary.mean == 1e308
+        assert summary.variance == 0.0
+
+    def test_overflow_path_matches_mixed_magnitudes(self) -> None:
+        values = [1.7e308, 1.7e308, 1.0]
+        # Divide before multiplying: the literal 3.4e308 is already inf.
+        assert summarize(values).mean == pytest.approx(1.7e308 / 3 * 2)
+
+    def test_unrepresentable_variance_is_inf_not_an_error(self) -> None:
+        summary = summarize([1e308, -1e308], ddof=0)
+        assert summary.mean == 0.0
+        assert math.isinf(summary.variance)
+
     def test_empty_series_raises(self) -> None:
         with pytest.raises(EmptySeriesError, match="at least one value"):
             summarize([])
@@ -185,6 +200,16 @@ class TestRunningStats:
             _ = stats.minimum
         with pytest.raises(EmptySeriesError):
             _ = stats.maximum
+
+    @pytest.mark.parametrize("ddof", [-1, -5])
+    def test_negative_ddof_is_rejected(self, ddof: int) -> None:
+        with pytest.raises(ValidationError, match="non-negative"):
+            RunningStats(ddof=ddof)
+
+    @pytest.mark.parametrize("ddof", [1.5, "1", True])
+    def test_non_integer_ddof_is_rejected(self, ddof: object) -> None:
+        with pytest.raises(ValidationError, match="must be an integer"):
+            RunningStats(ddof=ddof)  # type: ignore[arg-type]
 
     def test_non_numeric_update_raises(self) -> None:
         with pytest.raises(ValidationError, match="must be a number"):

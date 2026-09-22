@@ -206,6 +206,23 @@ class TestPipeline:
         with pytest.raises(NotFittedError):
             Pipeline([Standardize()]).apply([1.0, 2.0])
 
+    def test_rejects_a_non_callable_apply(self) -> None:
+        """`runtime_checkable` alone would accept this and fail at apply time."""
+
+        class NotCallable:
+            apply = 7
+
+        assert isinstance(NotCallable(), Transform)  # the protocol's blind spot
+        with pytest.raises(ValidationError, match="step 0 does not implement"):
+            Pipeline([NotCallable()])  # type: ignore[list-item]
+
+    def test_composition_revalidates_steps(self) -> None:
+        class NotCallable:
+            apply = 7
+
+        with pytest.raises(ValidationError, match="step 1 does not implement"):
+            _ = Pipeline([Clip()]) | NotCallable()  # type: ignore[operator]
+
     def test_rejects_non_transform_steps(self) -> None:
         with pytest.raises(ValidationError, match="does not implement"):
             Pipeline([Clip(), "not a transform"])  # type: ignore[list-item]

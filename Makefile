@@ -37,7 +37,6 @@ PKG_VERSION := $(shell grep -E '^version\s*=' pyproject.toml 2>/dev/null \
 # Paths (override via .env or command line)
 # ---------------------------------------------------------------------------
 PKGROOT ?= src/mypackage
-PYTHON_BIN ?= python3
 # Additional paths to type-check alongside the package.
 TYPECHECK_EXTRA ?= scripts
 
@@ -183,7 +182,7 @@ docs-api: ## 📚 Build only the MkDocs API reference into site/
 
 docs-serve: docs ## 🌐 Build, then serve the assembled site at :8000
 	@printf "$(GREEN)>>> http://127.0.0.1:8000$(RESET)\n"
-	cd public && $(PYTHON_BIN) -m http.server 8000
+	uv run python -m http.server 8000 --directory public
 
 gh-labels: ## 🏷️  Bootstrap the GitHub label taxonomy (type / area / layer / wave / priority)
 	bash .github/scripts/create-labels.sh

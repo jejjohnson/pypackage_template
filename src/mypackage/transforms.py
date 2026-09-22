@@ -350,7 +350,10 @@ class Pipeline:
 
     def __post_init__(self) -> None:
         for index, step in enumerate(self.steps):
-            if not isinstance(step, Transform):
+            # A runtime-checkable protocol only checks that `apply` *exists*,
+            # so `class Bad: apply = 7` would pass `isinstance` and then fail
+            # at apply time. Require it to be callable.
+            if not callable(getattr(step, "apply", None)):
                 msg = (
                     f"pipeline step {index} does not implement "
                     f"Transform.apply, got {step!r}"
