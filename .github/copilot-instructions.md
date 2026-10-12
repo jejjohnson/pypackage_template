@@ -39,5 +39,9 @@ The rules for every project:
 - Partial test runs need `--no-cov` (the 90 % coverage gate fails a subset).
 - Never push or merge to `main` unless told to; never replace an existing PR
   description, only append to it.
+- Step-by-step recipes (adopt the template, add a function, transform, CLI
+  command, guide page or notebook; pre-PR check; review) are plain Markdown
+  in `.claude/skills/<name>/SKILL.md`, and the two review checklists in
+  `.claude/agents/`; follow them as written.
 - Path-scoped standards live in `.github/instructions/`; code review follows
   [`CODE_REVIEW.md`](../CODE_REVIEW.md).
