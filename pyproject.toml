@@ -98,6 +98,12 @@ python-version = "3.12"
 # ``Examples:`` blocks in every Google-style docstring. They are executable
 # documentation: if an example in the docs goes stale, CI fails.
 testpaths = ["tests", "src/mypackage"]
+# Test tiers (see "Test tiers" in AGENTS.md). CI runs every tier.
+strict_markers = true
+markers = [
+    "slow: takes over ~1 s; deselect with -m 'not slow'",
+    "integration: end-to-end workflows, optional dependencies, external tools",
+]
 addopts = """\
     --doctest-modules \
     --cov=src/mypackage \

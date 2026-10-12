@@ -1,179 +1,416 @@
-# Agent Guidelines
+# AGENTS.md
 
-This file contains standing instructions for **all** coding agents working on this repository (Copilot, Claude, Gemini, etc.).
+Standing instructions for **every** coding agent working in this repository
+(Claude Code, Copilot, Codex, Gemini, …). This is the single source of truth:
+`CLAUDE.md` and `.github/copilot-instructions.md` point here.
 
----
+> **This repository is a template.** Passages that describe the bundled
+> example package, `mypackage`, start with a `<!-- template-example: … -->`
+> comment (`# template-example: …` in code and config). Each marker covers
+> the section it opens, down to the next heading of the same level, unless
+> it names a smaller scope. Marked passages are true of the example and must
+> be rewritten from your own code when you adopt the template (the
+> `adopt-template` skill walks through it; `grep -rn "template-example" .`
+> lists them). Everything unmarked is a permanent rule.
 
-## Karpathy Coding Principles
+## What this repo is
 
-Four behavioral principles to reduce the most common LLM coding mistakes. These bias toward caution over speed — for trivial tasks, use judgment.
+<!-- template-example: describe your package and its module map. -->
 
-### 1. Think Before Coding
+An opinionated Python package template (Python 3.12+, uv, ruff, ty, pytest,
+mystmd and MkDocs, release-please) that ships a real worked example,
+`mypackage`: a **dependency-free** library of descriptive statistics,
+smoothing filters and composable transforms over one-dimensional numeric
+series, with an `argparse` console script. It exists so every tool here has
+real code to operate on: mkdocstrings renders its docstrings, ty checks its
+annotations, the coverage gate measures its branches, and every docstring
+example runs as a doctest.
 
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
+People build on a package like this, so **the package is a library of
+primitives**: new code composes what is here, and anything genuinely new
+lands where the next person will find and reuse it.
 
-Before implementing:
+It is one package, `src/mypackage/`. The public API is
+`mypackage.__all__`, re-exported from `src/mypackage/__init__.py`, plus the
+`mypackage.cli` module (`main`, `build_parser`). Imports only point down
+this table:
 
-- State assumptions explicitly. If uncertain, ask before writing code.
-- If multiple interpretations exist, present them — don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
+| Module | Owns |
+|---|---|
+| `_typing.py` | PEP 695 `type Series = Sequence[float]`; the runtime-checkable `Transform` and `Fittable` protocols |
+| `exceptions.py` | `MypackageError` and its subclasses `ValidationError` (also a `ValueError`), `EmptySeriesError`, `NotFittedError` (also a `RuntimeError`) |
+| `utils.py` | The boundary validators `as_floats`, `require_non_empty`, `require_positive`; the generic `Window[T]` ring buffer; `timer` / `Elapsed` |
+| `stats.py` | `summarize` → frozen `Summary`, `quantile`, `zscores`, streaming `RunningStats` (Welford) |
+| `smoothing.py` | `moving_average`, `exponential_moving_average`, `median_filter`, the `Padding` boundary strategies |
+| `transforms.py` | `Standardize`, `MinMaxScale` (fitted), `Clip`, `MovingAverage` (stateless), `Pipeline`, `chain` |
+| `cli.py` | The `mypackage` console script (`summarize`, `smooth` subcommands), wired through `[project.scripts]` |
 
-### 2. Simplicity First
+### Boundaries
 
-**Minimum code that solves the problem. Nothing speculative.**
+<!-- template-example: this list only; replace it with your runtime dependencies, who builds on the package, and what it must never import. -->
 
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If 200 lines could be 50, rewrite it.
+- **No runtime dependencies** (`dependencies = []` in `pyproject.toml`):
+  everything is the standard library. A new runtime dependency needs
+  discussion; an optional one goes behind an extra and an in-function import
+  that names the extra when it is missing.
+- **The CLI is a thin shell.** `cli.py` parses arguments and formats output;
+  the computation lives in the library modules, which never import `cli`.
 
-Test: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+Whatever the package, dependencies point one way. When other projects build
+on it, list them here and keep their imports working: a rename or removal of
+a public name goes through a deprecation (the old name keeps working with a
+`DeprecationWarning` that names the replacement for at least one release).
 
-### 3. Surgical Changes
+## What it is built on
 
-**Touch only what you must. Clean up only your own mess.**
+<!-- template-example: one row per library your package uses, with the rule it brings. -->
 
-When editing existing code:
+Each foundation brings a rule. Breaking one runs fine on your example and
+fails in someone else's pipeline or in CI.
 
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it — don't delete it.
+| Foundation | The package uses it for | The rule it brings |
+|---|---|---|
+| **Python ≥ 3.12 standard library** | PEP 695 `type` aliases and generics (`class Window[T]`), `typing.Self`, `enum.StrEnum`, `math.fsum`, `statistics.median` | No runtime dependency for what the standard library already does. |
+| **`dataclasses`** | `Summary`, every transform, `RunningStats`, `Elapsed` | `slots=True` always; `frozen=True` for values and stateless objects; a fitted transform keeps what it learned in `init=False` fields with a trailing underscore (`mean_`) defaulting to `None`; validation in `__post_init__`. |
+| **`typing.Protocol`** (`runtime_checkable`) | `Transform`, `Fittable` | Structural, not nominal: no base class, no registry. `isinstance` only checks that the attribute exists, so code that relies on a protocol also checks the attribute is callable (as `Pipeline.__post_init__` does). |
+| **`argparse`** | `mypackage.cli` | Output goes to the injected streams, `main` returns an exit status instead of calling `sys.exit`. |
+| **pytest + `--doctest-modules`** | The suite and every docstring `Examples:` block | An example's expected output is what the code prints; a stale example is a failing test. |
 
-When your changes create orphans:
+## Reuse before you write
 
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
+Before writing a helper, a validator, a statistic, a filter or a transform,
+find out whether it exists:
 
-Test: Every changed line should trace directly to the user's request.
+1. **Search the capability index.**
+   [`docs/api/capabilities.md`](docs/api/capabilities.md) lists every
+   public name once, at its public home, grouped by the module that defines
+   it, with a one-line summary. It is generated (`make capabilities`) and
+   checked by `tests/test_capabilities.py`, so it is current.
+2. **Search the private helpers** in the table below: several invariants
+   live in exactly one place each.
+3. **If it is missing, add it to the module that owns the concept**, at the
+   lowest layer every caller can reach, not inline in the one caller you
+   have today; a helper two modules need goes into `utils.py`.
+4. **One object, one name.** A name means one thing across the package and
+   its submodules (`tests/test_capabilities.py`); a deliberate exception is
+   listed with its reason in `ALLOWED_SHARED_NAMES` in
+   `scripts/capabilities.py`.
 
-### 4. Goal-Driven Execution
+<!-- template-example: this table maps hand-rolled code to the example's names; rebuild it for your package. -->
 
-**Define success criteria. Loop until verified.**
+| You are about to write… | Use instead |
+|---|---|
+| `[float(v) for v in series]`, an emptiness check, an `if window <= 0` guard | `as_floats`, `require_non_empty`, `require_positive` (`mypackage.utils`); they raise `ValidationError` / `EmptySeriesError` with the uniform `'name' must …` message |
+| A mean, variance, min / max or median loop | `summarize` (→ `Summary`, with `std`, `spread`, `to_dict()`); `quantile`; `zscores`; one value at a time, `RunningStats` |
+| `math.fsum(values) / len(values)` that must survive overflow | `stats._mean` (rescales by a power of two when the sum overflows) |
+| A rolling mean, rolling median or exponential smoother | `moving_average`, `median_filter`, `exponential_moving_average` |
+| Padding a series at its ends | the `Padding` strategies (`edge`, `zero`, `reflect`, `none`) through `smoothing._pad`, `_reflect_index`; `_validate_window`, `_as_padding` for the arguments |
+| A `collections.deque(maxlen=…)` buffer | `Window[T]` |
+| `(x - mean) / std`, min–max scaling, clamping | `Standardize` (with `inverse`), `MinMaxScale`, `Clip` |
+| A list of steps applied in order, a base class for "things with `apply`" | `Pipeline`, `chain`, a pipeline composed with the `or` operator (`Pipeline.__or__`); satisfy the `Transform` protocol structurally |
+| A new exception for bad input or a missing `fit` | `ValidationError`, `EmptySeriesError`, `NotFittedError` |
+| `time.perf_counter()` bookkeeping | `timer()` → `Elapsed` |
+| Reading numbers from a file or stdin for the CLI, a non-negative-int option | `cli._read_values` (finite values only), `cli._non_negative_int` |
 
-Transform imperative tasks into declarative goals with verification:
+## The contracts
 
-- "Add validation" → Write tests for invalid inputs, then make them pass
-- "Fix the bug" → Write a test that reproduces it, then make it pass
-- "Optimize X" → Write the naive correct version first, then optimize while preserving correctness
+<!-- template-example: the contracts below are the example's extension points; replace them with your package's. -->
 
-For multi-step tasks, state a brief plan:
+Everything composes because it keeps these contracts; the tests in "What
+enforces them" check most of them.
 
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
+### 1. Public functions
 
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+- **Validate once, at the boundary.** A public function coerces and checks
+  its inputs through the `utils` validators (`require_non_empty(series)`,
+  `require_positive(window, name="window")`) and raises `ValidationError`
+  (or `EmptySeriesError`) whose message names the argument:
+  `'window' must be a positive integer, got 0`. Internal helpers assume
+  well-formed data.
+- **Pure.** Return a **new** `list[float]` and never mutate the input (the
+  `SMOOTHERS` tests in `tests/test_smoothing.py`, `test_does_not_mutate_input`
+  in the stats and transforms tests). Any `collections.abc.Sequence` of
+  numbers is accepted (`Series`).
+- **Honest numerics.** `math.fsum` for sums; an overflow becomes `inf`, not an
+  exception, when the true result is not representable (see `summarize`);
+  degenerate input (a constant series to standardise, `ddof` ≥ the count)
+  raises `ValidationError` rather than returning `nan`.
+- **Documented.** Google-style docstring with the formula (`$…$` / `$$…$$`,
+  rendered by MathJax in the API reference), `Args:`, `Returns:`, `Raises:`
+  and an executable `Examples:` block.
 
----
+### 2. Transforms
 
-## Before Every Commit
+- A transform satisfies `Transform`: `apply(series) -> list[float]`,
+  returning a new list. No base class.
+- **Stateless** (`Clip`, `MovingAverage`): `@dataclass(frozen=True,
+  slots=True)`; `fit` returns `self` unchanged; `fit_apply` is `apply`.
+- **Fitted** (`Standardize`, `MinMaxScale`): `@dataclass(slots=True)`;
+  learned state in `init=False` trailing-underscore fields defaulting to
+  `None`; `fit(series)` validates, sets them and returns `self` (so it
+  chains); `apply` before `fit` raises `NotFittedError("<Name> is not
+  fitted; call .fit(series) first")`, never a silent identity; `fit_apply`
+  is `fit(series).apply(series)`.
+- Constructor arguments that can be checked without data are validated in
+  `__post_init__` (`ValidationError`), as `MinMaxScale`, `Clip` and
+  `MovingAverage` do; the rest are checked by `fit`.
+- `Pipeline` fits each step on the previous step's output, calls `fit` only
+  when the step has a callable one, and rejects a step without a callable
+  `apply`; `|` returns a new pipeline.
 
-**All agents must** verify that every one of the following passes before creating a commit or reporting progress. No exceptions.
+### 3. The CLI
 
-1. **Tests** – `uv run pytest -q` (or `make test`) must have 0 failures.
-2. **Lint** – `uv run --group lint ruff check .` (or `make lint`) must report no issues.
-3. **Format** – `uv run --group lint ruff format --check .` must report no files to reformat.
-4. **Type checks** – `uv run --group typecheck ty check src/mypackage scripts` (or `make typecheck`) must report no errors in changed files.
+- A subcommand is a subparser in `build_parser()` plus a
+  `_run_<name>(args, out, stdin) -> int` handler registered in the
+  `handlers` dict in `main`.
+- Write only to the injected `out` stream; read numbers through
+  `_read_values`; validate options with an `argparse` `type=` (as
+  `_non_negative_int` does), so a bad option is a usage error (exit 2).
+- Library errors propagate as `MypackageError`, which `main` reports as
+  `error: …` on `err` with exit status 1 (`EXIT_ERROR`); `OSError` likewise.
+  Never call `sys.exit` or `print` in a handler.
 
-> **Common pitfall**: Running `ruff check src/mypackage/` instead of `ruff check .` misses lint errors in `tests/` and `scripts/`. CI runs `ruff check .` on the entire repo — always use `.` (repo root), not a subdirectory.
+### 4. Exceptions
 
-## Development Environment
+- Every error derives from `MypackageError` **and** the closest
+  standard-library exception, so `except ValueError` keeps working. A new
+  error goes into `exceptions.py`, is exported, and joins the parametrised
+  lists in `tests/test_exceptions.py`.
 
-**IMPORTANT**: Always use `uv run` when running Python tools or scripts (e.g., `pytest`, `python`, `ruff`, `ty`, `mkdocs`, `pre-commit`) so they run in the project environment. You do **not** need `uv run` for non-Python shell commands (e.g., `git`, `ls`, `cat`). Do NOT use the system Python directly.
+### The public API
 
-## Pull Request Descriptions
+- Export a public name from its module's `__all__` and from
+  `src/mypackage/__init__.py` (import and `__all__`); both stay sorted (ruff's
+  `RUF022` and `test_all_is_sorted_and_unique` agree on the order).
+- A new module declares a sorted `__all__`, joins `SUBMODULES` in
+  `tests/test_public_api.py`, and gets its own page in `docs/api/` (a
+  `::: mypackage.<module>` block), a `nav` entry in `mkdocs.yml` and a row in
+  `docs/api/index.md`; a name on an existing module's page is picked up by
+  its `:::` block.
+- Run `make capabilities` after any public API change.
+- Link prose to the API by the **top-level** name
+  (``[`summarize`](xref:api#mypackage.summarize)``), see "Documentation".
 
-**Never replace or remove an existing PR title or description.** When reporting progress on a PR that already has a title and description, only append new checklist items or update the status of existing ones. The original content must be preserved in full.
+## What enforces them
 
-This is a common failure mode: an agent called to make a small follow-up change will supply a fresh description scoped only to its own work, silently discarding all prior context. Always read the existing description first and treat it as the base.
+Most rules here are tests, so CI tells you when one breaks. Read a test's
+docstring before changing what it checks.
 
-## PR Title & Description Rules
+<!-- template-example: the test files and registries are the example's; list your own. -->
 
-**Do not change** the PR title or description between sessions except to:
-- Correct a conventional-commits format violation in the title.
-- Append new items to the description checklist.
+| Test | Enforces |
+|---|---|
+| `tests/test_public_api.py` | `__all__` sorted, unique and importable; `SUBMODULES` is exactly the set of modules; every submodule declares a sorted `__all__`; the `py.typed` marker ships; `__version__` is dotted |
+| `tests/test_capabilities.py` | `docs/api/capabilities.md` is current; no name is bound to two different objects |
+| `--doctest-modules` on `src/mypackage` (`addopts`) | Every docstring `Examples:` block runs and prints what it says |
+| `tests/test_smoothing.py` (`SMOOTHERS`) | Smoothers never mutate their input, return a new list, leave constants unchanged |
+| `tests/test_transforms.py` (`TestProtocols`, `TestPipeline`) | Every transform satisfies `Transform` (fitted ones `Fittable`); `NotFittedError` before `fit`; sequential fitting; no mutation |
+| `tests/test_exceptions.py` | The hierarchy: every error is a `MypackageError` and its stdlib base |
+| `tests/test_cli.py` | Injected streams, exit codes 0 / 1 / 2, finite-only input, the `[project.scripts]` entry point |
+| `tests/test_build_docs.py` | The two-tool docs pipeline: inventory parsing, anchor repair, link checking, the inventory port and the absolute nav URL in `docs/myst.yml` |
+| `[tool.coverage.report] fail_under = 90` | Coverage of `src/mypackage` in every coverage-enabled run (CI, `make test-cov`) |
+| `strict_markers = true` | Only the registered tier markers (`slow`, `integration`) exist |
+| ruff (`select = E, F, I, UP, B, SIM, RUF`), ty | Lint (the whole repo, notebook code cells included), format, types on `src/mypackage` and `scripts` |
 
-Never rewrite the existing description; only add to it.
+## Working in the repo
 
-## Pull Request Review Comments
-
-When addressing PR review comments, **resolve each review thread** after fixing it. Use the GitHub GraphQL API to list threads and resolve them:
+Always run Python tools through `uv run` (never the system Python); `git`,
+`ls` and other non-Python commands need no `uv run`.
 
 ```bash
-# 1. List all review threads and their IDs for a PR
+make install              # uv sync --all-groups + pre-commit hooks
+make test                 # every test + doctests, no coverage (fast)
+make test-cov             # the same with coverage and the 90 % gate (what CI runs)
+make lint                 # ruff check .   (entire repo)
+make format               # ruff format . && ruff check --fix .
+make typecheck            # ty check src/mypackage scripts (what CI runs)
+make capabilities         # regenerate docs/api/capabilities.md
+make docs                 # build both docs halves into public/ and check every link
+make docs-check           # strict validation of both halves, no themed render
+make docs-api             # MkDocs API reference only (mkdocs build --strict)
+make docs-serve           # build, then serve public/ at :8000
+make precommit            # every pre-commit hook on every file
+make build                # wheel + sdist into dist/
+```
+
+`addopts` turns coverage on, and a partial run never reaches the 90 % gate,
+so pass `--no-cov` when running part of the suite:
+
+```bash
+uv run pytest --no-cov tests/test_stats.py::TestSummarize::test_known_values -v
+```
+
+### Test tiers
+
+The markers are registered in `pyproject.toml` (`strict_markers = true`):
+
+- **Unmarked (fast):** unit tests and doctests, each well under a second.
+- **`@pytest.mark.slow`:** a test over ~1 s (a large sweep, a long fit). For
+  a parametrised test, mark only the expensive cases
+  (`pytest.param(..., marks=pytest.mark.slow)`).
+- **`@pytest.mark.integration`:** end-to-end workflows, optional
+  dependencies, external tools.
+
+CI ("Tests", `ci.yml`) runs every tier with coverage on Python 3.12 and 3.13
+(`uv run pytest -v`). Select the fast tier with
+`uv run pytest -m "not slow and not integration"`; when the slow tiers grow,
+give them a CI job of their own rather than dropping them.
+
+### Tests that assert on random draws
+
+<!-- template-example: this paragraph only. The example draws no random numbers; its tests use fixed fixtures in tests/conftest.py. -->
+
+`mypackage` draws no random numbers; its tests use the fixed series in
+`tests/conftest.py`.
+
+- **Incidental randomness** (any draw would do): seed it
+  (`random.Random(0)`, `numpy.random.default_rng(0)`, a fixed key) so a
+  failure reproduces.
+- **Sampling behaviour under test** (a Monte Carlo estimate, a statistical
+  property): bound the statistic by its own sampling distribution (a number
+  of standard errors, a test's p-value floor), not by a tolerance tuned on
+  one draw, and say in a comment where the bound comes from.
+
+### Before every commit
+
+All of these must pass, from the repo root:
+
+1. `make test`: zero failures (doctests included).
+2. `uv run --group lint ruff check .`: the **entire** repo, which includes
+   `tests/`, `scripts/` and the code cells of `docs/notebooks/*.ipynb`.
+   Never lint a subdirectory: `ruff check src/mypackage/` misses errors CI
+   catches.
+3. `uv run --group lint ruff format --check .`
+4. `make typecheck` (`ty check src/mypackage scripts`, as CI runs it).
+5. After changing a public API: `make capabilities`, and the `docs/api`
+   page.
+6. After changing docs, docstrings, `mkdocs.yml` or `docs/myst.yml`:
+   `make docs` (or at least `make docs-api` when only docstrings changed).
+7. After changing a dependency: `uv lock`, and commit `uv.lock`.
+
+## Coding principles
+
+1. **Think before coding.** State assumptions; if a request has several
+   readings, name them instead of picking one silently; if something is
+   unclear, stop and ask; push back when a simpler approach exists.
+2. **Simplicity first.** The minimum code that solves the problem: no
+   speculative features, no single-use abstractions, no configurability
+   nobody asked for, no error handling for impossible cases.
+3. **Surgical changes.** Touch only what the task needs; match the existing
+   style; don't refactor or add docstrings to code you didn't change;
+   remove only what your change made unused, and mention (don't delete)
+   unrelated dead code.
+4. **Goal-driven.** Turn the task into a check (a failing test, a
+   reproduced bug, a closed form to match) and loop until it passes; for
+   multi-step work, state the plan with a check per step.
+
+Also: Python 3.12+, `from __future__ import annotations` in every module,
+type hints on every public function, `X | None` over `Optional`, specific
+exceptions with `raise … from …`, Google-style docstrings, pure functions
+with side effects isolated and explicit. When you suggest a change, propose
+the code; when you fix a bug or add a feature, add the test that checks it.
+
+## Git, commits and pull requests
+
+- **Never** push to or merge into `main` unless explicitly told to ("push
+  to main", "merge to main"). Work on a feature branch and commit locally;
+  never run `git push` unless asked. "Merge the branch" means push the
+  feature branch, not merge into `main`. Confirm before any action that
+  affects a shared branch.
+- Commit messages and PR titles follow
+  [Conventional Commits](https://www.conventionalcommits.org/) with a
+  lowercase subject (`feat(stats): add …`); CI validates PR titles
+  (`conventional-commits.yml`). Types: `feat`, `fix`, `docs`, `style`,
+  `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`. Breaking
+  changes use `!` and a `BREAKING CHANGE:` footer.
+- Releases are cut by release-please (`release-please-config.json`): it
+  bumps the version and writes `CHANGELOG.md` from the `feat`, `fix`,
+  `perf` and `revert` commits; don't bump versions by hand.
+- **Never replace or remove an existing PR title or description.** An agent
+  called for a small follow-up tends to write a fresh description scoped to
+  its own work and silently discard the rest: read the existing description
+  first and only append checklist items or update their status. Change the
+  title only to fix a Conventional Commits violation.
+- Code review follows [`CODE_REVIEW.md`](CODE_REVIEW.md); issues follow the
+  label taxonomy and epic model in [`docs/contributing.md`](docs/contributing.md).
+
+### Pull Request Review Comments
+
+After fixing a review comment, resolve its thread. Don't resolve threads you
+didn't address.
+
+```bash
+# 1. List the review threads and their IDs
 gh api graphql -f query='
   query($owner: String!, $repo: String!, $pr: Int!) {
     repository(owner: $owner, name: $repo) {
       pullRequest(number: $pr) {
         reviewThreads(first: 100) {
-          nodes {
-            id
-            isResolved
-            comments(first: 1) {
-              nodes { body path line }
-            }
-          }
+          nodes { id isResolved comments(first: 1) { nodes { body path line } } }
         }
       }
     }
   }' -f owner=OWNER -f repo=REPO -F pr=PR_NUMBER
 
-# 2. Resolve a review thread by its node ID
-gh api graphql -f query='mutation($threadId: ID!) { resolveReviewThread(input: {threadId: $threadId}) { thread { isResolved } } }' -f threadId=THREAD_ID
+# 2. Resolve an addressed thread
+gh api graphql -f query='mutation($threadId: ID!) {
+  resolveReviewThread(input: {threadId: $threadId}) { thread { isResolved } } }' \
+  -f threadId=THREAD_ID
 ```
 
-Workflow:
-1. List review threads via the GraphQL query above to get thread node IDs
-2. Address each thread with code changes
-3. After pushing the fix, resolve each addressed review thread via the `resolveReviewThread` mutation
-4. Do **not** resolve threads you haven't addressed
-
-## Plans
-
-Plans and design documents go in `.plans/` (gitignored, never committed). If a plan needs to be tracked long-term, create a GitHub issue with the same detail instead. **Never commit plan files to the repository.**
-
-## GIT Safety Rules
-
-- **NEVER** push to `main` or merge into `main` unless the user explicitly says "push to main" or "merge to main".
-- **NEVER** push to any remote branch or run `git push` unless the user explicitly asks you to push. Only commit locally.
-- Always work on feature branches.
-- When the user says "merge the changes" or "merge the branch", they mean push the local branch to the remote — NOT merge into main.
-- Always confirm before any action that affects shared branches (main, production, etc.).
+When the `gh` CLI is unavailable, use the GitHub MCP tools for the same
+operations.
 
 ## Documentation
 
-This repo uses **MkDocs + Material + mkdocstrings + mkdocs-jupyter** for documentation.
+The docs are built by **two tools** and deployed as one site
+(`docs/README.md` has the rationale); `docs.yml` builds them on every PR and
+push to `main`, and `pages.yml` deploys `public/` to GitHub Pages from
+`main`.
 
-- **Build locally**: `make docs-serve` (or `uv run --group docs mkdocs serve`)
-- **Build static site**: `make docs` (or `uv run --group docs mkdocs build`)
-- **Deploy to GitHub Pages**: `make docs-deploy` (or `uv run --group docs mkdocs gh-deploy --force`)
-- **Auto-deploy**: the `pages.yml` workflow deploys automatically on every push to `main`
+| Half | Tool | Source | Deployed at |
+|---|---|---|---|
+| Prose — home, guides, example notebooks | mystmd | `docs/*.md`, `docs/guide/`, `docs/notebooks/` (toc in `docs/myst.yml`) | `/` |
+| API reference | MkDocs + mkdocstrings | `docs/api/` (`docs_dir` in `mkdocs.yml`) | `/reference/` |
 
-When writing docstrings, use **Google style** (enforced by `mkdocstrings` config).
+`make docs` runs `scripts/build_docs.py`: it builds the API with
+`mkdocs build --strict`, serves `site/` on port 8910 so mystmd can read its
+`objects.inv` (mystmd loads inventories only over http), runs
+`myst build --html --strict`, rewrites the localhost API URLs to
+`/reference/`, repairs anchors lowercased by mystmd's `$`-expansion bug, and
+fails if any internal link in the assembled `public/` site does not resolve.
+mystmd is a Node CLI (`npm install -g mystmd`), not a uv dependency; if its
+theme download is blocked, `docs/README.md` says how to build against a local
+clone of the theme.
 
-Notebooks in `docs/` may be stored as `.ipynb` files or as `jupytext`-paired `.py` files.
+- **Prose is MyST Markdown**, not MkDocs-Material syntax: `:::{note}`,
+  `:::{tab-set}`, `:::{dropdown}` directives, not `!!!` / `===` / `???`.
+- **Link to the API** with the `xref:` protocol and the **top-level**
+  exported name: ``[`summarize`](xref:api#mypackage.summarize)``, not
+  `mypackage.stats.summarize` (mystmd lowercases `$`-abbreviated anchors;
+  see `docs/README.md`). A missing target fails `myst build --strict`.
+- **URLs are flat**: a page's URL is its basename, with `_` turned into `-`
+  (`guide/quickstart.md` → `/quickstart/`,
+  `notebooks/smoothing_deep_dive.ipynb` → `/smoothing-deep-dive/`), so keep
+  basenames unique across `docs/`, `docs/guide/` and `docs/notebooks/`;
+  frontmatter `slug:` is ignored.
+- **Site-nav URLs stay absolute** (`site.nav` in `docs/myst.yml`):
+  the theme prefixes root-relative ones with `BASE_URL` a second time
+  (`tests/test_build_docs.py` checks it).
+- **API pages** (`docs/api/*.md`) are MkDocs pages: prose plus `:::` blocks,
+  `!!!` admonitions, listed in the `nav` of `mkdocs.yml`; docstrings are
+  Google style (`docstring_style: google`), maths through MathJax
+  (`pymdownx.arithmatex`).
+- **Notebooks** in `docs/notebooks/` are committed as executed `.ipynb`
+  files, authored as jupytext percent `.py` and deleted after conversion;
+  mystmd renders the stored outputs without re-executing, so each must be
+  listed in the `docs/myst.yml` toc. Figures render inline with
+  `plt.show()`: no `savefig`, no committed PNGs. `notebooks/` at the root
+  holds scratch notebooks, outside the docs. Full standards:
+  `.github/instructions/docs-examples.instructions.md`.
 
-## Commit Messages
+## Plans
 
-All commit messages **must** follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
-
-```
-<type>[optional scope]: <description>
-
-[optional body]
-
-[optional footer(s)]
-```
-
-Valid types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
-
-Examples:
-- `feat: add new data loading utility`
-- `fix: correct off-by-one error in slice computation`
-- `docs: update installation instructions`
-- `chore: bump ruff to 0.9.7`
+Plans and scratch design notes go in `.plans/` (gitignored, never
+committed); track work in GitHub issues. Draft a whole wave of issues from
+`docs/templates/wave-backlog.md` (see `docs/contributing.md`).

@@ -1,3 +1,12 @@
-# Code Review Skill
+---
+name: code-review
+description: Review a change or pull request in this repository against CODE_REVIEW.md, the contracts in AGENTS.md, reuse of what the package already provides (docs/api/capabilities.md), and the tests that enforce the rules.
+---
 
-Use `/CODE_REVIEW.md` for repository-specific review criteria.
+# Code review
+
+Read "Reuse before you write", "The contracts" and "What enforces them" in
+[`AGENTS.md`](../../../AGENTS.md); for every function, class or module the
+diff adds, search [`docs/api/capabilities.md`](../../../docs/api/capabilities.md)
+for an existing equivalent; then apply [`CODE_REVIEW.md`](../../../CODE_REVIEW.md)
+and report in its format.

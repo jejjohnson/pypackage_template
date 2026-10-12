@@ -244,7 +244,7 @@ The `[docs]` dependency group pulls in `watermark`, so under the documented auth
 
 ## Markdown Paragraph Wrapping
 
-**Each paragraph in a `# %% [markdown]` block must be a single long line.** Do not soft-wrap paragraph text across multiple `#` lines. jupytext preserves source newlines as soft breaks, which mkdocs-jupyter renders as awkward visual breaks.
+**Each paragraph in a `# %% [markdown]` block must be a single long line.** Do not soft-wrap paragraph text across multiple `#` lines. jupytext preserves source newlines as soft breaks, which the docs render as awkward visual breaks.
 
 Right:
 
@@ -280,7 +280,7 @@ Display:
 $$f(x) = \sum_{i=1}^{N} w_i \phi_i(x)$$
 ```
 
-MathJax is configured in `mkdocs.yml` — both inline and display math render in the docs.
+mystmd renders both inline and display math in the prose half (notebooks included); no extra configuration is needed.
 
 ## Checklist for New Notebooks
 
