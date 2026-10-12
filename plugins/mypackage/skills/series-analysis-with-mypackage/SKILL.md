@@ -52,8 +52,11 @@ smoothing loop, a validator or a scaler, look it up:
 
 ## The rules your code must keep
 
-- **Inputs are never mutated.** Every function returns a new list; any
-  sequence of numbers (`list`, `tuple`, `range`) is accepted.
+- **Inputs are never mutated.** No function or method changes the series
+  it is given, and any sequence of numbers (`list`, `tuple`, `range`) is
+  accepted. The series-to-series functions and every `apply` return a new
+  list; `summarize` returns a `Summary`, `quantile` a float, and `fit` the
+  transform itself.
 - **Fit, then apply.** `Standardize` and `MinMaxScale` learn from `fit`
   and raise `mp.NotFittedError` if applied before it; `fit` returns the
   transform, so `scaler = mp.Standardize().fit(train)` keeps it fitted.

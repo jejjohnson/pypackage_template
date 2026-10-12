@@ -4,7 +4,7 @@
 
 One package, `mypackage` (import `mypackage as mp`), installed from GitHub: `uv add "mypackage @ git+https://github.com/jejjohnson/pypackage_template.git"`. Before writing a helper, search the capability index — every public name with a one-line summary. Code you add should keep three rules:
 
-- **Inputs are never mutated:** every function returns a new list and accepts any sequence of numbers.
+- **Inputs are never mutated:** no function changes the series it is given, and any sequence of numbers is accepted; the series-to-series functions and every `apply` return a new list.
 - **Fit, then apply:** `Standardize` and `MinMaxScale` learn from `fit(train)` (which returns the transform) and raise `NotFittedError` if applied before it; reuse the fitted object on new data.
 - **Transforms are structural:** anything with `apply(series) -> list[float]` is a `Transform` and composes in a `Pipeline`, with no base class; bad input raises `ValidationError` (a `ValueError`), and every error is a `MypackageError`.
 

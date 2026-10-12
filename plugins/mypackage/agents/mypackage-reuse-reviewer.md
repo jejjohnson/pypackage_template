@@ -18,10 +18,12 @@ are given.
 ## What mypackage provides
 
 List the **installed** public API, so the advice matches what the project
-can import:
+can import. Run it with the project's interpreter (`uv run python` in a uv
+project); a bare `python` outside the activated environment is the system
+one and reports the package as not installed:
 
 ```bash
-python - <<'PY'
+uv run python - <<'PY'
 import importlib, inspect
 for name in ("mypackage", "mypackage.cli"):
     try:
@@ -47,7 +49,11 @@ has the same list grouped by module.
 2. Flag, wherever they appear:
    - a mean, variance, standard deviation, min / max, median or quantile
      computed by hand → `mypackage.summarize` (`Summary.mean`, `.variance`,
-     `.std`, `.median`), `mypackage.quantile`;
+     `.std`, `.median`), `mypackage.quantile`. `summarize` uses the sample
+     variance (`ddof=1`) and rejects a one-value series, so where the
+     hand-written code accepts a single value, recommend
+     `summarize(series, ddof=0)` (or keep the singleton case) rather than a
+     change that turns valid input into a `ValidationError`;
    - z-scores or a running mean / variance → `mypackage.zscores`,
      `mypackage.RunningStats`;
    - a rolling mean, rolling median or exponential smoothing loop, or code
