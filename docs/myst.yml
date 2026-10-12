@@ -39,6 +39,7 @@ project:
     - title: Project
       children:
         - file: contributing.md
+        - file: agents.md
         - file: changelog.md
 
 site:
