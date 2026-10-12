@@ -212,6 +212,28 @@ docstring before changing what it checks.
 | `strict_markers = true` | Only the registered tier markers (`slow`, `integration`) exist |
 | ruff (`select = E, F, I, UP, B, SIM, RUF`), ty | Lint (the whole repo, notebook code cells included), format, types on `src/mypackage` and `scripts` |
 
+## Recipes
+
+Step-by-step recipes for the common jobs live as plain Markdown in
+`.claude/skills/<name>/SKILL.md` (Claude Code loads them automatically; any
+agent can read and follow them), and two read-only review checklists in
+`.claude/agents/`:
+
+<!-- template-example: this table only; `add-function`, `add-transform`, `add-cli-command` and `mypackage-review` are the example package's, replace them with your extension points. -->
+
+| Job | Recipe |
+|---|---|
+| Turn a fresh copy of the template into your project | `adopt-template` |
+| Add a public function, class or module | `add-function` |
+| Add a transform (the `Transform` protocol) | `add-transform` |
+| Add a CLI subcommand or option | `add-cli-command` |
+| Add or update a guide page (MyST prose) | `add-guide-page` |
+| Add or update an example notebook | `add-notebook` |
+| Verify before a PR | `pre-pr-check` |
+| Review a change | `mypackage-review` (+ the read-only `.claude/agents/reuse-reviewer.md` and `correctness-reviewer.md`) |
+| Write a squash commit message | `squash-commit` |
+| Open or link GitHub issues | `create-gh-issue`, `link-gh-issues` (templates in `.github/ISSUE_TEMPLATE/`; `make gh-labels`, `gh-sub`, `gh-block`, `gh-show`) |
+
 ## Working in the repo
 
 Always run Python tools through `uv run` (never the system Python); `git`,
