@@ -1,108 +1,43 @@
 # Copilot Instructions
 
-## Project Overview
+Read [`AGENTS.md`](../AGENTS.md) at the repository root first: it is the
+single source of truth for every coding agent working here (the module map,
+"reuse before you write", the contracts, the tests that enforce them,
+commands, the pre-commit checklist, the two-tool docs, git and PR rules).
+Passages marked `<!-- template-example: … -->` there describe the bundled
+example package and are rewritten when the template is adopted.
 
-- **Python**: 3.12+
-- **Package Manager**: uv
-- **CLI Framework**: `argparse` (stdlib — the package has zero runtime dependencies)
-- **Layout**: `src/` layout (`src/mypackage/`)
-- **Testing**: pytest
-- **Docs**: mystmd (prose, notebooks) + MkDocs/mkdocstrings (API reference), assembled by `scripts/build_docs.py`
-- **Demo package**: `mypackage` — series statistics, smoothing filters, and composable transforms
+The essentials, in case you only read this file:
 
-## Build & Test Commands
+<!-- template-example: the module map and contracts of the example package. -->
 
-```bash
-make install     # Install all dependencies (uv sync --all-groups)
-make test        # Run tests (uv run pytest -v)
-make lint        # Lint code (ruff check)
-make format      # Format code (ruff format + ruff check --fix)
-make typecheck   # Type check (ty check)
-make precommit   # Run pre-commit on all files
-make docs-serve  # Serve docs locally
-```
+- One package, `src/mypackage/`, dependency-free, with modules that import
+  only downward: `_typing` → `exceptions` → `utils` → `stats` / `smoothing`
+  → `transforms` → `cli`. Search
+  [`docs/api/capabilities.md`](../docs/api/capabilities.md) before writing a
+  helper.
+- Keep the contracts in `AGENTS.md`:
+  - **public functions** validate once, at the boundary, with the `utils`
+    validators, raise `ValidationError` naming the argument, and return a
+    new list without mutating their input;
+  - **transforms** satisfy the `Transform` protocol structurally; fitted ones
+    raise `NotFittedError` before `fit`, and `fit` returns `self`;
+  - **CLI** subcommands write to the injected streams and return an exit
+    status; library errors become exit 1, usage errors exit 2;
+  - every exception derives from `MypackageError` and its stdlib base.
 
-## Before Every Commit — Mandatory Checklist
+The rules for every project:
 
-**All four checks must pass before any commit.** CI runs them on the entire repo (`ruff check .`), not just `src/mypackage/`, so always run the commands below from the repo root.
-
-```bash
-# 1. Tests + doctests — zero failures required
-#    `--doctest-modules` is in addopts, so every `Examples:` block in a
-#    docstring is executed. A stale example is a failing build.
-uv run pytest -v
-
-# 2. Lint — run on the ENTIRE repo (includes tests/ and scripts/)
-uv run --group lint ruff check .
-
-# 3. Format check — run on the ENTIRE repo
-uv run --group lint ruff format --check .
-
-# 4. Type check — on the package only
-uv run --group typecheck ty check src/mypackage scripts
-```
-
-> **Common pitfall**: Running `ruff check src/mypackage/` instead of `ruff check .` misses import-sorting errors in `tests/` and `scripts/`. The CI workflow runs `ruff check .`. Always use `.` (repo root), not a subdirectory.
-
-## Key Directories
-
-| Path | Purpose |
-|------|---------|
-| `src/mypackage/` | Main package source code |
-| `tests/` | Test suite |
-| `docs/` | Documentation (MkDocs) |
-| `docs/guide/` | Hand-written guide pages (**MyST** Markdown, not MkDocs-Material) |
-| `docs/api/` | MkDocs API reference — the only half MkDocs builds |
-| `docs/notebooks/` | Executed example notebooks (`.ipynb`, outputs committed) |
-| `scripts/` | Build tooling, incl. the two-tool docs pipeline |
-| `notebooks/` | Scratch Jupyter notebooks |
-| `scripts/` | Example scripts |
-
-## Behavioral Guidelines
-
-### Do Not Nitpick
-- Ignore style issues that linters/formatters catch (formatting, import order, quote style)
-- Don't suggest changes to code you weren't asked to modify
-- Match existing patterns even if you'd do it differently
-
-### Docstrings Are Tested
-`Examples:` blocks in Google-style docstrings run under `--doctest-modules`.
-When you change a function's behaviour, update its examples — and make sure
-the expected output is what the code actually prints, not what it ought to.
-
-### Always Propose Tests
-When implementing features or fixing bugs:
-1. Write a test that verifies the expected behavior
-2. Implement the change
-3. Verify the test passes
-
-### Never Suggest Without a Proposal
-Bad: "You should add validation here"
-Good: "Add validation here. Proposed implementation:"
-```python
-if value < 0:
-    raise ValueError('Value must be non-negative')
-```
-
-### Simplicity First
-- No abstractions for single-use code
-- No speculative features beyond what was asked
-- If 200 lines could be 50, propose the simpler version
-
-### Surgical Changes
-- Only modify lines directly related to the request
-- Don't refactor adjacent code
-- Don't add docstrings/comments to code you didn't change
-- Remove only imports/functions that YOUR changes made unused
-
-## Plans
-
-Plans and design documents go in `.plans/` (gitignored, never committed). Track work via GitHub issues, not committed plan files.
-
-## PR Review Comments
-
-When addressing PR review comments, always resolve each review thread after fixing it via the GitHub GraphQL API (`resolveReviewThread` mutation). Do not leave addressed comments unresolved. See the "Pull Request Review Comments" section in `AGENTS.md` for the exact GraphQL queries and workflow.
-
-## Code Review
-
-For all code review tasks, follow the guidance in `/CODE_REVIEW.md`.
+- Every docstring `Examples:` block runs (`--doctest-modules`): the expected
+  output must be what the code prints.
+- Before committing, from the repo root: `make test`,
+  `uv run --group lint ruff check .`, `uv run --group lint ruff format --check .`,
+  `make typecheck`; `make capabilities` after a public API change. Lint the
+  whole repo, never a subdirectory.
+- When you suggest a change, propose the code; when you fix a bug, add the
+  test that reproduces it. Don't nitpick what ruff and the formatter handle.
+- Partial test runs need `--no-cov` (the 90 % coverage gate fails a subset).
+- Never push or merge to `main` unless told to; never replace an existing PR
+  description, only append to it.
+- Path-scoped standards live in `.github/instructions/`; code review follows
+  [`CODE_REVIEW.md`](../CODE_REVIEW.md).

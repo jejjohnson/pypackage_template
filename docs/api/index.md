@@ -5,11 +5,12 @@ Everything listed in `mypackage.__all__` is importable from the top level:
 ```python
 import mypackage as mp
 
-mp.summarize(...)          # same object as mypackage.stats.summarize
+mp.summarize(...)  # same object as mypackage.stats.summarize
 ```
 
 The submodules below are an implementation detail you are welcome to reach
-into, but never have to.
+into, but never have to. The [capability index](capabilities.md) lists every
+public name on one page, with a one-line summary each.
 
 ## Modules
 
