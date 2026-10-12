@@ -207,7 +207,8 @@ docstring before changing what it checks.
 | `tests/test_transforms.py` (`TestProtocols`, `TestPipeline`) | Every transform satisfies `Transform` (fitted ones `Fittable`); `NotFittedError` before `fit`; sequential fitting; no mutation |
 | `tests/test_exceptions.py` | The hierarchy: every error is a `MypackageError` and its stdlib base |
 | `tests/test_cli.py` | Injected streams, exit codes 0 / 1 / 2, finite-only input, the `[project.scripts]` entry point |
-| `tests/test_build_docs.py` | The two-tool docs pipeline: inventory parsing, anchor repair, link checking, the inventory port and the absolute nav URL in `docs/myst.yml` |
+| `tests/test_build_docs.py` | The two-tool docs pipeline: inventory parsing, anchor repair, link checking, the inventory port and the absolute nav URL in `docs/myst.yml`, the files copied to the site root (`ROOT_FILES`) |
+| `tests/test_plugin_skill.py` | The downstream plugin's worked example runs and its quoted numbers hold; every name the plugin skill and reviewer mention exists |
 | `[tool.coverage.report] fail_under = 90` | Coverage of `src/mypackage` in every coverage-enabled run (CI, `make test-cov`) |
 | `strict_markers = true` | Only the registered tier markers (`slow`, `integration`) exist |
 | ruff (`select = E, F, I, UP, B, SIM, RUF`), ty | Lint (the whole repo, notebook code cells included), format, types on `src/mypackage` and `scripts` |
@@ -233,6 +234,18 @@ agent can read and follow them), and two read-only review checklists in
 | Review a change | `mypackage-review` (+ the read-only `.claude/agents/reuse-reviewer.md` and `correctness-reviewer.md`) |
 | Write a squash commit message | `squash-commit` |
 | Open or link GitHub issues | `create-gh-issue`, `link-gh-issues` (templates in `.github/ISSUE_TEMPLATE/`; `make gh-labels`, `gh-sub`, `gh-block`, `gh-show`) |
+
+<!-- template-example: this paragraph only; the plugin describes the example package. -->
+
+Downstream users get the package's guidance through the Claude Code plugin
+in `plugins/mypackage/` (published by `.claude-plugin/marketplace.json`) and
+`docs/llms.txt` (copied to the site root by `ROOT_FILES` in
+`scripts/build_docs.py`); see `docs/agents.md`. When the public API or the
+headline usage changes, update
+`plugins/mypackage/skills/series-analysis-with-mypackage/` too:
+`tests/test_plugin_skill.py` runs its worked example, checks the numbers its
+prose quotes, and checks that every `mp.X` / `mypackage.X` it and the plugin
+reviewer name still exists.
 
 ## Working in the repo
 

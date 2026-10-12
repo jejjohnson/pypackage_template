@@ -556,6 +556,10 @@ squash commits, GitHub issues) live in `.claude/skills/`, and two read-only
 reviewer subagents (reuse, correctness) in `.claude/agents/`; any agent can
 follow them as plain Markdown.
 
+For projects that build on the package, the repository is also a Claude
+Code plugin marketplace (`.claude-plugin/marketplace.json`, `plugins/`) and
+the docs site serves an `llms.txt`; `docs/agents.md` explains both.
+
 Passages that describe the example package are marked
 `<!-- template-example: … -->`; rewrite them from your own code after
 adopting the template (`grep -rn "template-example" .` lists them).

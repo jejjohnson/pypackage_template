@@ -30,7 +30,9 @@ git grep -n jejjohnson                                          # owner, URLs
 git grep -n "template-example"                                  # passages to rewrite (step 5)
 ```
 
-The paths are `src/mypackage/` and `.claude/skills/mypackage-review/`.
+The paths are `src/mypackage/`, `.claude/skills/mypackage-review/` and
+the plugin under `plugins/mypackage/` (its skill and agent file names
+carry the package name too).
 
 ## 3. Rename, and prove the copy still passes
 
@@ -38,6 +40,11 @@ The paths are `src/mypackage/` and `.claude/skills/mypackage-review/`.
 NEWPKG=yourpkg NEWPKG_CAMEL=Yourpkg NEWREPO=your-repo
 git mv src/mypackage "src/$NEWPKG"
 git mv .claude/skills/mypackage-review ".claude/skills/$NEWPKG-review"
+git mv plugins/mypackage "plugins/$NEWPKG"
+git mv "plugins/$NEWPKG/skills/series-analysis-with-mypackage" \
+       "plugins/$NEWPKG/skills/series-analysis-with-$NEWPKG"
+git mv "plugins/$NEWPKG/agents/mypackage-reuse-reviewer.md" \
+       "plugins/$NEWPKG/agents/$NEWPKG-reuse-reviewer.md"
 git grep -l -e mypackage -e Mypackage -e pypackage_template -- \
     ':!uv.lock' ':!CHANGELOG.md' ':!.claude/skills/adopt-template' \
   | xargs sed -i -e "s/mypackage/$NEWPKG/g" -e "s/Mypackage/$NEWPKG_CAMEL/g" \
@@ -116,6 +123,15 @@ tiers, the pre-commit checklist, the docs toolchain) stay as they are.
 - `.claude/skills/squash-commit`: your scopes.
 - Update the skill lists in `CLAUDE.md`, the "Recipes" table in
   `AGENTS.md` and `.github/copilot-instructions.md`.
+- The downstream plugin (`plugins/<pkg>/`, `.claude-plugin/marketplace.json`):
+  rename its skill to `<verb>-with-<pkg>` and rewrite it for your package —
+  where to find the capability index, what lives where, the rules, a worked
+  example that runs, a "don't write it" table; rewrite its reuse reviewer;
+  point `tests/test_plugin_skill.py` at them and rewrite its claims from the
+  new prose. Rewrite `docs/llms.txt` and `docs/agents.md` and check every
+  URL in them against the built site (`make docs`, then look in `public/`).
+  A package nobody else builds on can delete the plugin, `llms.txt` (and its
+  entry in `ROOT_FILES`), `docs/agents.md` and the test instead.
 
 ## 7. Labels, releases, URLs
 
@@ -125,7 +141,9 @@ tiers, the pre-commit checklist, the docs toolchain) stay as they are.
 - `release-please-config.json`: `package-name` (renamed in step 3) and
   `extra-files`.
 - Docs URLs: `site.nav` in `docs/myst.yml` (absolute, your Pages URL),
-  `repo_url` / `repo_name` in `mkdocs.yml`; enable GitHub Pages (Actions)
+  `repo_url` / `repo_name` in `mkdocs.yml`, the `homepage` and `repository`
+  in `plugins/<pkg>/.claude-plugin/plugin.json` and the owner in
+  `.claude-plugin/marketplace.json`; enable GitHub Pages (Actions)
   and, for coverage, `CODECOV_TOKEN`.
 - `.github/ISSUE_TEMPLATE/config.yml`: your Discussions URL, if any.
 - `README.md`: rewrite for your project.
