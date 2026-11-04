@@ -41,8 +41,8 @@ two-tool build.
 
 ## 4. Verify
 
-`make docs` builds both halves, assembles them and fails on any broken
-internal link, including links between the halves; `make docs-check`
+`uv run poe docs` builds both halves, assembles them and fails on any broken
+internal link, including links between the halves; `uv run poe docs-check`
 validates both halves without rendering the theme. Both need the mystmd CLI
 (`npm install -g mystmd`; if the theme download is blocked, see
 `docs/README.md`).

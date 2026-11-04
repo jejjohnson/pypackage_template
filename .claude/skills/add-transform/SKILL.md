@@ -57,7 +57,7 @@ step-by-step.
   `::: mypackage.transforms`; add the name to the Transforms row of
   `docs/api/index.md` and, if it changes the picture, the "Stateless versus
   fitted" table in `docs/guide/transforms.md`.
-- `make capabilities`.
+- `uv run poe capabilities`.
 
 ## 5. Tests (`tests/test_transforms.py`)
 
@@ -75,7 +75,7 @@ step-by-step.
 
 ```bash
 uv run pytest --no-cov tests/test_transforms.py src/mypackage/transforms.py tests/test_public_api.py tests/test_capabilities.py -v
-make test-cov
+uv run poe test-cov
 ```
 
 then the `pre-pr-check` skill.

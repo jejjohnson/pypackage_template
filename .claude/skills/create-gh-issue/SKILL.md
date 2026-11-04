@@ -114,7 +114,7 @@ Every issue carries exactly one `type:*`, one or more `area:*`, at most one `lay
 | Research / survey | `type:research`, `area:code` (or the relevant area) |
 | Engineering / CI / packaging | `type:chore`, `area:engineering`, `wave:0` |
 
-The labels come from `.github/scripts/create-labels.sh` (`make gh-labels`): `type:{epic-wave,epic-theme,feature,bug,design,chore,docs,research}`, `area:{engineering,testing,docs,code}`, `dependencies`, `layer:{0-primitives,1-components,2-models}`, `wave:0`…`wave:4`, `priority:{p0,p1,p2}`. A project that needs more areas (`area:algorithmic`, `area:performance`, …) adds them to that script first. Check `docs/contributing.md` for the current waves and milestones before picking; `gh label list` shows what exists.
+The labels come from `.github/scripts/create-labels.sh` (`uv run poe gh-labels`): `type:{epic-wave,epic-theme,feature,bug,design,chore,docs,research}`, `area:{engineering,testing,docs,code}`, `dependencies`, `layer:{0-primitives,1-components,2-models}`, `wave:0`…`wave:4`, `priority:{p0,p1,p2}`. A project that needs more areas (`area:algorithmic`, `area:performance`, …) adds them to that script first. Check `docs/contributing.md` for the current waves and milestones before picking; `gh label list` shows what exists.
 
 ### Step 5 — Create the issue
 
@@ -150,10 +150,10 @@ After the issue is created, apply the native GitHub links using the `link-gh-iss
 
 ```bash
 # Link the new issue as a sub-issue of its theme epic
-make gh-sub PARENT=<theme-epic#> CHILDREN="<new-issue#>"
+uv run poe gh-sub <theme-epic#> <new-issue#>
 
 # If the issue is blocked by another
-make gh-block ISSUE=<new-issue#> BLOCKED_BY=<blocker#>
+uv run poe gh-block <new-issue#> <blocker#>
 ```
 
 Keep the prose `## Relationships` lines in the body — they coexist with the native links.
@@ -184,7 +184,7 @@ When the user has a `.plans/<wave>-backlog.md` file drafted from `docs/templates
 
 ## Common pitfalls
 
-- **Missing label** — `gh issue create --label` fails ("could not add label") and creates nothing if the label doesn't exist. Run `make gh-labels` first on a fresh repo.
+- **Missing label** — `gh issue create --label` fails ("could not add label") and creates nothing if the label doesn't exist. Run `uv run poe gh-labels` first on a fresh repo.
 - **Missing milestone** — same. `gh api repos/:owner/:repo/milestones --method POST -f title="vX.Y-<slug>"` to create.
 - **Template frontmatter in the body** — `gh issue create --body-file` renders the frontmatter block as literal text. Strip the `---` block before writing the temp file.
 - **Shell-escaped backticks** — do NOT escape backticks when passing a body via `--body`. Use `--body-file` with a temp file for any body containing code fences or backticks. Heredocs with single-quoted delimiters (`<<'EOF'`) also preserve backticks correctly.

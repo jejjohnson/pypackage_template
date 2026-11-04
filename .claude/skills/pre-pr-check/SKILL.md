@@ -13,18 +13,18 @@ honestly: what ran, what passed, what was skipped and why.
 ```bash
 uv run --group lint ruff check .          # entire repo: tests/, scripts/, notebook cells
 uv run --group lint ruff format --check .
-make typecheck                            # ty on src/mypackage and scripts (what CI runs)
-make test-cov                             # every test + doctests, with the 90 % coverage gate (what CI runs)
+uv run poe typecheck                            # ty on src/mypackage and scripts (what CI runs)
+uv run poe test-cov                             # every test + doctests, with the 90 % coverage gate (what CI runs)
 ```
 
-`make test` is the same suite without coverage, for quick iterations. For a
+`uv run poe test` is the same suite without coverage, for quick iterations. For a
 part of the suite, pass `--no-cov` (a subset never reaches the gate):
 `uv run pytest --no-cov tests/<file>.py`.
 
 ## When the public API changed
 
 ```bash
-make capabilities
+uv run poe capabilities
 uv run pytest --no-cov tests/test_capabilities.py tests/test_public_api.py
 ```
 
@@ -42,8 +42,8 @@ in-function import that names it.
 
 - Every `Examples:` block runs under the test suite (`--doctest-modules`);
   check the expected output is what the code prints.
-- `make docs-api` (MkDocs, strict) for docstrings and `docs/api/`;
-  `make docs-check` (strict, both halves) and `make docs` (the assembled
+- `uv run poe docs-api` (MkDocs, strict) for docstrings and `docs/api/`;
+  `uv run poe docs-check` (strict, both halves) and `uv run poe docs` (the assembled
   site with link checking, what `docs.yml` runs) for prose and notebooks —
   both need the mystmd CLI (`npm install -g mystmd`); if the theme download
   is blocked, see `docs/README.md`.
@@ -52,7 +52,7 @@ in-function import that names it.
 
 - `git status` shows no stray files (`.plans/`, notebook `.py` drafts,
   `coverage.xml`, `site/`, `public/` are ignored; check nothing else is).
-- `make precommit` runs the git hooks (whitespace, end-of-file, YAML, large
+- `uv run poe precommit` runs the git hooks (whitespace, end-of-file, YAML, large
   files, ruff); fix what it reports in the files you touched.
 - Conventional Commits title with a lowercase subject; `!` and a
   `BREAKING CHANGE:` footer for a breaking change.

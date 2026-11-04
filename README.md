@@ -53,7 +53,6 @@ pypackage_template/
 ├── scripts/capabilities.py           # Generates docs/api/capabilities.md
 ├── pyproject.toml                    # Single source of truth for project metadata & tools
 ├── uv.lock                           # Fully reproducible lockfile
-├── Makefile                          # Self-documenting task runner
 ├── mkdocs.yml                        # API-reference site configuration
 ├── .pre-commit-config.yaml           # Git hook definitions
 ├── release-please-config.json        # Automated release & changelog config
@@ -73,9 +72,9 @@ pypackage_template/
 # Prerequisites: uv (https://github.com/astral-sh/uv)
 git clone https://github.com/jejjohnson/pypackage_template.git
 cd pypackage_template
-make install      # install all dependency groups
-make test         # run tests + doctests
-make docs-serve   # preview docs locally
+uv run poe install      # install all dependency groups
+uv run poe test         # run tests + doctests
+uv run poe docs-serve   # preview docs locally
 ```
 
 Then try the bundled example:
@@ -155,7 +154,7 @@ The demo package also exercises two packaging features you will want in a real
 project:
 
 - **`[project.scripts]`** installs a console script:
-  `mypackage = "mypackage.cli:main"`. `make build` produces a wheel whose
+  `mypackage = "mypackage.cli:main"`. `uv run poe build` produces a wheel whose
   `mypackage` command works on any machine that installs it.
 - **`src/mypackage/py.typed`** is the [PEP 561](https://peps.python.org/pep-0561/) marker that tells downstream
   type checkers your annotations are real and should be honoured. Without it,
@@ -203,7 +202,7 @@ python-version = "3.12"
 
 [ty](https://github.com/astral-sh/ty) is Astral's new Rust-based type checker (same team as ruff and uv). It is extremely fast and designed to integrate with the rest of the Astral toolchain.
 
-> **What:** A Rust-based static type checker from the Astral team — run `make typecheck` to catch type errors without executing any code.
+> **What:** A Rust-based static type checker from the Astral team — run `uv run poe typecheck` to catch type errors without executing any code.
 
 > **Why ty?** Catches whole classes of bugs before runtime. Faster than mypy or pyright. Part of the same ecosystem as ruff and uv.
 
@@ -228,13 +227,13 @@ fail_under = 90
   Google-style docstring is executed. Documentation that drifts from the code
   fails the build. `ruff format` is configured with `docstring-code-format`
   so those examples are formatted like real source.
-- Fast local run (no coverage): `make test` (skips coverage collection for speed)
-- Coverage runs (with reports + gate): `uv run pytest` or `make test-cov`, and in CI
+- Fast local run (no coverage): `uv run poe test` (skips coverage collection for speed)
+- Coverage runs (with reports + gate): `uv run pytest` or `uv run poe test-cov`, and in CI
 - Coverage report (when enabled): terminal summary + `coverage.xml` for Codecov upload
 - **Coverage gate:** `fail_under = 90` — coverage-enabled runs and CI fail if coverage drops below 90% (the bundled example sits at 100%)
 - CI matrix: Python 3.12 and 3.13
 
-> **What:** pytest with a 90% coverage gate and executable doctests wired in — `make test` is fast (no coverage), while CI and `make test-cov` enforce the gate and upload results to Codecov.
+> **What:** pytest with a 90% coverage gate and executable doctests wired in — `uv run poe test` is fast (no coverage), while CI and `uv run poe test-cov` enforce the gate and upload results to Codecov.
 
 > **Why a coverage gate?** Prevents silent regressions. The matrix catches version-specific bugs that single-version CI misses.
 
@@ -255,7 +254,7 @@ Hooks that run on every `git commit`:
 | `ruff` | Lint + autofix |
 | `ruff-format` | Format |
 
-Run manually: `make precommit`. Hook versions are bumped automatically weekly via `.github/workflows/pre-commit-autoupdate.yml`.
+Run manually: `uv run poe precommit`. Hook versions are bumped automatically weekly via `.github/workflows/pre-commit-autoupdate.yml`.
 
 > **What:** Six git hooks that run automatically on every `git commit` to catch formatting, whitespace, and YAML issues before they reach CI.
 
@@ -283,9 +282,9 @@ publishes a Sphinx-compatible `objects.inv`, which is exactly what mystmd
 needs to cross-reference *into* it. So each tool does the half it is good at.
 
 ```bash
-make docs          # build both halves, assemble into public/, verify links
-make docs-api      # API reference only (fast; needs no Node)
-make docs-serve    # build, then serve the assembled site at :8000
+uv run poe docs          # build both halves, assemble into public/, verify links
+uv run poe docs-api      # API reference only (fast; needs no Node)
+uv run poe docs-serve    # build, then serve the assembled site at :8000
 ```
 
 `mystmd` is a Node CLI (`npm install -g mystmd`), not a uv dependency.
@@ -420,7 +419,7 @@ File path patterns are mapped to labels from the standard taxonomy (`area:*`, `l
 - Changes in `src/**/_primitives/` → `layer:0-primitives`
 - Changes in `tests/` → `area:testing`
 - Changes in `docs/`, `mkdocs.yml`, `*.md` → `area:docs`
-- Changes in `.github/`, `pyproject.toml`, `Makefile` → `area:engineering`
+- Changes in `.github/`, `pyproject.toml` → `area:engineering`
 - Changes in dependency files → `dependencies`
 
 > **What:** Automatic label application on every PR based on which files changed — no manual labelling required.
@@ -454,17 +453,17 @@ Both exist so that an implementer (human or AI agent) can work on an issue witho
 A companion label taxonomy (`type:*`, `area:*`, `layer:*`, `wave:*`, `priority:*`) is created by running:
 
 ```bash
-make gh-labels       # idempotent; edit .github/scripts/create-labels.sh to customise
+uv run poe gh-labels       # idempotent; edit .github/scripts/create-labels.sh to customise
 ```
 
 For planning a whole wave of issues at once, copy [`docs/templates/wave-backlog.md`](docs/templates/wave-backlog.md) into your project's `.plans/` directory and draft the wave as one reviewable file before opening GitHub issues. See [`docs/contributing.md`](docs/contributing.md) → "Drafting a wave backlog" for the workflow.
 
-Once issues are open, apply GitHub's **native sub-issue and blocked-by links** on top of the prose `## Relationships` block. A helper script and three Makefile targets wrap the GraphQL mutations:
+Once issues are open, apply GitHub's **native sub-issue and blocked-by links** on top of the prose `## Relationships` block. A helper script and three poe tasks wrap the GraphQL mutations:
 
 ```bash
-make gh-sub   PARENT=7  CHILDREN="42 43 44"   # link sub-issues
-make gh-block ISSUE=44  BLOCKED_BY=43          # mark dependency
-make gh-show  ISSUE=44                         # inspect parent / sub-issues / blocking / blocked-by
+uv run poe gh-sub   7 42 43 44   # link sub-issues
+uv run poe gh-block 44 43          # mark dependency
+uv run poe gh-show  44                         # inspect parent / sub-issues / blocking / blocked-by
 ```
 
 Two Claude Code skills guide these workflows end-to-end:
@@ -476,44 +475,47 @@ See [`docs/contributing.md`](docs/contributing.md) (or [`CONTRIBUTING.md`](CONTR
 
 > **What:** Six issue templates + a 24-label taxonomy + a `Wave → Theme → Issue` hierarchy + a wave-backlog drafting template under `docs/templates/` + `create-gh-issue` and `link-gh-issues` skills with helper scripts for filing issues and applying native sub-issue / blocked-by links, all documented in `docs/contributing.md`.
 
-> **Why an epic model?** Consistent issue structure lets humans and AI agents collaborate on planning without renegotiating conventions each time. Templates encode the conventions; `make gh-labels` bootstraps the labels; `make gh-sub` / `make gh-block` wire the native hierarchy.
+> **Why an epic model?** Consistent issue structure lets humans and AI agents collaborate on planning without renegotiating conventions each time. Templates encode the conventions; `uv run poe gh-labels` bootstraps the labels; `uv run poe gh-sub` / `uv run poe gh-block` wire the native hierarchy.
 
 ---
 
-### 🛠️ Makefile — Self-documenting Task Runner
+### 🛠️ Poe the Poet — Task Runner in `pyproject.toml`
 
-**File:** `Makefile`
+**File:** `pyproject.toml` (`[tool.poe]` and `[tool.poe.tasks]`)
 
-All common tasks are available via `make`:
+Every common task is a [Poe the Poet](https://poethepoet.natn.io) task defined in `pyproject.toml`; there is no Makefile. Poe is in the `dev` dependency group, so `uv run poe <task>` works from a fresh clone (`uv run` syncs the group first). For a shorter `poe <task>`, install it globally with `uv tool install poethepoet`.
 
-| Target | Description |
+| Task | Description |
 |--------|-------------|
-| `make help` | Print all targets with descriptions |
-| `make install` | Install all dependency groups via uv |
-| `make init` | Bootstrap `.env` from `.env.example` |
-| `make test` | Run tests (no coverage) |
-| `make test-cov` | Run tests with coverage report |
-| `make lint` | Lint with ruff (no autofix) |
-| `make format` | Format with ruff (format + autofix) |
-| `make typecheck` | Type-check with ty |
-| `make precommit` | Run pre-commit hooks on all files |
-| `make build` | Build wheel and sdist |
-| `make clean` | Remove build artefacts and caches |
-| `make docs` | Build documentation site |
-| `make docs-serve` | Preview documentation locally |
-| `make capabilities` | Regenerate the capability index (`docs/api/capabilities.md`) |
-| `make docs-deploy` | Deploy documentation to GitHub Pages |
-| `make gh-labels` | Bootstrap the GitHub label taxonomy (idempotent) |
-| `make gh-sub` | Link CHILDREN as sub-issues of PARENT (e.g. `make gh-sub PARENT=7 CHILDREN="42 43"`) |
-| `make gh-block` | Mark ISSUE as blocked by BLOCKED_BY (`make gh-block ISSUE=44 BLOCKED_BY=43`) |
-| `make gh-show` | Show parent / sub-issues / blocking / blocked-by for an issue |
-| `make version` | Display package version and git hash |
+| `uv run poe` | List every task with its description |
+| `uv run poe install` | Install all dependency groups via uv + pre-commit hooks |
+| `uv run poe init` | Bootstrap `.env` from `.env.example` |
+| `uv run poe test` | Run tests (no coverage) |
+| `uv run poe test-cov` | Run tests with coverage report and the 90 % gate |
+| `uv run poe lint` | Lint with ruff (no autofix) |
+| `uv run poe format` | Format with ruff (format + autofix) |
+| `uv run poe format-check` | Check formatting without changing files |
+| `uv run poe typecheck` | Type-check with ty |
+| `uv run poe check` | Everything CI checks: lint, format-check, typecheck, test-cov |
+| `uv run poe precommit` | Run pre-commit hooks on all files |
+| `uv run poe build` | Build wheel and sdist |
+| `uv run poe clean` | Remove build artefacts and caches |
+| `uv run poe docs` | Build documentation site |
+| `uv run poe docs-check` | Validate docs sources without the themed render |
+| `uv run poe docs-api` | Build only the MkDocs API reference |
+| `uv run poe docs-serve` | Preview documentation locally |
+| `uv run poe capabilities` | Regenerate the capability index (`docs/api/capabilities.md`) |
+| `uv run poe gh-labels` | Bootstrap the GitHub label taxonomy (idempotent) |
+| `uv run poe gh-sub` | Link children as sub-issues of a parent (`uv run poe gh-sub 7 42 43`) |
+| `uv run poe gh-block` | Mark an issue as blocked by another (`uv run poe gh-block 44 43`) |
+| `uv run poe gh-show` | Show parent / sub-issues / blocking / blocked-by for an issue |
+| `uv run poe version` | Display package version and git hash |
 
-The Makefile auto-loads `.env` and exports its variables. The `check-env-VARNAME` guard pattern lets targets declare required env vars as prerequisites.
+Extra arguments after a task name are passed through to its command, e.g. `uv run poe test tests/test_stats.py -k summarize`. Poe loads `.env` when present, and `[tool.poe.env]` gives `PKGROOT` and `TYPECHECK_EXTRA` defaults that `.env` or the shell can override.
 
-> **What:** A self-documenting task runner — `make help` prints every available command with its description, so you never need to remember toolchain invocations.
+> **What:** A task runner configured in `pyproject.toml` — `uv run poe` prints every task with its description, so you never need to remember toolchain invocations.
 
-> **Why a Makefile?** Single interface regardless of the underlying toolchain. Onboarding takes seconds: `make help` shows everything.
+> **Why Poe instead of a Makefile?** One config file instead of two, works on Windows (no `make`), real argument parsing for tasks like `gh-sub`, and task help text that lives next to the task. The commands themselves are the same `uv run …` invocations CI uses.
 
 ---
 
@@ -521,7 +523,7 @@ The Makefile auto-loads `.env` and exports its variables. The `check-env-VARNAME
 
 **File:** `.env.example`
 
-`.env.example` is committed to git as a template. The actual `.env` is gitignored. Run `make init` to copy the example to `.env`.
+`.env.example` is committed to git as a template. The actual `.env` is gitignored. Run `uv run poe init` to copy the example to `.env`.
 
 Documented variables:
 
@@ -531,9 +533,9 @@ Documented variables:
 | `PYPI_TOKEN` | PyPI token for publishing |
 | `GITHUB_TOKEN` | GitHub personal access token |
 
-> **What:** A committed `.env.example` documents every supported environment variable; the real `.env` is gitignored and auto-loaded by the Makefile.
+> **What:** A committed `.env.example` documents every supported environment variable; the real `.env` is gitignored and auto-loaded by poe.
 
-> **Why `.env.example`?** Local overrides without committing secrets. The Makefile auto-loads and exports vars, so all targets see them automatically.
+> **Why `.env.example`?** Local overrides without committing secrets. Poe loads it before every task, so all tasks see the variables automatically.
 
 ---
 
@@ -546,7 +548,7 @@ imports it from `CLAUDE.md`; Copilot is pointed at it): the module map,
 "reuse before you write", the package's contracts and the tests that enforce
 them, the commands, the pre-commit checklist, test tiers, the docs toolchain,
 and the git / PR rules. `docs/api/capabilities.md` lists every public name
-with a one-line summary, generated by `make capabilities` and checked by
+with a one-line summary, generated by `uv run poe capabilities` and checked by
 `tests/test_capabilities.py`, so agents find what exists before writing it
 again.
 
@@ -614,13 +616,13 @@ including the rename commands and rewriting the agent files from your code.
 3. **Update `[project]` in `pyproject.toml`**: name, description, authors, keywords, classifiers, `requires-python`
 4. **Update `mkdocs.yml`**: `site_name`, `site_description`, `repo_url`, `repo_name`
 5. **Rename `src/mypackage/`** to `src/<yourpackage>/`
-6. **Copy `.env.example` to `.env`** (`make init`) and fill in values
-7. **Run `make install`** then **`make test`** to verify the baseline works
+6. **Copy `.env.example` to `.env`** (`uv run poe init`) and fill in values
+7. **Run `uv run poe install`** then **`uv run poe test`** to verify the baseline works
 8. **Set up Codecov** and add `CODECOV_TOKEN` to GitHub Secrets if you want coverage tracking
 9. **Update badge URLs** in this README to point at your repository
 10. **Update `[project.urls]`** in `pyproject.toml` to your repository URL
 11. Delete or update `CHANGELOG.md` and `.release-please-manifest.json` to start fresh
-12. **Bootstrap the GitHub label taxonomy**: `make gh-labels` (edits `.github/scripts/create-labels.sh` if you need to customise `area:*` / `layer:*` / `wave:*` for your project)
+12. **Bootstrap the GitHub label taxonomy**: `uv run poe gh-labels` (edits `.github/scripts/create-labels.sh` if you need to customise `area:*` / `layer:*` / `wave:*` for your project)
 13. **Review `docs/contributing.md`** and adjust the label taxonomy / epic model / contact links for your project; update `.github/ISSUE_TEMPLATE/config.yml` discussions URL
 
 ---

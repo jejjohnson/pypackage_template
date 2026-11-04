@@ -6,7 +6,7 @@ Every public name in `mypackage` (30 of them), each listed once at
 its public home and grouped by the module that defines it, with the
 first sentence of its docstring. Search this page before
 writing a helper: if what you need is here, compose it; if it is almost
-here, extend it where it lives. Regenerate with `make capabilities`
+here, extend it where it lives. Regenerate with `uv run poe capabilities`
 after changing a public API (`tests/test_capabilities.py` checks it is
 current).
 

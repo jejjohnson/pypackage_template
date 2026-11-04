@@ -28,7 +28,7 @@ verifies the shape; `isinstance` verifies the method exists at runtime.
 
 :::{note} Protocol `isinstance` checks are shallow
 A `runtime_checkable` protocol only checks that the attribute *exists* —
-not its signature. Static type checking (`make typecheck`) is what catches
+not its signature. Static type checking (`uv run poe typecheck`) is what catches
 an `apply` with the wrong parameters. The runtime check exists to give a
 clear [`ValidationError`](xref:api#mypackage.ValidationError) when someone drops a
 string into a pipeline, not to replace the type checker.

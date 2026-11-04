@@ -8,11 +8,11 @@ before writing a helper ("Reuse before you write" in ``AGENTS.md``).
 
 Usage::
 
-    make capabilities                                   # rewrite the index
+    uv run poe capabilities                             # rewrite the index
     uv run python scripts/capabilities.py --check       # fail if stale
 
 ``tests/test_capabilities.py`` runs the check, so a public API change that
-skips ``make capabilities`` fails the test suite.
+skips ``uv run poe capabilities`` fails the test suite.
 
 The script needs no editing when the template is adopted: the import package
 is read from ``pyproject.toml`` and the public submodules are discovered. Two
@@ -261,7 +261,7 @@ def render() -> str:
         "its public home and grouped by the module that defines it, with the",
         f"first sentence of its docstring{upstream}. Search this page before",
         "writing a helper: if what you need is here, compose it; if it is almost",
-        "here, extend it where it lives. Regenerate with `make capabilities`",
+        "here, extend it where it lives. Regenerate with `uv run poe capabilities`",
         "after changing a public API (`tests/test_capabilities.py` checks it is",
         "current).",
         "",
@@ -302,7 +302,8 @@ def main() -> int:
     if args.check:
         current = INDEX.read_text(encoding="utf-8") if INDEX.exists() else ""
         if stale(current, text):
-            print(f"{INDEX.relative_to(ROOT)} is stale; run `make capabilities`")
+            rel = INDEX.relative_to(ROOT)
+            print(f"{rel} is stale; run `uv run poe capabilities`")
             status = 1
     else:
         INDEX.write_text(text, encoding="utf-8")

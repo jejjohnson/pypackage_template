@@ -124,10 +124,10 @@ bash .github/scripts/link-issues.sh sub <parent> <child1> <child2> ...
 # Mark one issue blocked by another
 bash .github/scripts/link-issues.sh block <issue> <blocker>
 
-# Or via Makefile
-make gh-sub PARENT=7 CHILDREN="42 43 44"
-make gh-block ISSUE=44 BLOCKED_BY=43
-make gh-show ISSUE=44            # parent, sub-issues, blocking, blocked-by
+# Or via the poe tasks in pyproject.toml
+uv run poe gh-sub 7 42 43 44
+uv run poe gh-block 44 43
+uv run poe gh-show 44            # parent, sub-issues, blocking, blocked-by
 ```
 
 Prefer the script when applying more than two or three links — it handles node-ID resolution and error cases uniformly.

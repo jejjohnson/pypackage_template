@@ -89,7 +89,7 @@ they cannot see.
   module in `SUBMODULES` (`tests/test_public_api.py`), with its
   `docs/api/<module>.md` page, a `nav` entry in `mkdocs.yml` and a row in
   `docs/api/index.md`; `docs/api/capabilities.md` regenerated
-  (`make capabilities`).
+  (`uv run poe capabilities`).
 - Docstrings: Google style; the formula in `$…$`; `Args:`, `Returns:`,
   `Raises:` matching the code; an executable `Examples:` block whose output
   is what the code prints (print rounded values, not 17-digit floats).

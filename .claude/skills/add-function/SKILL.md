@@ -62,7 +62,7 @@ never imports `cli` or `transforms`.
   `tests/test_public_api.py`, a `docs/api/<module>.md` page with a
   `::: mypackage.<module>` block, a `nav` entry in `mkdocs.yml` and a row in
   `docs/api/index.md`; a guide page if it deserves prose (`add-guide-page`).
-- `make capabilities`.
+- `uv run poe capabilities`.
 
 ## 5. Tests
 
@@ -83,7 +83,7 @@ function:
 
 ```bash
 uv run pytest --no-cov tests/test_<module>.py src/mypackage/<module>.py tests/test_public_api.py tests/test_capabilities.py -v
-make test-cov       # the whole suite with the 90 % coverage gate
+uv run poe test-cov       # the whole suite with the 90 % coverage gate
 ```
 
 then the `pre-pr-check` skill.

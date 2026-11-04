@@ -19,7 +19,7 @@ Every issue carries exactly one `type:*`, one or more `area:*`, at most one `lay
 Bootstrap the standard set on a fresh repo:
 
 ```bash
-make gh-labels
+uv run poe gh-labels
 ```
 
 The script lives at `.github/scripts/create-labels.sh`. Edit the hard-coded `create …` entries in the script to customise `area:*`, `layer:*`, and `wave:*` for the project, then re-run — the script is idempotent.
@@ -97,7 +97,7 @@ gh issue create --web
 
 The web flow opens `/issues/new/choose` so you can pick the template in the UI. `gh issue create` does not support pre-selecting a template for the web path; the `--template` flag is only used as starting body text in the non-web flow.
 
-After the issue is created, apply native parent / blocked-by links via the Makefile targets documented below in the Relationships section (or `make gh-sub` / `make gh-block`).
+After the issue is created, apply native parent / blocked-by links via the poe tasks documented below in the Relationships section (or `uv run poe gh-sub` / `uv run poe gh-block`).
 
 ### From Claude Code
 
@@ -171,19 +171,19 @@ The prose `## Relationships` block above is a human-readable record. GitHub also
 - **Sub-issues** — open the parent issue, side-panel → *Sub-issues* → *Create sub-issue* or *Add existing sub-issue*.
 - **Blocked by** — open the blocked issue, side-panel → *Development* → *Mark as blocked by*.
 
-#### From the CLI (Makefile targets)
+#### From the CLI (poe tasks)
 
-For scripted work, the repo ships a helper script wrapped by three `make` targets:
+For scripted work, the repo ships a helper script wrapped by three `poe` tasks (defined in `pyproject.toml`):
 
 ```bash
 # Link children as sub-issues under a parent
-make gh-sub PARENT=7 CHILDREN="42 43 44"
+uv run poe gh-sub 7 42 43 44
 
 # Mark issue 44 as blocked by 43
-make gh-block ISSUE=44 BLOCKED_BY=43
+uv run poe gh-block 44 43
 
 # Inspect parent / sub-issues / blocking / blocked-by for an issue
-make gh-show ISSUE=44
+uv run poe gh-show 44
 ```
 
 Direct script usage (same functionality plus unlink commands):
@@ -207,7 +207,7 @@ Example prompts:
 - "Apply the relationships from epic #29"
 - "Link #42, #43, #44 as sub-issues of #7"
 - "Mark #44 as blocked by #43"
-- "What's blocking #44?" (Claude runs `make gh-show ISSUE=44` or the underlying GraphQL query)
+- "What's blocking #44?" (Claude runs `uv run poe gh-show 44` or the underlying GraphQL query)
 
 #### Raw GraphQL (for reference)
 
@@ -227,14 +227,14 @@ Issue node IDs are resolved via `gh api repos/:owner/:repo/issues/<N> --jq .node
 Run these locally before opening a PR:
 
 ```bash
-make format       # ruff format . + ruff check --fix .   (applies changes)
-make lint         # ruff check .                         (CI-style check)
-make typecheck    # ty check
-make test         # pytest
+uv run poe format       # ruff format . + ruff check --fix .   (applies changes)
+uv run poe lint         # ruff check .                         (CI-style check)
+uv run poe typecheck    # ty check
+uv run poe test         # pytest
 ```
 
-Note that `make format` **mutates files** — it formats and applies autofixes. `make lint` is the CI-parity read-only check. Run `make format` first, commit the result, then run `make lint` / `make test` to verify.
+Note that `uv run poe format` **mutates files** — it formats and applies autofixes. `uv run poe lint` is the CI-parity read-only check. Run `uv run poe format` first, commit the result, then run `uv run poe lint` / `uv run poe test` to verify.
 
-Pre-commit hooks run ruff on every commit. Run `make precommit` to apply them to all files manually.
+Pre-commit hooks run ruff on every commit. Run `uv run poe precommit` to apply them to all files manually.
 
 Commit messages follow the [Conventional Commits](https://www.conventionalcommits.org/) specification — enforced on PR titles by `.github/workflows/conventional-commits.yml`.

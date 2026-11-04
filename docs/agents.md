@@ -15,7 +15,7 @@ things that let them find the package instead.
 The [capability index](https://jejjohnson.github.io/pypackage_template/reference/capabilities/)
 lists every public name in `mypackage` and `mypackage.cli`, grouped by the
 module that defines it, with a one-line summary. It is regenerated from the
-code (`make capabilities`) and checked in the test suite, so it never
+code (`uv run poe capabilities`) and checked in the test suite, so it never
 drifts.
 
 ## The Claude Code plugin

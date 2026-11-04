@@ -11,7 +11,7 @@ See the full contributor guide at [docs/contributing.md](docs/contributing.md) f
 Bootstrap the standard label set for a fresh clone of this template:
 
 ```bash
-make gh-labels
+uv run poe gh-labels
 ```
 
 Commit messages follow the [Conventional Commits](https://www.conventionalcommits.org/) spec — enforced on PR titles by CI.

@@ -36,7 +36,7 @@ pip install mypackage
 ```bash
 git clone https://github.com/jejjohnson/pypackage_template.git
 cd pypackage_template
-make install
+uv run poe install
 ```
 :::
 ::::
@@ -49,7 +49,7 @@ import mypackage as mp
 series = [2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]
 
 summary = mp.summarize(series)
-print(summary.mean, summary.std)     # 5.0 2.138...
+print(summary.mean, summary.std)  # 5.0 2.138...
 
 smoothed = mp.moving_average(series, window=3)
 pipeline = mp.chain(mp.Standardize(), mp.Clip(-2.0, 2.0))

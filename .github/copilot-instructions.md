@@ -30,9 +30,9 @@ The rules for every project:
 
 - Every docstring `Examples:` block runs (`--doctest-modules`): the expected
   output must be what the code prints.
-- Before committing, from the repo root: `make test`,
+- Before committing, from the repo root: `uv run poe test`,
   `uv run --group lint ruff check .`, `uv run --group lint ruff format --check .`,
-  `make typecheck`; `make capabilities` after a public API change. Lint the
+  `uv run poe typecheck`; `uv run poe capabilities` after a public API change. Lint the
   whole repo, never a subdirectory.
 - When you suggest a change, propose the code; when you fix a bug, add the
   test that reproduces it. Don't nitpick what ruff and the formatter handle.

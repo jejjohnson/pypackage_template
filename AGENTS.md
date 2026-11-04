@@ -84,7 +84,7 @@ find out whether it exists:
 1. **Search the capability index.**
    [`docs/api/capabilities.md`](docs/api/capabilities.md) lists every
    public name once, at its public home, grouped by the module that defines
-   it, with a one-line summary. It is generated (`make capabilities`) and
+   it, with a one-line summary. It is generated (`uv run poe capabilities`) and
    checked by `tests/test_capabilities.py`, so it is current.
 2. **Search the private helpers** in the table below: several invariants
    live in exactly one place each.
@@ -187,7 +187,7 @@ enforces them" check most of them.
   `::: mypackage.<module>` block), a `nav` entry in `mkdocs.yml` and a row in
   `docs/api/index.md`; a name on an existing module's page is picked up by
   its `:::` block.
-- Run `make capabilities` after any public API change.
+- Run `uv run poe capabilities` after any public API change.
 - Link prose to the API by the **top-level** name
   (``[`summarize`](xref:api#mypackage.summarize)``), see "Documentation".
 
@@ -209,7 +209,7 @@ docstring before changing what it checks.
 | `tests/test_cli.py` | Injected streams, exit codes 0 / 1 / 2, finite-only input, the `[project.scripts]` entry point |
 | `tests/test_build_docs.py` | The two-tool docs pipeline: inventory parsing, anchor repair, link checking, the inventory port and the absolute nav URL in `docs/myst.yml`, the files copied to the site root (`ROOT_FILES`) |
 | `tests/test_plugin_skill.py` | The downstream plugin's worked example runs and its quoted numbers hold; every name the plugin skill and reviewer mention exists |
-| `[tool.coverage.report] fail_under = 90` | Coverage of `src/mypackage` in every coverage-enabled run (CI, `make test-cov`) |
+| `[tool.coverage.report] fail_under = 90` | Coverage of `src/mypackage` in every coverage-enabled run (CI, `uv run poe test-cov`) |
 | `strict_markers = true` | Only the registered tier markers (`slow`, `integration`) exist |
 | ruff (`select = E, F, I, UP, B, SIM, RUF`), ty | Lint (the whole repo, notebook code cells included), format, types on `src/mypackage` and `scripts` |
 
@@ -233,7 +233,7 @@ agent can read and follow them), and two read-only review checklists in
 | Verify before a PR | `pre-pr-check` |
 | Review a change | `mypackage-review` (+ the read-only `.claude/agents/reuse-reviewer.md` and `correctness-reviewer.md`) |
 | Write a squash commit message | `squash-commit` |
-| Open or link GitHub issues | `create-gh-issue`, `link-gh-issues` (templates in `.github/ISSUE_TEMPLATE/`; `make gh-labels`, `gh-sub`, `gh-block`, `gh-show`) |
+| Open or link GitHub issues | `create-gh-issue`, `link-gh-issues` (templates in `.github/ISSUE_TEMPLATE/`; `uv run poe gh-labels`, `gh-sub`, `gh-block`, `gh-show`) |
 
 <!-- template-example: this paragraph only; the plugin describes the example package. -->
 
@@ -253,20 +253,25 @@ Always run Python tools through `uv run` (never the system Python); `git`,
 `ls` and other non-Python commands need no `uv run`.
 
 ```bash
-make install              # uv sync --all-groups + pre-commit hooks
-make test                 # every test + doctests, no coverage (fast)
-make test-cov             # the same with coverage and the 90 % gate (what CI runs)
-make lint                 # ruff check .   (entire repo)
-make format               # ruff format . && ruff check --fix .
-make typecheck            # ty check src/mypackage scripts (what CI runs)
-make capabilities         # regenerate docs/api/capabilities.md
-make docs                 # build both docs halves into public/ and check every link
-make docs-check           # strict validation of both halves, no themed render
-make docs-api             # MkDocs API reference only (mkdocs build --strict)
-make docs-serve           # build, then serve public/ at :8000
-make precommit            # every pre-commit hook on every file
-make build                # wheel + sdist into dist/
+uv run poe                  # list every task (they live in [tool.poe.tasks] in pyproject.toml)
+uv run poe install          # uv sync --all-groups + pre-commit hooks
+uv run poe test             # every test + doctests, no coverage (fast)
+uv run poe test-cov         # the same with coverage and the 90 % gate (what CI runs)
+uv run poe lint             # ruff check .   (entire repo)
+uv run poe format           # ruff format . && ruff check --fix .
+uv run poe typecheck        # ty check src/mypackage scripts (what CI runs)
+uv run poe check            # lint + format-check + typecheck + test-cov (everything CI checks)
+uv run poe capabilities     # regenerate docs/api/capabilities.md
+uv run poe docs             # build both docs halves into public/ and check every link
+uv run poe docs-check       # strict validation of both halves, no themed render
+uv run poe docs-api         # MkDocs API reference only (mkdocs build --strict)
+uv run poe docs-serve       # build, then serve public/ at :8000
+uv run poe precommit        # every pre-commit hook on every file
+uv run poe build            # wheel + sdist into dist/
 ```
+
+Extra arguments after a task name are passed to its command
+(`uv run poe test tests/test_stats.py -k summarize`).
 
 `addopts` turns coverage on, and a partial run never reaches the 90 % gate,
 so pass `--no-cov` when running part of the suite:
@@ -310,17 +315,17 @@ give them a CI job of their own rather than dropping them.
 
 All of these must pass, from the repo root:
 
-1. `make test`: zero failures (doctests included).
+1. `uv run poe test`: zero failures (doctests included).
 2. `uv run --group lint ruff check .`: the **entire** repo, which includes
    `tests/`, `scripts/` and the code cells of `docs/notebooks/*.ipynb`.
    Never lint a subdirectory: `ruff check src/mypackage/` misses errors CI
    catches.
 3. `uv run --group lint ruff format --check .`
-4. `make typecheck` (`ty check src/mypackage scripts`, as CI runs it).
-5. After changing a public API: `make capabilities`, and the `docs/api`
+4. `uv run poe typecheck` (`ty check src/mypackage scripts`, as CI runs it).
+5. After changing a public API: `uv run poe capabilities`, and the `docs/api`
    page.
 6. After changing docs, docstrings, `mkdocs.yml` or `docs/myst.yml`:
-   `make docs` (or at least `make docs-api` when only docstrings changed).
+   `uv run poe docs` (or at least `uv run poe docs-api` when only docstrings changed).
 7. After changing a dependency: `uv lock`, and commit `uv.lock`.
 
 ## Coding principles
@@ -408,7 +413,7 @@ push to `main`, and `pages.yml` deploys `public/` to GitHub Pages from
 | Prose — home, guides, example notebooks | mystmd | `docs/*.md`, `docs/guide/`, `docs/notebooks/` (toc in `docs/myst.yml`) | `/` |
 | API reference | MkDocs + mkdocstrings | `docs/api/` (`docs_dir` in `mkdocs.yml`) | `/reference/` |
 
-`make docs` runs `scripts/build_docs.py`: it builds the API with
+`uv run poe docs` runs `scripts/build_docs.py`: it builds the API with
 `mkdocs build --strict`, serves `site/` on port 8910 so mystmd can read its
 `objects.inv` (mystmd loads inventories only over http), runs
 `myst build --html --strict`, rewrites the localhost API URLs to

@@ -57,7 +57,7 @@ No separate `images/` directory — figures live inside the `.ipynb` cell output
    entry:
 
    ```bash
-   make docs
+   uv run poe docs
    ```
 
    This builds both halves of the site, assembles them, and verifies that
@@ -297,7 +297,7 @@ mystmd renders both inline and display math in the prose half (notebooks include
 - [ ] `.py` deleted; `.ipynb` with embedded outputs committed
 - [ ] Listed in the `toc` in `docs/myst.yml`
 - [ ] Basename unique across `docs/`
-- [ ] `make docs` passes (both halves build, all links resolve)
+- [ ] `uv run poe docs` passes (both halves build, all links resolve)
 - [ ] Every numeric claim in the prose matches the executed output — if a cell
       prints a table, the paragraph describing it must agree with the numbers
       actually printed, not the ones you expected

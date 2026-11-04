@@ -50,13 +50,13 @@ git grep -l -e mypackage -e Mypackage -e pypackage_template -- \
   | xargs sed -i -e "s/mypackage/$NEWPKG/g" -e "s/Mypackage/$NEWPKG_CAMEL/g" \
                  -e "s/pypackage_template/$NEWREPO/g"
 uv lock && uv sync --all-groups
-make format         # the new names re-sort imports and __all__
-make lint           # a longer name can push a line past 88 characters
-make capabilities   # the index now names the new package
-make test-cov && make typecheck
+uv run poe format         # the new names re-sort imports and __all__
+uv run poe lint           # a longer name can push a line past 88 characters
+uv run poe capabilities   # the index now names the new package
+uv run poe test-cov && uv run poe typecheck
 ```
 
-(`sed -i ''` on macOS.) `make lint` (and `make format`, which exits
+(`sed -i ''` on macOS.) `uv run poe lint` (and `uv run poe format`, which exits
 non-zero for the same reason) flags any line the new name made too long:
 wrap it by hand (a longer name usually pushes the two inventory
 strings in `test_reads_entries` in `tests/test_build_docs.py` past the
@@ -88,7 +88,7 @@ The example touches:
 | Generic tests to keep | `tests/test_public_api.py`, `tests/test_capabilities.py`, `tests/test_build_docs.py` |
 
 The coverage gate (`fail_under = 90`) fails an empty package: write tests
-with the code. `make capabilities` after every public API change.
+with the code. `uv run poe capabilities` after every public API change.
 
 ## 5. Rewrite the agent files from the new code
 
@@ -129,14 +129,14 @@ tiers, the pre-commit checklist, the docs toolchain) stay as they are.
   example that runs, a "don't write it" table; rewrite its reuse reviewer;
   point `tests/test_plugin_skill.py` at them and rewrite its claims from the
   new prose. Rewrite `docs/llms.txt` and `docs/agents.md` and check every
-  URL in them against the built site (`make docs`, then look in `public/`).
+  URL in them against the built site (`uv run poe docs`, then look in `public/`).
   A package nobody else builds on can delete the plugin, `llms.txt` (and its
   entry in `ROOT_FILES`), `docs/agents.md` and the test instead.
 
 ## 7. Labels, releases, URLs
 
 - `.github/scripts/create-labels.sh`: your `area:*` / `layer:*` / `wave:*`
-  labels, then `make gh-labels`; the label table in
+  labels, then `uv run poe gh-labels`; the label table in
   `.claude/skills/create-gh-issue/SKILL.md` and `docs/contributing.md`.
 - `release-please-config.json`: `package-name` (renamed in step 3) and
   `extra-files`.
@@ -150,7 +150,7 @@ tiers, the pre-commit checklist, the docs toolchain) stay as they are.
 
 ## 8. Verify
 
-- The `pre-pr-check` skill, including `make docs`.
+- The `pre-pr-check` skill, including `uv run poe docs`.
 - `git grep -n -e mypackage -e Mypackage -e pypackage_template` finds
   nothing you did not mean to keep.
 - Remove the description of the marker convention, which no longer

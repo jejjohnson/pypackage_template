@@ -8,7 +8,7 @@
 # Usage:
 #   bash .github/scripts/create-labels.sh
 #   or:
-#   make gh-labels
+#   uv run poe gh-labels
 #
 # Requires: `gh` CLI authenticated with repo scope.
 #

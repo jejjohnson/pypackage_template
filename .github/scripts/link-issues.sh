@@ -15,9 +15,9 @@
 #
 # All issue arguments are numeric (e.g. 42), resolved to node IDs automatically.
 #
-# Or via Makefile:
-#   make gh-sub PARENT=7 CHILDREN="42 43 44"
-#   make gh-block ISSUE=44 BLOCKED_BY=43
+# Or via the poe tasks in pyproject.toml:
+#   uv run poe gh-sub 7 42 43 44
+#   uv run poe gh-block 44 43
 #
 # Requires: `gh` CLI authenticated with repo scope.
 

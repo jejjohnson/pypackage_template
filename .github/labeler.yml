@@ -1,7 +1,7 @@
 # PR auto-labeling rules.
 #
 # Applied by .github/workflows/label-pr.yml using actions/labeler.
-# Labels referenced here must exist — run `make gh-labels` to create them.
+# Labels referenced here must exist — run `uv run poe gh-labels` to create them.
 # The `dependencies` label is also created by the bootstrap script so this
 # file works on a fresh repo with no manual label setup.
 #
@@ -17,7 +17,6 @@
     - any-glob-to-any-file:
       - ".github/**"
       - "pyproject.toml"
-      - "Makefile"
       - ".pre-commit-config.yaml"
       - "uv.lock"
 

@@ -56,8 +56,8 @@ read it first. This is the checklist.
   `toc` in `docs/myst.yml` (the examples sit under `Examples`).
 - `uv run --group lint ruff format docs/notebooks/` and
   `uv run --group lint ruff check .`
-- `make docs-check` (strict validation of both halves) and `make docs`
+- `uv run poe docs-check` (strict validation of both halves) and `uv run poe docs`
   (builds, assembles and checks every internal link) both need the mystmd
   CLI (`npm install -g mystmd`); if the theme download is blocked, see
-  `docs/README.md`. Without mystmd, run `make docs-api` and say in the PR
+  `docs/README.md`. Without mystmd, run `uv run poe docs-api` and say in the PR
   that the prose half was not checked.

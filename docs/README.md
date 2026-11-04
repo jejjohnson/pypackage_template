@@ -10,8 +10,8 @@ This project's documentation is built by **two tools**, deployed as one site.
 Build both and assemble them with:
 
 ```bash
-make docs          # build + assemble into public/
-make docs-serve    # assemble, then serve public/ locally
+uv run poe docs          # build + assemble into public/
+uv run poe docs-serve    # assemble, then serve public/ locally
 ```
 
 ## Why the split

@@ -55,14 +55,14 @@ Use the module's `run(*argv, stdin=...)` helper, which returns
   changes.
 - `docs/api/cli.md` lists `main` and `build_parser` only; a new public
   helper there needs adding to its `members:`, `cli.__all__` and
-  `make capabilities`.
+  `uv run poe capabilities`.
 
 ## 5. Verify
 
 ```bash
 uv run pytest --no-cov tests/test_cli.py src/mypackage/cli.py -v
 echo "1 2 3 4" | uv run mypackage <name>
-make test-cov
+uv run poe test-cov
 ```
 
 then the `pre-pr-check` skill.
