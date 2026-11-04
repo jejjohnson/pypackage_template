@@ -5,7 +5,7 @@ This project's documentation is built by **two tools**, deployed as one site.
 | Half | Tool | Source | Deployed at |
 |---|---|---|---|
 | Prose — home, guides, notebooks | [mystmd](https://mystmd.org) | `docs/*.md`, `docs/guide/`, `docs/notebooks/` | `/` |
-| API reference | MkDocs + mkdocstrings | `docs/api/` | `/reference/` |
+| API reference | [Zensical](https://zensical.org) + mkdocstrings | `docs/api/` | `/reference/` |
 
 Build both and assemble them with:
 
@@ -24,6 +24,14 @@ docstrings into a MyST site today.
 MkDocs + mkdocstrings already does that well, and it publishes a
 Sphinx-compatible `objects.inv`, which is exactly what mystmd needs to
 cross-reference *into* it. So each tool does the half it is good at.
+
+The API half is built by [Zensical](https://zensical.org), the successor to
+Material for MkDocs (which reached end of life on 2026-11-05). It reads
+`mkdocs.yml` as is and runs mkdocstrings natively, so the config, the API
+pages and the inventory are unchanged; only the build command is
+`zensical build` instead of `mkdocs build`. Zensical does not run arbitrary
+MkDocs plugins or hooks (unsupported ones are silently ignored), so check
+<https://zensical.org/docs/compatibility/mkdocs/plugins/> before adding one.
 
 ## Site-nav URLs must be absolute
 

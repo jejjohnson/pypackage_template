@@ -43,10 +43,10 @@ typecheck = [
 docs = [
     # The prose half of the site is built by mystmd, a Node CLI installed with
     # `npm install -g mystmd` rather than through uv. See docs/README.md.
-    # MkDocs here builds only the API reference, whose `objects.inv` is what
-    # lets the MyST prose cross-reference into it.
-    "mkdocs>=1.6.1",
-    "mkdocs-material>=9.7.7",
+    # Zensical (the successor to Material for MkDocs, which reached end of life
+    # on 2026-11-05) builds only the API reference from mkdocs.yml; its
+    # `objects.inv` is what lets the MyST prose cross-reference into it.
+    "zensical>=0.0.74",
     "mkdocstrings[python]>=1.0.6",
     "jupytext>=1.19.6",
     "ipykernel>=7.3.0",
@@ -255,7 +255,7 @@ print("Clean complete.")
 # --- Docs -------------------------------------------------------------------
 
 [tool.poe.tasks.docs]
-help = "Build the full site (MyST prose + MkDocs API) into public/"
+help = "Build the full site (MyST prose + Zensical API) into public/"
 cmd = "uv run python scripts/build_docs.py"
 
 [tool.poe.tasks.docs-check]
@@ -263,8 +263,8 @@ help = "Validate docs sources without rendering the MyST theme"
 cmd = "uv run python scripts/build_docs.py --check"
 
 [tool.poe.tasks.docs-api]
-help = "Build only the MkDocs API reference into site/"
-cmd = "uv run --group docs mkdocs build --strict"
+help = "Build only the Zensical API reference into site/"
+cmd = "uv run --group docs zensical build --strict"
 
 [tool.poe.tasks.docs-serve]
 help = "Build, then serve the assembled site at http://127.0.0.1:8000"

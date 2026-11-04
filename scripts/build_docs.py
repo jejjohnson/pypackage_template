@@ -5,8 +5,8 @@ The docs are produced by two generators (see ``docs/README.md``):
 
 - **mystmd** builds the prose half — home page, guides, notebooks — into
   ``docs/_build/html``.
-- **MkDocs + mkdocstrings** builds the API reference into ``site/``, and
-  publishes a Sphinx-compatible ``objects.inv`` alongside it.
+- **Zensical + mkdocstrings** builds the API reference into ``site/`` from
+  ``mkdocs.yml``, and publishes a Sphinx-compatible ``objects.inv`` alongside it.
 
 This script runs both, assembles them into ``public/`` (prose at the root, API
 reference under ``/reference/``), repairs the cross-references between them,
@@ -49,7 +49,7 @@ API_SUBDIR = "reference"
 ROOT_FILES = ("llms.txt",)
 
 # Must match `references.api` in docs/myst.yml. mystmd only loads intersphinx
-# inventories over http(s), so the freshly built MkDocs output is served here
+# inventories over http(s), so the freshly built Zensical output is served here
 # during the MyST build and the resulting URLs are rewritten afterwards.
 API_PORT = 8910
 # No trailing slash: mystmd echoes the configured inventory URL into the page
@@ -316,8 +316,8 @@ def _serve(directory: Path) -> ThreadingHTTPServer:
 
 
 def build_api() -> None:
-    """Build the MkDocs API reference into ``site/``."""
-    _run(["uv", "run", "--group", "docs", "mkdocs", "build", "--strict"], REPO)
+    """Build the Zensical API reference into ``site/``."""
+    _run(["uv", "run", "--group", "docs", "zensical", "build", "--strict"], REPO)
 
 
 def build_prose(*, html: bool) -> None:
@@ -355,7 +355,7 @@ def assemble(base_url: str) -> list[str]:
     if not MYST_OUT.is_dir():
         sys.exit(f"missing MyST output at {MYST_OUT}")
     if not MKDOCS_OUT.is_dir():
-        sys.exit(f"missing MkDocs output at {MKDOCS_OUT}")
+        sys.exit(f"missing Zensical output at {MKDOCS_OUT}")
 
     if PUBLIC.exists():
         shutil.rmtree(PUBLIC)

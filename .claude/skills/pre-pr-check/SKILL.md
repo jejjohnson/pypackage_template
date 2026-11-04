@@ -35,7 +35,7 @@ uv run pytest --no-cov tests/test_capabilities.py tests/test_public_api.py
 
 - Every `Examples:` block runs under the test suite (`--doctest-modules`); check the expected output is what the code prints.
 - Docstring maths is Unicode, never `$…$`. When the `eman-style-math` skill is installed, check each changed page: `uv run --with cyclopts --with loguru --with pyyaml python ~/.claude/skills/eman-style-math/scripts/check_math.py <file> --target myst`.
-- `uv run poe docs-api` (MkDocs, strict) for docstrings and `docs/api/`; `uv run poe docs-check` (strict, both halves) and `uv run poe docs` (the assembled site with link checking, what `docs.yml` runs) for prose and notebooks — both need the mystmd CLI (`npm install -g mystmd`); if the theme download is blocked, see `docs/README.md`.
+- `uv run poe docs-api` (Zensical, strict) for docstrings and `docs/api/`; `uv run poe docs-check` (strict, both halves) and `uv run poe docs` (the assembled site with link checking, what `docs.yml` runs) for prose and notebooks — both need the mystmd CLI (`npm install -g mystmd`); if the theme download is blocked, see `docs/README.md`.
 
 ## Before pushing
 
