@@ -24,7 +24,6 @@ rendering the MyST theme, which needs network access to fetch the template.
 
 from __future__ import annotations
 
-import argparse
 import os
 import re
 import shutil
@@ -36,6 +35,9 @@ from functools import partial
 from html.parser import HTMLParser
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+
+import cyclopts
+from loguru import logger
 
 
 REPO = Path(__file__).resolve().parent.parent
@@ -304,7 +306,7 @@ def verify_links(root: Path, base_url: str = "") -> list[str]:
 
 
 def _run(command: list[str], cwd: Path) -> None:
-    print(f"$ {' '.join(command)}", flush=True)
+    logger.info("$ {}", " ".join(command))
     subprocess.run(command, cwd=cwd, check=True)
 
 
@@ -381,8 +383,8 @@ def assemble(base_url: str) -> list[str]:
         fixed_anchors += anchors
         rewritten += origins
 
-    print(f"repaired {fixed_anchors} lowercased API anchors")
-    print(f"rewrote {rewritten} API links to {replacement}")
+    logger.info("repaired {} lowercased API anchors", fixed_anchors)
+    logger.info("rewrote {} API links to {}", rewritten, replacement)
 
     problems: list[str] = []
     for page in PUBLIC.rglob("*.html"):
@@ -400,39 +402,36 @@ def assemble(base_url: str) -> list[str]:
     return problems + verify_links(PUBLIC, base_url)
 
 
-def main(argv: list[str] | None = None) -> int:
+app = cyclopts.App(help=__doc__.splitlines()[0], result_action="return_value")
+
+
+@app.default
+def main(*, check: bool = False) -> int:
     """Run the documentation build.
 
     Args:
-        argv: Argument list, excluding the program name.
+        check: Validate sources without rendering the themed MyST site.
 
     Returns:
         ``0`` on success, ``1`` if the assembled site has broken links.
     """
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument(
-        "--check",
-        action="store_true",
-        help="Validate sources without rendering the themed MyST site.",
-    )
-    args = parser.parse_args(argv)
     base_url = os.environ.get("BASE_URL", "").rstrip("/")
 
     build_api()
-    build_prose(html=not args.check)
-    if args.check:
-        print("\nsources validated (themed HTML not rendered)")
+    build_prose(html=not check)
+    if check:
+        logger.success("sources validated (themed HTML not rendered)")
         return 0
 
     problems = assemble(base_url)
     if problems:
-        print(f"\n{len(problems)} broken link(s) in the assembled site:")
+        logger.error("{} broken link(s) in the assembled site:", len(problems))
         for problem in problems:
-            print(f"  - {problem}")
+            logger.error("  - {}", problem)
         return 1
-    print(f"\nassembled site is link-clean -> {PUBLIC}")
+    logger.success("assembled site is link-clean -> {}", PUBLIC)
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(app())
