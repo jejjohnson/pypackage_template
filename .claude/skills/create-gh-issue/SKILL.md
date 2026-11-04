@@ -92,11 +92,11 @@ Content rules (from `report`):
 When the body has maths and the `eman-style-math` skill is installed, expand its macros and check the body before filing:
 
 ```bash
-python ~/.claude/skills/eman-style-math/scripts/expand_macros.py body.md
+uv run --with cyclopts --with loguru --with pyyaml python ~/.claude/skills/eman-style-math/scripts/expand_macros.py body.md
 ```
 
 ```bash
-python ~/.claude/skills/eman-style-math/scripts/check_math.py body.md --target github
+uv run --with cyclopts --with loguru --with pyyaml python ~/.claude/skills/eman-style-math/scripts/check_math.py body.md --target github
 ```
 
 ## 4. Pick labels

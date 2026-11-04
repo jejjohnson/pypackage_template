@@ -159,11 +159,11 @@ GitHub's task-list feature links bidirectionally from the parent, so checklist i
 
 The prose `## Relationships` block above is a human-readable record. GitHub also exposes two **native** relationship features that power the UI sub-issue panel and the dependency graph — **apply both**:
 
-| Prose line | Native feature | Mutation |
+| Prose line | Native feature | REST endpoint |
 |---|---|---|
-| `Parent:` / `Theme Epics` / `Issues` checklist | Sub-issues (parent ↔ child hierarchy) | `addSubIssue` / `removeSubIssue` |
-| `Blocked by:` | Typed dependency | `addBlockedBy` |
-| `Blocks:` | Inverse — applied on the OTHER issue | `addBlockedBy` (on the blocked side) |
+| `Parent:` / `Theme Epics` / `Issues` checklist | Sub-issues (parent ↔ child hierarchy) | `POST …/sub_issues` / `DELETE …/sub_issue` |
+| `Blocked by:` | Typed dependency | `POST …/dependencies/blocked_by` |
+| `Blocks:` | Inverse — applied on the OTHER issue | `POST …/dependencies/blocked_by` (on the blocked side) |
 | `Related:` | No native feature | prose only |
 
 #### From the UI

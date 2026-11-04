@@ -247,7 +247,7 @@ Its JAX/Equinox rules apply when the package uses JAX: logic under `pkg/_src/` w
 
 The bundled example is pure standard library, so it keeps `dataclasses` (`slots=True`) where `python-style` uses `eqx.Module`, makes every error inherit the closest standard-library exception as well as the package base (an open question in `python-style`, settled here), and lets doctests print exact floats such as `2.5`.
 
-**CLIs and scripts** use `cyclopts` for arguments and `loguru` for output; never argparse, click, typer, progress `print`s or stdlib `logging`. Two exceptions remain: the example's `mypackage` CLI uses `argparse` to keep the package dependency-free (`template-example`), and `scripts/build_docs.py` and `scripts/capabilities.py` still use `argparse` and `print`; move them over when you next change them.
+**CLIs and scripts** use `cyclopts` for arguments and `loguru` for output; never argparse, click, typer, progress `print`s or stdlib `logging`. For a repo script, add them to the `dev` group (`uv add --group dev cyclopts loguru`); for a package CLI they are runtime dependencies and need the usual discussion. Two exceptions remain: the example's `mypackage` CLI uses `argparse` to keep the package dependency-free (`template-example`), and `scripts/build_docs.py` and `scripts/capabilities.py` still use `argparse` and `print`; move them over when you next change them.
 
 ### Maths notation
 
@@ -256,18 +256,18 @@ Maths follows `eman-style-math` in every format: the letter says what kind of ob
 - **Code and docstrings:** Unicode only (x̄, σ², Σ⁻¹, ∑, 𝔼, ⊙), never `$…$`; identifiers stay ASCII.
 - **MyST prose and MkDocs pages:** `$…$` and `$$…$$` with the kind-named macros (`\vect{x}`, `\gvect{\mu}`, `\mat{K}`, `\gmat{\Sigma}`). The macros are installed in `docs/myst.yml` (`math:`) and `docs/api/javascripts/mathjax.js`; regenerate both with the skill's `scripts/emit_macros.py` when the macros change.
 - **GitHub issues and PRs:** expand the macros first (`scripts/expand_macros.py`), display maths in a `math` fence.
-- **Everywhere:** each `$…$` expression on one source line; no spacing or sizing macros (`\,`, `\;`, `\quad`, `\qquad`, `\big`, `\tfrac`, `\boxed`, `\cdots`, `\operatorname`). Check a page with `python ~/.claude/skills/eman-style-math/scripts/check_math.py <file> --target myst`.
+- **Everywhere:** each `$…$` expression on one source line; no spacing or sizing macros (`\,`, `\;`, `\quad`, `\qquad`, `\big`, `\tfrac`, `\boxed`, `\cdots`, `\operatorname`). Check a page with `uv run --with cyclopts --with loguru --with pyyaml python ~/.claude/skills/eman-style-math/scripts/check_math.py <file> --target myst` (the skill's scripts need those three packages, which this repo does not install).
 
 ### Prose and diagrams
 
-- Markdown prose is never hard-wrapped: one line per paragraph or list item, in docs, skills, agent instructions, issues and PR text. Don't rewrap untouched text in a file you edit.
+- Markdown prose is never hard-wrapped: one line per paragraph or list item in docs, skills and agent instructions; issue bodies follow `report` (one sentence per line); PR text, one line per paragraph. Don't rewrap untouched text in a file you edit.
 - Docs, READMEs and release notes written in the maintainer's voice follow `eman-prose-tech` (the docs register): plain words, "we" for the maintainers, parentheses rather than em dashes.
 - Pseudocode in design pages, issues and READMEs follows `code-sketch`: a shapes header, the equation above each line, an aligned shape column and a status marker (`today (pkg)`, `proposed (X)`, `user`) on every call into the stack.
 - Never draw ASCII box-and-arrow diagrams; use Mermaid (both docs halves render it). Directory trees stay plain text.
 
 ## Personal skills
 
-The maintainer's skills live in [jejagents](https://github.com/jejjohnson/jejagents) and install into `~/.claude/skills/` with its `install.sh`. Use them when they are installed; the sections above carry what an agent without them needs.
+The maintainer's skills live in [jejagents](https://github.com/jejjohnson/jejagents) and install into `~/.claude/skills/` with its `install.sh`. Use them when they are installed; the sections above carry what an agent without them needs. Where a skill and this file disagree, this file wins: it records the template's deliberate departures.
 
 | Job | Skill |
 |---|---|
@@ -315,7 +315,7 @@ gh api graphql -f query='mutation($threadId: ID!) {
   -f threadId=THREAD_ID
 ```
 
-When the `gh` CLI is unavailable, use the GitHub MCP tools for the same operations.
+GraphQL is blocked in Claude sessions; there, and whenever the `gh` CLI is unavailable, use the GitHub MCP tools for the same operations (they can resolve review threads).
 
 ## Documentation
 

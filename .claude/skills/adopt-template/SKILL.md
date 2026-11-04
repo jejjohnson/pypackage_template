@@ -80,7 +80,7 @@ The coverage gate (`fail_under = 90`) fails an empty package: write tests with t
 - `.github/copilot-instructions.md`, `CODE_REVIEW.md` (section 2 and "Package-Specific Checks" — run every code example you put there), `.github/instructions/python-coding.instructions.md`;
 - `scripts/capabilities.py`: list the libraries you build on in `UPSTREAM` (with a blurb) and any deliberate name clash in `ALLOWED_SHARED_NAMES`.
 
-The unmarked rules (git and PR rules, the review-thread GraphQL, test tiers, the pre-commit checklist, the docs toolchain, the house style) stay as they are. If the new package uses JAX, the JAX rules of `python-style` now apply in full ("House style" in `AGENTS.md`); rewrite the paragraph there that records the stdlib example's departures from it.
+The unmarked rules (git and PR rules, the review-thread commands, test tiers, the pre-commit checklist, the docs toolchain, the house style) stay as they are. If the new package uses JAX, the JAX rules of `python-style` now apply in full ("House style" in `AGENTS.md`); rewrite the paragraph there that records the stdlib example's departures from it.
 
 ## 6. Rewrite the skills and reviewers
 
