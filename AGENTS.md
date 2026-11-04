@@ -172,7 +172,7 @@ uv run poe check            # lint + format-check + typecheck + test-cov (everyt
 uv run poe capabilities     # regenerate docs/api/capabilities.md
 uv run poe docs             # build both docs halves into public/ and check every link
 uv run poe docs-check       # strict validation of both halves, no themed render
-uv run poe docs-api         # MkDocs API reference only (mkdocs build --strict)
+uv run poe docs-api         # Zensical API reference only (zensical build --strict)
 uv run poe docs-serve       # build, then serve public/ at :8000
 uv run poe precommit        # every pre-commit hook on every file
 uv run poe build            # wheel + sdist into dist/
@@ -247,7 +247,7 @@ Its JAX/Equinox rules apply when the package uses JAX: logic under `pkg/_src/` w
 
 The bundled example is pure standard library, so it keeps `dataclasses` (`slots=True`) where `python-style` uses `eqx.Module`, makes every error inherit the closest standard-library exception as well as the package base (an open question in `python-style`, settled here), and lets doctests print exact floats such as `2.5`.
 
-**CLIs and scripts** use `cyclopts` for arguments and `loguru` for output; never argparse, click, typer, progress `print`s or stdlib `logging`. For a repo script, add them to the `dev` group (`uv add --group dev cyclopts loguru`); for a package CLI they are runtime dependencies and need the usual discussion. Two exceptions remain: the example's `mypackage` CLI uses `argparse` to keep the package dependency-free (`template-example`), and `scripts/build_docs.py` and `scripts/capabilities.py` still use `argparse` and `print`; move them over when you next change them.
+**CLIs and scripts** use `cyclopts` for arguments and `loguru` for output; never argparse, click, typer, progress `print`s or stdlib `logging`. For a repo script they are in the `dev` group already; for a package CLI they are runtime dependencies and need the usual discussion. Two exceptions remain: the example's `mypackage` CLI uses `argparse` to keep the package dependency-free (`template-example`), and `scripts/capabilities.py` still uses `argparse` and `print`; move it over when you next change it (`scripts/build_docs.py` shows the pattern: a `cyclopts.App` with `@app.default`, and `loguru` for every message).
 
 ### Maths notation
 
@@ -324,15 +324,15 @@ The docs are built by **two tools** and deployed as one site (`docs/README.md` h
 | Half | Tool | Source | Deployed at |
 |---|---|---|---|
 | Prose — home, guides, example notebooks | mystmd | `docs/*.md`, `docs/guide/`, `docs/notebooks/` (toc in `docs/myst.yml`) | `/` |
-| API reference | MkDocs + mkdocstrings | `docs/api/` (`docs_dir` in `mkdocs.yml`) | `/reference/` |
+| API reference | Zensical + mkdocstrings | `docs/api/` (`docs_dir` in `mkdocs.yml`) | `/reference/` |
 
-`uv run poe docs` runs `scripts/build_docs.py`: it builds the API with `mkdocs build --strict`, serves `site/` on port 8910 so mystmd can read its `objects.inv` (mystmd loads inventories only over http), runs `myst build --html --strict`, rewrites the localhost API URLs to `/reference/`, repairs anchors lowercased by mystmd's `$`-expansion bug, and fails if any internal link in the assembled `public/` site does not resolve. mystmd is a Node CLI (`npm install -g mystmd`), not a uv dependency; if its theme download is blocked, `docs/README.md` says how to build against a local clone of the theme.
+`uv run poe docs` runs `scripts/build_docs.py`: it builds the API with `zensical build --strict` (Zensical reads `mkdocs.yml`), serves `site/` on port 8910 so mystmd can read its `objects.inv` (mystmd loads inventories only over http), runs `myst build --html --strict`, rewrites the localhost API URLs to `/reference/`, repairs anchors lowercased by mystmd's `$`-expansion bug, and fails if any internal link in the assembled `public/` site does not resolve. mystmd is a Node CLI (`npm install -g mystmd`), not a uv dependency; if its theme download is blocked, `docs/README.md` says how to build against a local clone of the theme.
 
 - **Prose is MyST Markdown**, not MkDocs-Material syntax: `:::{note}`, `:::{tab-set}`, `:::{dropdown}` directives, not `!!!` / `===` / `???`.
 - **Link to the API** with the `xref:` protocol and the **top-level** exported name: ``[`summarize`](xref:api#mypackage.summarize)``, not `mypackage.stats.summarize` (mystmd lowercases `$`-abbreviated anchors; see `docs/README.md`). A missing target fails `myst build --strict`.
 - **URLs are flat**: a page's URL is its basename, with `_` turned into `-` (`guide/quickstart.md` → `/quickstart/`, `notebooks/smoothing_deep_dive.ipynb` → `/smoothing-deep-dive/`), so keep basenames unique across `docs/`, `docs/guide/` and `docs/notebooks/`; frontmatter `slug:` is ignored.
 - **Site-nav URLs stay absolute** (`site.nav` in `docs/myst.yml`): the theme prefixes root-relative ones with `BASE_URL` a second time (`tests/test_build_docs.py` checks it).
-- **API pages** (`docs/api/*.md`) are MkDocs pages: prose plus `:::` blocks, `!!!` admonitions, listed in the `nav` of `mkdocs.yml`; docstrings are Google style (`docstring_style: google`) with Unicode maths; maths in the API pages themselves goes through MathJax (`pymdownx.arithmatex`), with the `eman-style-math` macros loaded by `docs/api/javascripts/mathjax.js`.
+- **API pages** (`docs/api/*.md`) are MkDocs-format pages, built by Zensical (which runs only the plugins it supports and ignores the rest silently; check its plugin list before adding one): prose plus `:::` blocks, `!!!` admonitions, listed in the `nav` of `mkdocs.yml`; docstrings are Google style (`docstring_style: google`) with Unicode maths; maths in the API pages themselves goes through MathJax (`pymdownx.arithmatex`), with the `eman-style-math` macros loaded by `docs/api/javascripts/mathjax.js`.
 - **Notebooks** in `docs/notebooks/` are committed as executed `.ipynb` files, authored as jupytext percent `.py` and deleted after conversion; mystmd renders the stored outputs without re-executing, so each must be listed in the `docs/myst.yml` toc. Figures render inline with `plt.show()`: no `savefig`, no committed PNGs. `notebooks/` at the root holds scratch notebooks, outside the docs. Full standards: `.github/instructions/docs-examples.instructions.md`.
 
 ## Plans

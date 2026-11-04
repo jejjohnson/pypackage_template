@@ -25,7 +25,7 @@ Read "Documentation" in `AGENTS.md` first; `docs/README.md` explains the two-too
 ## 3. Wire it in
 
 - The `toc` entry in `docs/myst.yml`.
-- If an API page covers the same module, link the guide from it the way `docs/api/stats.md` does (`[statistics guide](../../statistics/)` — the flat URL, relative to `/reference/<page>/`).
+- If an API page covers the same module, link the guide from it the way `docs/api/stats.md` does (`[statistics guide](../statistics/)`: the flat URL, written relative to the source file in `docs/api/`, because Zensical resolves links from the source file and adds one level for the page's directory URL, so it emits `../../statistics/` from `/reference/stats/`).
 
 ## 4. Verify
 

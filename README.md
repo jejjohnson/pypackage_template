@@ -314,7 +314,7 @@ Splitting the docs across two tools creates a class of bug neither tool can
 catch: a link from one generator's output into the other's. The build script
 closes that gap. It
 
-1. builds the API reference with MkDocs,
+1. builds the API reference with Zensical (the successor to Material for MkDocs, reading `mkdocs.yml`),
 2. serves it locally so mystmd can read the inventory — mystmd only loads
    inventories over http, rejecting a filesystem path and *silently ignoring*
    a `file://` URL,
@@ -502,7 +502,7 @@ Every common task is a [Poe the Poet](https://poethepoet.natn.io) task defined i
 | `uv run poe clean` | Remove build artefacts and caches |
 | `uv run poe docs` | Build documentation site |
 | `uv run poe docs-check` | Validate docs sources without the themed render |
-| `uv run poe docs-api` | Build only the MkDocs API reference |
+| `uv run poe docs-api` | Build only the Zensical API reference |
 | `uv run poe docs-serve` | Preview documentation locally |
 | `uv run poe capabilities` | Regenerate the capability index (`docs/api/capabilities.md`) |
 | `uv run poe gh-labels` | Bootstrap the GitHub label taxonomy (idempotent) |
@@ -639,7 +639,7 @@ including the rename commands and rewriting the agent files from your code.
 | hatchling | <https://hatch.pypa.io/latest/> |
 | pytest | <https://docs.pytest.org/> |
 | mystmd | <https://mystmd.org> |
-| MkDocs Material | <https://squidfunk.github.io/mkdocs-material/> |
+| Zensical | <https://zensical.org> |
 | mkdocstrings | <https://mkdocstrings.github.io/> |
 | pre-commit | <https://pre-commit.com/> |
 | Release Please | <https://github.com/googleapis/release-please> |

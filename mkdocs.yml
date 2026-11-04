@@ -1,6 +1,6 @@
 # ---------------------------------------------------------------------------
-# MkDocs builds ONLY the API reference, which is deployed as the `/reference/`
-# subtree of the MyST site. Prose, guides, and notebooks are built by mystmd
+# Zensical builds ONLY the API reference from this file (it reads mkdocs.yml
+# as is), and it is deployed as the `/reference/` subtree of the MyST site. Prose, guides, and notebooks are built by mystmd
 # from `docs/myst.yml`. See `docs/README.md` for the split and the rationale.
 #
 # mkdocstrings publishes a Sphinx-compatible `objects.inv` into `site/`, and
@@ -26,6 +26,8 @@ validation:
 
 theme:
   name: material
+  # Zensical's Material-compatible look; `modern` is its newer default.
+  variant: classic
   features:
     - navigation.sections
     - navigation.top

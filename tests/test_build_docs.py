@@ -68,7 +68,7 @@ class TestParseInventory:
         """Guards against drift in what mkdocstrings actually emits."""
         real = Path(__file__).resolve().parent.parent / "site" / "objects.inv"
         if not real.is_file():
-            pytest.skip("run `mkdocs build` first")
+            pytest.skip("run `uv run poe docs-api` first")
         entries = build_docs.parse_inventory(real.read_bytes())
         assert "mypackage.summarize" in entries
         assert all("$" not in uri for uri in entries.values())
