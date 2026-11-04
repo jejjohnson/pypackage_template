@@ -37,9 +37,9 @@ pandas, because "I have a sample" is the more common situation.
 
 [`quantile`](xref:api#mypackage.quantile) uses linear interpolation between order
 statistics — the same as NumPy's default `method="linear"`. With
-$h = q\,(N-1)$ and $j = \lfloor h \rfloor$:
+$h = q (N-1)$ and $j = \lfloor h \rfloor$:
 
-$$Q(q) = x_{(j+1)} + (h - j)\,\bigl(x_{(j+2)} - x_{(j+1)}\bigr)$$
+$$Q(q) = x_{(j+1)} + (h - j) (x_{(j+2)} - x_{(j+1)})$$
 
 ```python
 import mypackage as mp

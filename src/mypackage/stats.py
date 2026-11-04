@@ -8,13 +8,13 @@ Two complementary styles live side by side:
 - **Streaming, stateful** — [`RunningStats`][mypackage.RunningStats] consumes
   observations one at a time in constant memory using Welford's algorithm.
 
-For a series $x_1, \\dots, x_N$ the sample mean and variance are
+For a series x₁, …, x_N the sample mean x̄ and variance s² are
 
-$$\\bar{x} = \\frac{1}{N} \\sum_{i=1}^{N} x_i,
-\\qquad
-s^2 = \\frac{1}{N - \\delta} \\sum_{i=1}^{N} (x_i - \\bar{x})^2,$$
+x̄ = (1/N) ∑ᵢ xᵢ,
 
-where $\\delta$ is ``ddof`` (1 for the unbiased sample variance, 0 for the
+s² = ∑ᵢ (xᵢ − x̄)² / (N − δ),
+
+where δ is ``ddof`` (1 for the unbiased sample variance, 0 for the
 population variance).
 """
 
@@ -183,11 +183,10 @@ def summarize(series: Series, *, ddof: int = 1) -> Summary:
 def quantile(series: Series, q: float) -> float:
     """Return the ``q``-th quantile using linear interpolation.
 
-    With sorted observations $x_{(1)} \\le \\dots \\le x_{(N)}$ and the
-    fractional position $h = q\\,(N - 1)$, the result is
+    With sorted observations x_(1) ≤ … ≤ x_(N) and the fractional position
+    h = q (N − 1), the result is
 
-    $$Q(q) = x_{(j+1)} + (h - j)\\,(x_{(j+2)} - x_{(j+1)}),
-    \\qquad j = \\lfloor h \\rfloor.$$
+    Q(q) = x_(j+1) + (h − j) (x_(j+2) − x_(j+1)),  with j = ⌊h⌋.
 
     This matches NumPy's default ``method="linear"``.
 
@@ -229,7 +228,7 @@ def quantile(series: Series, q: float) -> float:
 def zscores(series: Series, *, ddof: int = 1) -> list[float]:
     """Standardise ``series`` to zero mean and unit variance.
 
-    $$z_i = \\frac{x_i - \\bar{x}}{s}$$
+    zᵢ = (xᵢ − x̄) / s,  with x̄ the mean and s the standard deviation.
 
     Args:
         series: The observations to standardise.
@@ -269,12 +268,12 @@ class RunningStats:
     square of sums" formulation, which loses precision catastrophically for
     large means.
 
-    Each observation $x_n$ updates the running mean and the sum of squared
-    deviations $M_{2,n}$:
+    Each observation xₙ updates the running mean x̄ₙ and the sum of squared
+    deviations M₂,ₙ:
 
-    $$\\bar{x}_n = \\bar{x}_{n-1} + \\frac{x_n - \\bar{x}_{n-1}}{n},
-    \\qquad
-    M_{2,n} = M_{2,n-1} + (x_n - \\bar{x}_{n-1})(x_n - \\bar{x}_n).$$
+    x̄ₙ = x̄ₙ₋₁ + (xₙ − x̄ₙ₋₁) / n,
+
+    M₂,ₙ = M₂,ₙ₋₁ + (xₙ − x̄ₙ₋₁) (xₙ − x̄ₙ).
 
     Attributes:
         ddof: Delta degrees of freedom used by ``variance`` and ``std``. Must

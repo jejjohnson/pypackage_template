@@ -7,14 +7,9 @@ description: Analyse one-dimensional numeric series with mypackage — descripti
 
 # Series analysis on mypackage
 
-mypackage turns the usual loops over a list of numbers — a mean and
-variance, a rolling median, a z-score scaler fitted on one split and applied
-to another — into small, validated, pure functions and composable
-transforms, with no runtime dependencies. Before writing a statistic, a
-smoothing loop, a validator or a scaler, look it up:
+mypackage turns the usual loops over a list of numbers — a mean and variance, a rolling median, a z-score scaler fitted on one split and applied to another — into small, validated, pure functions and composable transforms, with no runtime dependencies. Before writing a statistic, a smoothing loop, a validator or a scaler, look it up:
 
-1. **The capability index** lists every public name with a one-line
-   summary:
+1. **The capability index** lists every public name with a one-line summary:
    <https://jejjohnson.github.io/pypackage_template/reference/capabilities/>.
    Or list the installed version:
 
@@ -31,8 +26,7 @@ smoothing loop, a validator or a scaler, look it up:
            print(f"{name}.{attr}: {doc}")
    ```
 
-2. Compose what exists. Install it from GitHub:
-   `uv add "mypackage @ git+https://github.com/jejjohnson/pypackage_template.git"`.
+2. Compose what exists. Install it from GitHub: `uv add "mypackage @ git+https://github.com/jejjohnson/pypackage_template.git"`.
 
 ## What lives where
 
@@ -52,24 +46,11 @@ smoothing loop, a validator or a scaler, look it up:
 
 ## The rules your code must keep
 
-- **Inputs are never mutated.** No function or method changes the series
-  it is given, and any sequence of numbers (`list`, `tuple`, `range`) is
-  accepted. The series-to-series functions and every `apply` return a new
-  list; `summarize` returns a `Summary`, `quantile` a float, and `fit` the
-  transform itself.
-- **Fit, then apply.** `Standardize` and `MinMaxScale` learn from `fit`
-  and raise `mp.NotFittedError` if applied before it; `fit` returns the
-  transform, so `scaler = mp.Standardize().fit(train)` keeps it fitted.
-  Fit on training data only, and reuse the fitted object on new data.
-- **Transforms are structural.** Anything with an `apply(series) ->
-  list[float]` method is a `mp.Transform` and composes in a pipeline: no
-  base class to inherit.
-- **Errors are typed.** Bad input raises `mp.ValidationError` (a
-  `ValueError`), empty input `mp.EmptySeriesError`; catch
-  `mp.MypackageError` for all of them.
-- **Degenerate data is an error, not a `nan`**: a constant series cannot be
-  standardised, `ddof` must be smaller than the count, `window` no longer
-  than the series.
+- **Inputs are never mutated.** No function or method changes the series it is given, and any sequence of numbers (`list`, `tuple`, `range`) is accepted. The series-to-series functions and every `apply` return a new list; `summarize` returns a `Summary`, `quantile` a float, and `fit` the transform itself.
+- **Fit, then apply.** `Standardize` and `MinMaxScale` learn from `fit` and raise `mp.NotFittedError` if applied before it; `fit` returns the transform, so `scaler = mp.Standardize().fit(train)` keeps it fitted. Fit on training data only, and reuse the fitted object on new data.
+- **Transforms are structural.** Anything with an `apply(series) -> list[float]` method is a `mp.Transform` and composes in a pipeline: no base class to inherit.
+- **Errors are typed.** Bad input raises `mp.ValidationError` (a `ValueError`), empty input `mp.EmptySeriesError`; catch `mp.MypackageError` for all of them.
+- **Degenerate data is an error, not a `nan`**: a constant series cannot be standardised, `ddof` must be smaller than the count, `window` no longer than the series.
 
 ## Worked example
 
@@ -119,13 +100,7 @@ except mp.NotFittedError as err:
     message = str(err)
 ```
 
-The glitch drags the raw mean to 25.27 °C and the standard deviation to
-16.4, while the median stays at 21.7. The median filter removes it outright
-(the cleaned maximum is 22.9, the standard deviation 0.90), where the moving
-average smears it over three samples near 46. The last six hours sit 1.8 to
-2.5 training standard deviations above the training mean, so the ±3 clip
-leaves them alone, and `RunningStats` agrees with `summarize` on the
-cleaned series.
+The glitch drags the raw mean to 25.27 °C and the standard deviation to 16.4, while the median stays at 21.7. The median filter removes it outright (the cleaned maximum is 22.9, the standard deviation 0.90), where the moving average smears it over three samples near 46. The last six hours sit 1.8 to 2.5 training standard deviations above the training mean, so the ±3 clip leaves them alone, and `RunningStats` agrees with `summarize` on the cleaned series.
 
 ## Don't write it — use mypackage
 
@@ -141,15 +116,10 @@ cleaned series.
 
 ## Self-check before you finish
 
-- No hand-written mean, variance, quantile or rolling loop remains where a
-  mypackage function does the job.
-- Every scaler is fitted on training data only, and the fitted object (not
-  a new one) is applied to new data.
+- No hand-written mean, variance, quantile or rolling loop remains where a mypackage function does the job.
+- Every scaler is fitted on training data only, and the fitted object (not a new one) is applied to new data.
 - The caller's lists are unchanged after your code runs.
-- Errors you catch are `mp.MypackageError` subclasses, not a bare
-  `except`.
+- Errors you catch are `mp.MypackageError` subclasses, not a bare `except`.
 
-If mypackage lacks what you need, keep your addition small and shaped like
-it (a pure function that validates with `mp.require_non_empty`, or a class
-with `apply`) and consider proposing it upstream at
+If mypackage lacks what you need, keep your addition small and shaped like it (a pure function that validates with `mp.require_non_empty`, or a class with `apply`) and consider proposing it upstream at
 <https://github.com/jejjohnson/pypackage_template/issues>.

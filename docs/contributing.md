@@ -196,7 +196,7 @@ bash .github/scripts/link-issues.sh unblock <issue> <blocker>
 bash .github/scripts/link-issues.sh show    <issue>
 ```
 
-The script resolves issue numbers to GraphQL node IDs automatically, and treats "already linked" as a no-op so re-runs are safe.
+The script calls the REST API, resolves issue numbers to the numeric issue ids the link endpoints take, and treats "already linked" as a no-op so re-runs are safe. Set `GH_REPO=owner/repo` to act on another repository.
 
 #### From Claude Code
 
@@ -207,18 +207,18 @@ Example prompts:
 - "Apply the relationships from epic #29"
 - "Link #42, #43, #44 as sub-issues of #7"
 - "Mark #44 as blocked by #43"
-- "What's blocking #44?" (Claude runs `uv run poe gh-show 44` or the underlying GraphQL query)
+- "What's blocking #44?" (Claude runs `uv run poe gh-show 44`)
 
-#### Raw GraphQL (for reference)
+#### Raw REST calls (for reference)
 
-Under the hood the helper runs:
+Under the hood the helper runs these (both link endpoints take the issue's numeric `id`, not its number):
 
-```graphql
-mutation { addSubIssue(input: { issueId: "<parent-node-id>", subIssueId: "<child-node-id>" }) { subIssue { number } } }
-mutation { addBlockedBy(input: { issueId: "<this-node-id>", blockingIssueId: "<blocker-node-id>" }) { issue { number } } }
+```bash
+gh api repos/{owner}/{repo}/issues/<parent>/sub_issues -F sub_issue_id=<child id>
+gh api repos/{owner}/{repo}/issues/<issue>/dependencies/blocked_by -F issue_id=<blocker id>
 ```
 
-Issue node IDs are resolved via `gh api repos/:owner/:repo/issues/<N> --jq .node_id`.
+An issue's id comes from `gh api repos/{owner}/{repo}/issues/<N> --jq .id`. The script uses REST rather than GraphQL because GraphQL is blocked in Claude sessions.
 
 ---
 

@@ -108,9 +108,9 @@ def moving_average(
 ) -> list[float]:
     """Smooth ``series`` with a centred, equally weighted moving average.
 
-    With $w$ the window length and $l = \\lfloor w/2 \\rfloor$,
+    With w the window length and l = ⌊w/2⌋,
 
-    $$y_i = \\frac{1}{w} \\sum_{k=-l}^{w - 1 - l} x_{i+k}.$$
+    yᵢ = (1/w) ∑ₖ xᵢ₊ₖ,  for k = −l, …, w − 1 − l.
 
     Args:
         series: The observations to smooth.
@@ -157,11 +157,13 @@ def moving_average(
 def exponential_moving_average(series: Series, alpha: float) -> list[float]:
     """Smooth ``series`` with a causal exponentially weighted moving average.
 
-    $$y_0 = x_0, \\qquad y_i = \\alpha x_i + (1 - \\alpha) y_{i-1}.$$
+    y₀ = x₀,  yᵢ = α xᵢ + (1 − α) yᵢ₋₁,
+
+    with α the smoothing factor ``alpha``.
 
     The filter is *causal*: ``y[i]`` depends only on samples up to ``i``, so it
     can run on a live stream. The cost is a phase lag of roughly
-    $(1 - \\alpha)/\\alpha$ samples.
+    (1 − α)/α samples.
 
     Args:
         series: The observations to smooth.

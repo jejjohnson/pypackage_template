@@ -53,49 +53,30 @@ No separate `images/` directory — figures live inside the `.ipynb` cell output
    ```
 
 6. Delete the `.py` — the `.ipynb` is the committed source of truth.
-7. Confirm the docs still build strictly, since a new notebook needs a nav
-   entry:
+7. Confirm the docs still build strictly, since a new notebook needs a nav entry:
 
    ```bash
    uv run poe docs
    ```
 
-   This builds both halves of the site, assembles them, and verifies that
-   every internal link resolves — including links from the notebook prose
-   into the API reference.
+   This builds both halves of the site, assembles them, and verifies that every internal link resolves — including links from the notebook prose into the API reference.
 
 8. Commit the `.ipynb` and add it to the `toc` in `docs/myst.yml`.
 
 ## Notebook Basenames Must Be Unique
 
-mystmd derives a page's URL from its **basename**, ignoring the directory. A
-notebook named `quickstart.ipynb` therefore collides with a guide page named
-`quickstart.md`, and mystmd silently disambiguates them with an
-order-dependent `-1` suffix — an unstable URL that changes when files are
-added. Frontmatter `slug:` is ignored, so the only fix is a distinct basename.
+mystmd derives a page's URL from its **basename**, ignoring the directory. A notebook named `quickstart.ipynb` therefore collides with a guide page named `quickstart.md`, and mystmd silently disambiguates them with an order-dependent `-1` suffix — an unstable URL that changes when files are added. Frontmatter `slug:` is ignored, so the only fix is a distinct basename.
 
 Keep basenames unique across `docs/`, `docs/guide/`, and `docs/notebooks/`.
 
 ## Ruff Lints Notebook Code Cells
 
-`ruff check .` — what CI runs — includes the **code cells** of every
-`docs/notebooks/*.ipynb`. Two consequences:
+`ruff check .` — what CI runs — includes the **code cells** of every `docs/notebooks/*.ipynb`. Two consequences:
 
-- **Code cell lines must be ≤ 88 characters**, same as the rest of the repo.
-  Long `ax.plot(...)` calls are the usual offender; bind an intermediate
-  variable rather than letting the line run.
-- **Lint the `.ipynb`, never the jupytext `.py`.** The `.py` will report E501
-  on every markdown cell, because the standard below requires each markdown
-  paragraph to be one long line. It will also report `I001`, because ruff sees
-  the cell-separated import blocks as one unsorted block. Both are artefacts
-  of the flat `.py` view and neither applies to the notebook, where ruff lints
-  each cell independently. This is a large part of why step 6 deletes the
-  `.py`.
+- **Code cell lines must be ≤ 88 characters**, same as the rest of the repo. Long `ax.plot(...)` calls are the usual offender; bind an intermediate variable rather than letting the line run.
+- **Lint the `.ipynb`, never the jupytext `.py`.** The `.py` will report E501 on every markdown cell, because the standard below requires each markdown paragraph to be one long line. It will also report `I001`, because ruff sees the cell-separated import blocks as one unsorted block. Both are artefacts of the flat `.py` view and neither applies to the notebook, where ruff lints each cell independently. This is a large part of why step 6 deletes the `.py`.
 
-If you need to fix a lint error after executing, edit the `.py` (regenerate it
-with `jupytext --to py:percent foo.ipynb`), re-convert, and **re-execute** —
-never hand-edit a committed `.ipynb`'s source cells, or the outputs stop
-matching the code that supposedly produced them.
+If you need to fix a lint error after executing, edit the `.py` (regenerate it with `jupytext --to py:percent foo.ipynb`), re-convert, and **re-execute** — never hand-edit a committed `.ipynb`'s source cells, or the outputs stop matching the code that supposedly produced them.
 
 ## Jupytext Header (dev only)
 
@@ -273,14 +254,15 @@ Lines that *must* stay on their own (do not join):
 
 ## Math in Markdown Cells
 
-Inline: `$\|x - x'\|^2$`.
-Display:
+Maths follows the maintainer's `eman-style-math` standard ("Maths notation" in `AGENTS.md`): define every symbol, with its shape, before its first use, and write vectors and matrices with the kind-named macros, which `docs/myst.yml` loads for the prose half (notebooks included).
+
+Inline: $\Vert \vect{x} - \vect{x}' \Vert^2$, written `$\Vert \vect{x} - \vect{x}' \Vert^2$`. Display:
 
 ```markdown
-$$f(x) = \sum_{i=1}^{N} w_i \phi_i(x)$$
+$$f(\vect{x}) = \sum_{i=1}^{N} w_i \phi_i(\vect{x})$$
 ```
 
-mystmd renders both inline and display math in the prose half (notebooks included); no extra configuration is needed.
+Keep each `$…$` and `$$…$$` expression on one source line and leave out spacing and sizing macros (`\,`, `\;`, `\quad`, `\qquad`, `\big`, `\tfrac`, `\boxed`, `\cdots`); `check_math.py --target myst` from the skill flags them. Prose in the notebooks follows `eman-prose-tech` (docs register), and diagrams are Mermaid, never ASCII art.
 
 ## Checklist for New Notebooks
 
@@ -298,6 +280,4 @@ mystmd renders both inline and display math in the prose half (notebooks include
 - [ ] Listed in the `toc` in `docs/myst.yml`
 - [ ] Basename unique across `docs/`
 - [ ] `uv run poe docs` passes (both halves build, all links resolve)
-- [ ] Every numeric claim in the prose matches the executed output — if a cell
-      prints a table, the paragraph describing it must agree with the numbers
-      actually printed, not the ones you expected
+- [ ] Every numeric claim in the prose matches the executed output — if a cell prints a table, the paragraph describing it must agree with the numbers actually printed, not the ones you expected

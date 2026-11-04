@@ -11,9 +11,7 @@ When performing code review, use `/CODE_REVIEW.md` as the source of truth for:
 - Output format and priority levels
 - Suggestion type emojis and review tone
 
-Read "Reuse before you write" and "The contracts" in `/AGENTS.md` first, and
-check every function, class or module the diff adds against
-`docs/api/capabilities.md`.
+Read "Reuse before you write" and "The contracts" in `/AGENTS.md` first, and check every function, class or module the diff adds against `docs/api/capabilities.md`.
 
 Key principles:
 - Sacrifice *cleverness* for *clarity*. Sacrifice *brevity* for *explicitness*.

@@ -53,7 +53,7 @@ __all__ = [
 class Standardize:
     """Centre a series on zero and scale it to unit standard deviation.
 
-    $$z_i = \\frac{x_i - \\bar{x}}{s}$$
+    zᵢ = (xᵢ − x̄) / s,  with x̄ the mean and s the standard deviation.
 
     The mean and standard deviation are learned by `fit` and reused by every
     later `apply`, which is what makes this safe to fit on a training split and
@@ -148,7 +148,9 @@ class Standardize:
 class MinMaxScale:
     """Linearly rescale a series into ``feature_range``.
 
-    $$y_i = a + (b - a) \\, \\frac{x_i - \\min(x)}{\\max(x) - \\min(x)}$$
+    yᵢ = a + (b − a) (xᵢ − min x) / (max x − min x),
+
+    with (a, b) the ``feature_range``.
 
     Attributes:
         feature_range: Target ``(low, high)`` interval.

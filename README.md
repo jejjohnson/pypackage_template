@@ -458,7 +458,7 @@ uv run poe gh-labels       # idempotent; edit .github/scripts/create-labels.sh t
 
 For planning a whole wave of issues at once, copy [`docs/templates/wave-backlog.md`](docs/templates/wave-backlog.md) into your project's `.plans/` directory and draft the wave as one reviewable file before opening GitHub issues. See [`docs/contributing.md`](docs/contributing.md) → "Drafting a wave backlog" for the workflow.
 
-Once issues are open, apply GitHub's **native sub-issue and blocked-by links** on top of the prose `## Relationships` block. A helper script and three poe tasks wrap the GraphQL mutations:
+Once issues are open, apply GitHub's **native sub-issue and blocked-by links** on top of the prose `## Relationships` block. A helper script and three poe tasks wrap the REST endpoints:
 
 ```bash
 uv run poe gh-sub   7 42 43 44   # link sub-issues
@@ -557,6 +557,8 @@ transform, CLI command, guide page or notebook, the pre-PR check, review,
 squash commits, GitHub issues) live in `.claude/skills/`, and two read-only
 reviewer subagents (reuse, correctness) in `.claude/agents/`; any agent can
 follow them as plain Markdown.
+
+The house style comes from the maintainer's personal skills in [jejagents](https://github.com/jejjohnson/jejagents): `python-style` for Python, `eman-style-math` for maths (Unicode in docstrings, macros in the docs), `code-sketch` for pseudocode, `eman-prose-tech` for prose, `report` and `gh-issue` for issues. The "House style" and "Personal skills" sections of `AGENTS.md` carry their essentials, so an agent without them installed still follows the same rules.
 
 For projects that build on the package, the repository is also a Claude
 Code plugin marketplace (`.claude-plugin/marketplace.json`, `plugins/`) and
