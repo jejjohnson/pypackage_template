@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.0](https://github.com/jejjohnson/pypackage_template/compare/v0.1.7...v0.2.0) (2026-11-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* the Makefile is gone; use `uv run poe <task>`.
+
+### Build System
+
+* replace the Makefile with poe tasks in pyproject.toml ([925c32a](https://github.com/jejjohnson/pypackage_template/commit/925c32a6b38a767dce392ed9d1a6405e052dee06))
+
 ## [0.1.7](https://github.com/jejjohnson/pypackage_template/compare/v0.1.6...v0.1.7) (2026-10-22)
 
 
